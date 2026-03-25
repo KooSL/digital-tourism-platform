@@ -15,7 +15,7 @@
 
       <div class="topphonebox">
         <div class="topphonebox-img">
-          <img src="assets/images/team/Founder.jpg" alt="">
+          <img src="assets/images/team/founder-2.png" alt="">
         </div>
         <div class="topphonebox-phone">
           <p class="talktoexpert">Connect with Our Expert – Amrit</p>
@@ -28,14 +28,14 @@
 
       <div class="topemailbox">
         <p>Any Inquiries? Email Us</p>
-        <a href="mailto:takeyourseat18@gmail.com" class="contact-link email">
+        <a href="mailto:contact.takeyourseat@gmail.com" class="contact-link email">
           <i class="fa-solid fa-envelope"></i>
-          <span>takeyourseat18@gmail.com</span>
+          <span>contact.takeyourseat@gmail.com</span>
         </a>
       </div>
 
       <div class="topwhatsappbox">
-        <a href="https://wa.me/+9779865507624" target="_blank" aria-label="WhatsApp" class="contact-link whatsapp">
+        <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp" class="contact-link whatsapp">
           <i class="fa-brands fa-whatsapp"></i>
         </a>
       </div>
@@ -53,7 +53,7 @@
         <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="Tiktok">
           <i class="fa-brands fa-tiktok"></i>
         </a>
-        <a href="https://wa.me/+9779865507624" target="_blank" aria-label="WhatsApp">
+        <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp">
           <i class="fa-brands fa-whatsapp"></i>
         </a>
       </div>

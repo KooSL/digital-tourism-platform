@@ -42,7 +42,13 @@ if(isset($_GET['delete'])){
         <td>
           <?= implode(' ', array_slice(explode(' ', $row['answer']), 0, 5)); ?>...
         </td>
-        <td><?= $row['is_featured'] ?></td>
+        <?php
+          if($row['is_featured'] == 1){
+            echo '<td class="status-col published">Yes</td>';
+          } else {
+            echo '<td class="status-col draft">No</td>';
+          }
+        ?>
         
         <?php
           if($row['status'] == 1){

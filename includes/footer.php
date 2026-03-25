@@ -64,14 +64,14 @@
       <div class="footer-contacts">
         <p><i class="fa-solid fa-location-dot"></i> Bharatpur-1, Chitwan, Nepal</p>
         <p><i class="fa-solid fa-phone"></i> / <i class="fa-brands fa-whatsapp"></i> +977-9764667165</p>
-        <p><i class="fa-solid fa-envelope"></i> takeyourseat18@gmail.com</p>
+        <p><i class="fa-solid fa-envelope"></i>contact.takeyourseat@gmail.com</p>
       </div>
       <!-- SOCIAL ICONS -->
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
         <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank"aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
         <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
-        <a href="https://wa.me/+9779865507624" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
       </div>
     </div>
   </div>

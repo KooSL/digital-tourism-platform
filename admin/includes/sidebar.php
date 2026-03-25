@@ -56,13 +56,13 @@
       </ul>
     </li>
 
-    <!-- <li class="has-submenu">
+    <li class="has-submenu">
       <a href="">FAQs ▾</a>
       <ul class="submenu">
         <li><a href="add-faq">Add FAQ</a></li>
         <li><a href="manage-faqs">Manage FAQs</a></li>
       </ul>
-    </li> -->
+    </li>
 
     <li>
       <a href="logout">Logout</a>

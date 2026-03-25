@@ -97,7 +97,7 @@
     <div class="team-grid founder">
       <!-- Team Member -->
       <div class="team-card">
-        <img src="assets/images/team/amrit.jpg" alt="Team Member">
+        <img src="assets/images/team/founder-2.png" alt="Team Member">
         <h3>Amrit Sagar Bhattarai</h3>
         <p class="team-role">Founder & Managing Director</p>
         <p class="role-description">
@@ -127,12 +127,23 @@
       </div>
     </div>
 
+    <!-- <div class="team-grid founder">
+      <div class="team-card">
+        <img src="assets/images/team/founder-2.png" alt="Team Member">
+        <h3>Amrit Sagar Bhattarai</h3>
+        <p class="team-role">Web & Digital Administrator</p>
+        <p class="role-description">
+          Handles web development specially back-end, system maintenance, hosting management, and overall digital operations to ensure smooth and secure performance.
+        </p>
+      </div>
+    </div> -->
+
     <div class="team-grid">
       <!-- Team Member -->
       <div class="team-card">
         <img src="assets/images/team/kushal.jpg" alt="Team Member">
         <h3>Kushal Acharya</h3>
-        <p class="team-role">Web & Digital Administrator</p>
+        <p class="team-role">Web & Digital Administrator (Intern)</p>
         <p class="role-description">
           Handles web development specially back-end, system maintenance, hosting management, and overall digital operations to ensure smooth and secure performance.
         </p>
@@ -141,7 +152,7 @@
       <div class="team-card">
         <img src="assets/images/team/bipin.png" alt="Team Member">
         <h3>Bipin Chapai</h3>
-        <p class="team-role">Web & Digital Administrator</p>
+        <p class="team-role">Web & Digital Administrator (Intern)</p>
         <p class="role-description">
           Focuses on graphic designs and user experience, handling social media,  building clean, responsive, and user-friendly interfaces to ensure smooth navigation and an engaging digital experience for users.
         </p>
@@ -156,6 +167,15 @@
         <p class="team-role">Receptionist</p>
         <p class="role-description">
           Manages front-desk operations, handles customer inquiries, coordinates appointments, and ensures smooth communication between clients and the organization.
+        </p>
+      </div>
+
+      <div class="team-card">
+        <img src="assets/images/team/guide.png" alt="Team Member">
+        <h3>Ramesh Chhetri</h3>
+        <p class="team-role">Tour Guide</p>
+        <p class="role-description">
+          Assist travelers, provide destination information, and ensure a smooth and enjoyable travel experience.
         </p>
       </div>
     </div>

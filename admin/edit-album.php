@@ -212,8 +212,9 @@ if (isset($_POST['update'])) {
     </div>
 
     <div class="file_input">
-      <label>Change Cover Image (Max: 2MB, Allowed: JPEG, PNG, GIF, WebP)</label>
+      <label>Change Cover Image</label>
       <input type="file" name="cover" accept="image/jpeg,image/png,image/gif,image/webp">
+      <small class="error">Max size: 2MB. Allowed: JPEG, PNG, GIF, WebP</small>
     </div>
 
     <label>Status</label>

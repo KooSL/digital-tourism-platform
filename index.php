@@ -388,7 +388,7 @@ if (isset($_GET['i'])) {
   </div>
 </section>
 
-<!-- <?php
+<?php
       $faqs = mysqli_query(
         $conn,
         "SELECT * FROM faqs
@@ -433,7 +433,7 @@ document.querySelectorAll(".faq-question").forEach(btn => {
     btn.parentElement.classList.toggle("active");
   });
 });
-</script> -->
+</script>
 
 
 <!-- WHY CHOOSE US -->

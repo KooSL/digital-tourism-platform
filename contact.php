@@ -111,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
           <li><strong><i class="fa-solid fa-location-dot"></i> Address:</strong> Bharatpur-1, Chitwan, Nepal</li>
           <li><strong><i class="fa-solid fa-phone"></i> Telephone:</strong> 056-511777</li>
           <li><strong><i class="fa-solid fa-phone"></i> Phone / <i class="fa-brands fa-square-whatsapp"></i> Whatsapp:</strong> +977-9764667165</li>
-          <li><strong><i class="fa-solid fa-envelope"></i> Email:</strong> takeyourseat18@gmail.com</li>
+          <li><strong><i class="fa-solid fa-envelope"></i> Email:</strong> contact.takeyourseat@gmail.com</li>
           <li><strong><i class="fa-solid fa-clock"></i> Working Hours:</strong> Sun–Fri | 10:00 AM – 6:00 PM</li>
         </ul>
       </div>
@@ -134,7 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
           <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
           <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
-          <a href="https://wa.me/+9779865507624" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
 

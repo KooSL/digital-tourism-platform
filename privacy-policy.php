@@ -68,7 +68,7 @@
 
         <h2>8. Contact Us</h2>
         <p>
-            <strong>Email:</strong> takeyourseat18@gmail.com <br>
+            <strong>Email:</strong> contact.takeyourseat@gmail.com <br>
             <strong>Phone:</strong> +977-9764667165 <br>
         </p>
 
