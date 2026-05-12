@@ -1,6 +1,6 @@
-# ✈️ TakeYourSeat
+# Digital Tourism Platform
 
-TakeYourSeat is a professional tour and travel platform built with PHP & MySQL.  
+Digital Tourism Platform is a professional tour and travel platform built with PHP & MySQL.  
 It includes Tours & Treks Packages, Flights, Services, Admin Panel, FCM Notifications, and dynamic inquiry handling.
 
 ---
@@ -57,7 +57,4 @@ It includes Tours & Treks Packages, Flights, Services, Admin Panel, FCM Notifica
 
 ## 👨‍💻 Developed By
 
-Take Your Seat Team  
-Member: Kushal Acharya, Bipin Chapai, 
-Mentor: Amrit Sagar Bhattarai, 
-Bharatpur, Nepal
+Kushal Acharya, Bipin Chapai
