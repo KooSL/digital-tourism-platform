@@ -18,7 +18,7 @@ if (isset($_GET['i'])) {
 <?php include 'config/db.php'; ?>
 
 <!-- HERO SECTION -->
-<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_4_2.jpeg');">
+<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_5_2.jpeg');">
   <div class="hero-overlay">
     <div class="container-hero-content">
 
@@ -45,7 +45,6 @@ if (isset($_GET['i'])) {
 </section>
 
 
-
 <!-- POPULAR TOURS -->
 <section class="home-tours">
   <div class="container">
@@ -56,29 +55,40 @@ if (isset($_GET['i'])) {
       safety, and unforgettable travel experiences.
     </p>
 
+    <!-- DOMESTIC TOURS -->
+    <h2 class="section-title type">Our Domestic Packages</h2>
+
     <div class="tour-slider-wrapper">
 
-      <!-- PREV BUTTON -->
-      <button class="slider-btn prev" id="prevBtn">
+      <button class="slider-btn prev domestic-prev">
         <i class="fas fa-chevron-left"></i>
       </button>
 
-      <!-- SLIDER VIEWPORT -->
       <div class="tour-slider-viewport">
-        <div class="tour-slider-track" id="tourTrack">
+        <div class="tour-slider-track domestic-track">
 
           <?php
-          $query = mysqli_query(
+          $domestic = mysqli_query(
             $conn,
-            "SELECT * FROM tours WHERE status = 1 ORDER BY id DESC"
+            "SELECT * FROM tours 
+             WHERE status = 1 AND type = 'domestic' 
+             ORDER BY is_popular DESC, created_at DESC"
           );
 
-          while ($tour = mysqli_fetch_assoc($query)) {
+          while ($tour = mysqli_fetch_assoc($domestic)) {
           ?>
             <div class="tour-card">
               <div class="tour-card-img">
                 <?php if ($tour['is_popular'] == 1): ?>
-                  <span class="popular-badge-home"><i class="fa-solid fa-fire"></i> Popular</span>
+                  <span class="popular-badge-home">
+                    <i class="fa-solid fa-fire"></i> Popular
+                  </span>
+                <?php endif; ?>
+
+                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
+                  <span class="latest-badge-home">
+                    <i class="fa-solid fa-star"></i> Latest
+                  </span>
                 <?php endif; ?>
 
                 <img
@@ -95,14 +105,74 @@ if (isset($_GET['i'])) {
                 <a href="tour-details?id=<?= $tour['id']; ?>">View Details</a>
               </div>
             </div>
-
           <?php } ?>
 
         </div>
       </div>
 
-      <!-- NEXT BUTTON -->
-      <button class="slider-btn next" id="nextBtn">
+      <button class="slider-btn next domestic-next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+
+    </div>
+
+
+    <!-- INTERNATIONAL TOURS -->
+    <h2 class="section-title type">Our International Packages</h2>
+
+    <div class="tour-slider-wrapper">
+
+      <button class="slider-btn prev international-prev">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <div class="tour-slider-viewport">
+        <div class="tour-slider-track international-track">
+
+          <?php
+          $international = mysqli_query(
+            $conn,
+            "SELECT * FROM tours 
+             WHERE status = 1 AND type = 'international' 
+             ORDER BY is_popular DESC, created_at DESC"
+          );
+
+          while ($tour = mysqli_fetch_assoc($international)) {
+          ?>
+            <div class="tour-card">
+              <div class="tour-card-img">
+                <?php if ($tour['is_popular'] == 1): ?>
+                  <span class="popular-badge-home">
+                    <i class="fa-solid fa-fire"></i> Popular
+                  </span>
+                <?php endif; ?>
+
+                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
+                  <span class="latest-badge-home">
+                    <i class="fa-solid fa-star"></i> Latest
+                  </span>
+                <?php endif; ?>
+
+                <img
+                  src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>"
+                  alt="<?= htmlspecialchars($tour['title']); ?>">
+              </div>
+
+              <div class="tour-info">
+                <h3><?= htmlspecialchars($tour['title']); ?></h3>
+                <p>NPR <?= htmlspecialchars($tour['price']); ?> | USD $<?= htmlspecialchars($tour['price_usd']); ?></p>
+              </div>
+
+              <div class="tour-card-btn">
+                <a href="tour-details?id=<?= $tour['id']; ?>">View Details</a>
+              </div>
+            </div>
+          <?php } ?>
+
+        </div>
+      </div>
+
+      <button class="slider-btn next international-next">
         <i class="fas fa-chevron-right"></i>
       </button>
 
@@ -272,28 +342,28 @@ if (isset($_GET['i'])) {
     <div class="stats-grid">
 
       <div class="stat-box">
-        <h3 class="counter" data-target="5000">0</h3>
-        <p>Happy Clients</p>
+        <h3 class="counter" data-target="4200">0</h3>
+        <p>Happy Travelers</p>
       </div>
 
       <div class="stat-box">
-        <h3 class="counter" data-target="1500">0</h3>
-        <p>Flights Issued</p>
+        <h3 class="counter" data-target="1400">0</h3>
+        <p>Flight Bookings</p>
       </div>
 
       <div class="stat-box">
-        <h3 class="counter" data-target="1200">0</h3>
+        <h3 class="counter" data-target="1250">0</h3>
         <p>Tour Packages</p>
       </div>
 
       <div class="stat-box">
-        <h3 class="counter" data-target="20">0</h3>
-        <p>Visas Issued</p>
+        <h3 class="counter" data-target="25">0</h3>
+        <p>Visa Applications Processed</p>
       </div>
 
       <div class="stat-box">
-        <h3 class="counter" data-target="500">0</h3>
-        <p>Bus Tickets Issued</p>
+        <h3 class="counter" data-target="700">0</h3>
+        <p>Bus Ticket Bookings</p>
       </div>
 
     </div>
@@ -389,14 +459,14 @@ if (isset($_GET['i'])) {
 </section>
 
 <?php
-      $faqs = mysqli_query(
-        $conn,
-        "SELECT * FROM faqs
+$faqs = mysqli_query(
+  $conn,
+  "SELECT * FROM faqs
    WHERE status = 1 AND is_featured = 1
    ORDER BY id DESC
    LIMIT 4"
-      );
-      ?>
+);
+?>
 
 <section class="home-faq">
   <div class="container">
@@ -428,11 +498,11 @@ if (isset($_GET['i'])) {
 </section>
 
 <script>
-document.querySelectorAll(".faq-question").forEach(btn => {
-  btn.addEventListener("click", () => {
-    btn.parentElement.classList.toggle("active");
+  document.querySelectorAll(".faq-question").forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.parentElement.classList.toggle("active");
+    });
   });
-});
 </script>
 
 
