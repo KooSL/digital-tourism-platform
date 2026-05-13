@@ -1,4 +1,3 @@
-
 * {
   margin: 0;
   padding: 0;
@@ -11,18 +10,21 @@ body {
 }
 
 * {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-h1, h2, h3, .headline {
-  font-family: 'Poppins', sans-serif;
+h1,
+h2,
+h3,
+.headline {
+  font-family: "Poppins", sans-serif;
 }
 
 /* SIDEBAR */
 .admin-sidebar {
   width: 230px;
   height: 100vh;
-  background: #006DB6;
+  background: #006db6;
   color: white;
   position: fixed;
   top: 0;
@@ -53,7 +55,7 @@ h1, h2, h3, .headline {
 }
 
 .sidebar-menu a:hover {
-  background: #FFA630;
+  background: #ffa630;
 }
 
 /* SUBMENU */
@@ -70,7 +72,7 @@ h1, h2, h3, .headline {
 
 .submenu a {
   font-size: 14px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   margin-bottom: 5px;
 }
 
@@ -78,10 +80,10 @@ h1, h2, h3, .headline {
 .admin-header {
   position: fixed;
   top: 0;
-  left: 230px;           
+  left: 230px;
   right: 0;
   height: 60px;
-  background: #FFA630;
+  background: #ffa630;
   border-bottom: 1px solid #eee;
   z-index: 1000;
 }
@@ -96,7 +98,7 @@ h1, h2, h3, .headline {
 
 .admin-header h2 {
   font-size: 18px;
-  color: #006DB6;
+  color: #006db6;
 }
 
 .admin-user {
@@ -104,22 +106,23 @@ h1, h2, h3, .headline {
   gap: 20px;
 }
 
-.admin-user a{
+.admin-user a {
   text-decoration: none;
   color: white;
 }
 
 .admin-user a:hover {
-  color: #006DB6;
+  color: #006db6;
 }
 
 /* MAIN CONTENT */
 .admin-content {
-  margin-left: 230px;     
-  padding: 90px 30px 30px; 
+  margin-left: 230px;
+  padding: 90px 30px 30px;
 }
 
-.admin-content h1, .admin-content h2 {
+.admin-content h1,
+.admin-content h2 {
   margin-bottom: 15px;
   /* color: #006DB6; */
 }
@@ -132,7 +135,7 @@ h1, h2, h3, .headline {
 }
 
 .btn-add-new {
-  background: #006DB6;
+  background: #006db6;
   color: white;
   padding: 10px 15px;
   text-decoration: none;
@@ -140,9 +143,8 @@ h1, h2, h3, .headline {
 }
 
 .btn-add-new:hover {
-  background: #FFA630;
+  background: #ffa630;
 }
-
 
 /* STATS */
 .dashboard-stats {
@@ -157,7 +159,7 @@ h1, h2, h3, .headline {
   padding: 20px;
   border-radius: 6px;
   width: 200px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease;
 }
 
@@ -168,13 +170,13 @@ h1, h2, h3, .headline {
 .stat-box h3 {
   margin-bottom: 10px;
   font-size: 28px;
-  color: #006DB6;
+  color: #006db6;
 }
 
-.active{
+.active {
   color: green;
 }
-.inactive{
+.inactive {
   color: red;
 }
 
@@ -182,7 +184,7 @@ h1, h2, h3, .headline {
   margin-bottom: 10px;
 }
 
-.recent-box h2{
+.recent-box h2 {
   text-align: left;
 }
 
@@ -190,7 +192,7 @@ h1, h2, h3, .headline {
   background: white;
   padding: 20px;
   border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   text-align: center;
 }
 
@@ -199,12 +201,12 @@ table {
   border-collapse: collapse;
 }
 
-table th, table td {
+table th,
+table td {
   font-size: 14px;
   padding: 10px;
   border-bottom: 1px solid #eee;
 }
-
 
 /* FOOTER */
 .admin-footer {
@@ -213,9 +215,7 @@ table th, table td {
   padding: 20px;
   font-size: 13px;
   color: #777;
-} 
-
-
+}
 
 /* ADMIN FORM */
 .admin-form {
@@ -223,11 +223,10 @@ table th, table td {
   padding: 25px;
   max-width: 800px;
   border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-.admin-form input
-{
+.admin-form input {
   width: 100%;
   padding: 12px;
   margin-bottom: 2px;
@@ -236,8 +235,7 @@ table th, table td {
   font-size: 14px;
 }
 
-.admin-form textarea
-{
+.admin-form textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
@@ -259,12 +257,12 @@ table th, table td {
   font-size: 14px;
 }
 
-.admin-form .file_input{
+.admin-form .file_input {
   margin-bottom: 15px;
 }
 
 .admin-form button {
-  background: #006DB6;
+  background: #006db6;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -274,7 +272,7 @@ table th, table td {
 }
 
 .admin-form button:hover {
-  background: #FFA630;
+  background: #ffa630;
 }
 
 .admin-form .additinerarybtn {
@@ -297,27 +295,25 @@ table th, table td {
   margin-bottom: 8px;
   display: block;
   font-weight: bold;
-  color: #006DB6;
+  color: #006db6;
 }
 
-.admin-form a{
+.admin-form a {
   text-decoration: none;
-  color: #006DB6;
+  color: #006db6;
 }
 
-.admin-form a:hover{
-  color: #FFA630;
+.admin-form a:hover {
+  color: #ffa630;
 }
 
 .admin-form p {
   margin-bottom: 15px;
 }
 
-.rating option{
+.rating option {
   color: gold;
 }
-
-
 
 .admin-table {
   width: 100%;
@@ -325,23 +321,24 @@ table th, table td {
   background: #fff;
 }
 
-.admin-table th, .admin-table td {
+.admin-table th,
+.admin-table td {
   padding: 12px;
   border: 1px solid #ddd;
   text-align: center;
 }
 
-.pdf-view a{
+.pdf-view a {
   text-decoration: none;
-  color: #006DB6;
+  color: #006db6;
 }
 
-.pdf-view a:hover{
-  color: #FFA630;
+.pdf-view a:hover {
+  color: #ffa630;
 }
 
 .btn-edit {
-  background: #006DB6;
+  background: #006db6;
   color: #fff;
   padding: 6px 10px;
   text-decoration: none;
@@ -349,7 +346,7 @@ table th, table td {
 }
 
 .btn-edit:hover {
-  background: #FFA630;
+  background: #ffa630;
 }
 
 .btn-delete {
@@ -382,7 +379,6 @@ table th, table td {
   text-align: center;
 }
 
-
 .msg-cell {
   max-width: 300px;
   text-align: left;
@@ -393,11 +389,9 @@ table th, table td {
   vertical-align: middle;
 }
 
-.ratingstar{
+.ratingstar {
   color: gold;
 }
-
-
 
 .login-body {
   /* background: #006DB6; */
@@ -412,7 +406,7 @@ table th, table td {
   width: 300px;
   border-radius: 6px;
   padding: 25px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .login-box h2 {
@@ -432,7 +426,7 @@ table th, table td {
 .login-box button {
   width: 100%;
   padding: 10px;
-  background: #006DB6;
+  background: #006db6;
   border: none;
   color: #fff;
   /* font-weight: bold; */
@@ -441,7 +435,7 @@ table th, table td {
 }
 
 .login-box button:hover {
-  background: #FFA630;
+  background: #ffa630;
 }
 
 .error {
@@ -465,3 +459,15 @@ table th, table td {
   text-align: left;
 }
 
+.error-box {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
