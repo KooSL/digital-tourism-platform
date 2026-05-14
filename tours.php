@@ -5,8 +5,8 @@
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<?php include 'config/db.php'; 
-  $type = $_GET['type'] ?? '';
+<?php include 'config/db.php';
+$type = $_GET['type'] ?? '';
 ?>
 
 <section class="page-banner">
@@ -23,31 +23,29 @@
 <section class="container tour-list">
 
   <?php
-    
-    $sql = "SELECT * FROM tours WHERE status = 1";
 
-    if ($type) {
-        $sql .= " AND type = ?";
-        $sql .= " ORDER BY id DESC";
+  $sql = "SELECT * FROM tours WHERE status = 1";
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $type);
-    } else {
-        $sql .= " ORDER BY id DESC";
-        $stmt = $conn->prepare($sql);
-    }
+  if ($type) {
+    $sql .= " AND type = ?";
+    $sql .= " ORDER BY is_popular DESC, created_at DESC";
 
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $type);
+  } else {
+    $sql .= " ORDER BY is_popular DESC, created_at DESC";
+    $stmt = $conn->prepare($sql);
+  }
+
+  $stmt->execute();
+  $result = $stmt->get_result();
 
   while ($row = mysqli_fetch_assoc($result)) {
   ?>
     <div class="tour-row">
 
       <div class="tour-img">
-        <?php if ($row['is_popular'] == 1) { ?>
-          <span class="popular-badge"><i class="fa-solid fa-fire"></i> Popular</span>
-        <?php } ?>
+
 
         <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>"
           alt="<?= $row['title'] ?>">
@@ -55,13 +53,26 @@
 
       <div class="tour-details">
 
-        <?php if (!$type && in_array($row['type'], ['domestic','international'])): ?>
-          <span class="type-badge">
+        <div class="tour-badges">
+          <?php if (!$type && in_array($row['type'], ['domestic', 'international'])): ?>
+            <span class="type-badge">
               <i class="fa-solid 
-              <?= $row['type'] === 'domestic' ? 'fa-house' : 'fa-earth-americas' ?>"></i>
+                <?= $row['type'] === 'domestic' ? 'fa-house' : 'fa-earth-americas' ?>"></i>
               <?= ucfirst($row['type']) ?>
-          </span>
-        <?php endif; ?>
+            </span>
+          <?php endif; ?>
+
+          <?php if ($row['is_popular'] == 1) { ?>
+            <span class="popular-badge"><i class="fa-solid fa-fire"></i> Popular</span>
+          <?php } ?>
+
+          <?php if (strtotime($row['created_at']) >= strtotime('-7 days')): ?>
+            <span class="latest-badge">
+              <i class="fa-solid fa-star"></i> Latest
+            </span>
+          <?php endif; ?>
+        </div>
+
 
         <h3><?= $row['title'] ?></h3>
         <p class="duration"><?= $row['duration'] ?></p>

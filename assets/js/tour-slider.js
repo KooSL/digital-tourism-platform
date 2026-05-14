@@ -1,8 +1,9 @@
-document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
-  const track = wrapper.querySelector(".tour-slider-track");
-  const nextBtn = wrapper.querySelector(".next");
-  const prevBtn = wrapper.querySelector(".prev");
-  const cards = wrapper.querySelectorAll(".tour-card");
+document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
+
+  const track = wrapper.querySelector('.tour-slider-track');
+  const nextBtn = wrapper.querySelector('.next');
+  const prevBtn = wrapper.querySelector('.prev');
+  const cards = wrapper.querySelectorAll('.tour-card');
 
   let index = 0;
   let startX = 0;
@@ -15,11 +16,11 @@ document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
   }
 
   if (cards.length <= getVisibleCards()) {
-    track.classList.add("center");
+    track.classList.add('center');
   }
 
   function getCardWidth() {
-    const card = wrapper.querySelector(".tour-card");
+    const card = wrapper.querySelector('.tour-card');
     const gap = 25;
     return card.offsetWidth + gap;
   }
@@ -36,7 +37,7 @@ document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
   }
 
   // Button navigation
-  nextBtn.addEventListener("click", () => {
+  nextBtn.addEventListener('click', () => {
     const visibleCards = getVisibleCards();
     if (index < cards.length - visibleCards) {
       index++;
@@ -44,7 +45,7 @@ document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
     }
   });
 
-  prevBtn.addEventListener("click", () => {
+  prevBtn.addEventListener('click', () => {
     if (index > 0) {
       index--;
       updateSlider();
@@ -52,16 +53,16 @@ document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
   });
 
   // Touch swipe
-  track.addEventListener("touchstart", (e) => {
+  track.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
     isDragging = true;
   });
 
-  track.addEventListener("touchmove", (e) => {
+  track.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
   });
 
-  track.addEventListener("touchend", (e) => {
+  track.addEventListener('touchend', (e) => {
     if (!isDragging) return;
 
     let endX = e.changedTouches[0].clientX;
@@ -81,4 +82,5 @@ document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
 
     isDragging = false;
   });
+
 });
