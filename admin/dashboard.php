@@ -20,6 +20,7 @@ include 'auth.php';
     $albumCount = $conn->query("SELECT COUNT(*) AS total FROM gallery_albums")->fetch_assoc();
     $testCount = $conn->query("SELECT COUNT(*) AS total FROM testimonials")->fetch_assoc();
     $cliCount = $conn->query("SELECT COUNT(*) AS total FROM clients")->fetch_assoc();
+    $busInqCount = $conn->query("SELECT COUNT(*) AS total FROM bus_inquiries")->fetch_assoc();
 
     $activeTours = mysqli_fetch_assoc(
       mysqli_query($conn, "SELECT COUNT(*) as total FROM tours WHERE status=1")
@@ -61,6 +62,7 @@ include 'auth.php';
     <div class="stat-box">
       <p class="stat-title">Total Inquiries</p>
       <h3><?php echo $inqCount['total']; ?></h3>
+      <p><span class="bus-inquiries">Bus Inquiries: <?php echo $busInqCount['total']; ?></span></p>
     </div>
 
     <div class="stat-box">
@@ -90,7 +92,7 @@ include 'auth.php';
 
       <?php
       // $result = $conn->query("SELECT * FROM inquiries WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY id DESC LIMIT 5");
-      $result = $conn->query("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5");
+      $result = $conn->query("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5") ;
       while($row = $result->fetch_assoc()):
       ?>
       <tr>
