@@ -16,6 +16,15 @@
       </ul>
     </li>
 
+    <li class="has-submenu">
+      <a href="">Buses ▾</a>
+      <ul class="submenu">
+        <li><a href="add-bus">Add Bus</a></li>
+        <li><a href="manage-buses">Manage Buses</a></li>
+        <li><a href="bus-inquiries">Bus Inquiries</a></li>
+      </ul>
+    </li>
+
     
 
     <li class="has-submenu">
@@ -89,4 +98,3 @@
   </ul> -->
   <?php } ?>
 </aside>
-

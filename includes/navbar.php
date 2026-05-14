@@ -10,12 +10,13 @@
     <ul class="nav-menu" id="navMenu">
       <li><a href="/TakeYourSeat">Home</a></li>
       <li class="dropdown">
-        <a href="">Tour</a>
+        <a href="">Tours / Treks</a>
         <ul class="dropdown-menu">
           <li><a href="tours?type=domestic">Domestic</a></li>
           <li><a href="tours?type=international">International</a></li>
         </ul>
       </li>
+      <li><a href="buses">Buses</a></li>
       <li><a href="flights">Flights</a></li>
       <li><a href="services">Services</a></li>
       <li><a href="gallery">Gallery</a></li>
@@ -35,12 +36,13 @@
       <ul>
         <li><a href="/TakeYourSeat">Home</a></li>
         <li class="mobile-dropdown">
-          <a href="tours">Tour</a>
+          <a href="">Tours / Treks</a>
           <ul class="mobile-submenu">
             <li><a href="tours?type=domestic">Domestic</a></li>
             <li><a href="tours?type=international">International</a></li>
           </ul>
         </li>
+        <li><a href="buses">Buses</a></li>
         <li><a href="flights">Flights</a></li>
         <li><a href="services">Services</a></li>
         <li><a href="gallery">Gallery</a></li>
