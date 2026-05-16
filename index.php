@@ -1,3 +1,5 @@
+<?php include 'includes/header.php'; ?>
+
 <?php
 if (isset($_GET['i'])) {
   $url = strtok($_SERVER["REQUEST_URI"], '?');
@@ -5,9 +7,6 @@ if (isset($_GET['i'])) {
   exit;
 }
 ?>
-
-
-<?php include 'includes/header.php'; ?>
 
 <!-- HEADER -->
 <div class="header-wrapper">
@@ -18,9 +17,23 @@ if (isset($_GET['i'])) {
 <?php include 'config/db.php'; ?>
 
 <!-- HERO SECTION -->
-<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_6.jpg');">
+<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_5_2.jpeg');">
   <div class="hero-overlay">
     <div class="container-hero-content">
+
+      <?php if (isset($_GET['success'])): ?>
+        <div class="success-box" id="successBox">
+          <strong>Success!</strong>
+          <p><?php echo isset($_SESSION['success']) ? $_SESSION['success'] : 'Registration successful!'; ?></p>
+        </div>
+      <?php endif; ?>
+
+      <?php if (isset($_GET['error'])): ?>
+        <div class="error-box" id="errorBox">
+          <strong>Error!</strong>
+          <p><?php echo isset($_SESSION['error']) ? $_SESSION['error'] : 'Something went wrong!'; ?></p>
+        </div>
+      <?php endif; ?>
 
       <!-- <img src="assets/images/logo/airplane-icon_white.png" class="airplane-icon" alt="Airplane"> -->
 
@@ -51,7 +64,7 @@ if (isset($_GET['i'])) {
 
     <h2 class="section-title">Explore Our Latest and Popular Packages</h2>
     <p class="section-subtitle-explore">
-      Digital Tourism Platform offers carefully designed packages focusing on comfort,
+      Take Your Seat offers carefully designed packages focusing on comfort,
       safety, and unforgettable travel experiences.
     </p>
 
@@ -410,7 +423,7 @@ if (isset($_GET['i'])) {
 
     <h2 class="section-title">What Our Clients Say</h2>
     <p class="section-subtitle-testimonial">
-      Real experiences from travelers who trusted Digital Tourism Platform
+      Real experiences from travelers who trusted Take Your Seat
     </p>
 
     <div class="testimonial-slider-wrapper">
@@ -510,7 +523,7 @@ $faqs = mysqli_query(
 <section class="why-us">
   <div class="container">
 
-    <h2 class="section-title white">Why Choose Digital Tourism Platform?</h2>
+    <h2 class="section-title white">Why Choose Take Your Seat?</h2>
 
     <div class="why-grid">
 
@@ -605,7 +618,7 @@ $clients = mysqli_query(
   </div>
 </section>
 
-
+<script src="assets/js/success-errorBox.js"></script>
 <script src="assets/js/search-tours.js"></script>
 <script src="assets/js/tour-slider.js"></script>
 <script src="assets/js/flight-slider.js"></script>

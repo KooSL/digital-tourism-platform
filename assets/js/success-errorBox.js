@@ -1,19 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const successBox = document.getElementById("successBox");
+  handleBox("successBox");
+  handleBox("errorBox");
 
-  if (successBox) {
+  function handleBox(id) {
+    const box = document.getElementById(id);
+
+    if (!box) return;
+
     setTimeout(() => {
-      successBox.style.transition = "opacity 0.6s ease";
-      successBox.style.opacity = "0";
+      box.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+      box.style.opacity = "0";
+      box.style.transform = "translateY(-10px)";
 
       setTimeout(() => {
-        successBox.remove();
-      }, 600);
-    }, 5000);
+        box.remove();
+      }, 500);
+    }, 4000);
 
     if (window.history.replaceState) {
-      const cleanURL = window.location.pathname + window.location.search.replace(/([?&])success=1(&|$)/, '$1').replace(/[\?&]$/, '');
-      window.history.replaceState({}, document.title, cleanURL);
+      let url = window.location.href;
+
+      url = url
+        .replace(/([?&])(success|error)=1(&|$)/, "$1")
+        .replace(/[?&]$/, "");
+
+      window.history.replaceState({}, document.title, url);
     }
   }
 });
