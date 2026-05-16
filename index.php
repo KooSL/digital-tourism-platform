@@ -18,7 +18,7 @@ if (isset($_GET['i'])) {
 <?php include 'config/db.php'; ?>
 
 <!-- HERO SECTION -->
-<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_5_2.jpeg');">
+<section class="home-hero" style="background-image: url('assets/images/home_page/home_page_6.jpg');">
   <div class="hero-overlay">
     <div class="container-hero-content">
 
@@ -51,7 +51,7 @@ if (isset($_GET['i'])) {
 
     <h2 class="section-title">Explore Our Latest and Popular Packages</h2>
     <p class="section-subtitle-explore">
-      Take Your Seat offers carefully designed packages focusing on comfort,
+      Digital Tourism Platform offers carefully designed packages focusing on comfort,
       safety, and unforgettable travel experiences.
     </p>
 
@@ -410,7 +410,7 @@ if (isset($_GET['i'])) {
 
     <h2 class="section-title">What Our Clients Say</h2>
     <p class="section-subtitle-testimonial">
-      Real experiences from travelers who trusted Take Your Seat
+      Real experiences from travelers who trusted Digital Tourism Platform
     </p>
 
     <div class="testimonial-slider-wrapper">
@@ -510,7 +510,7 @@ $faqs = mysqli_query(
 <section class="why-us">
   <div class="container">
 
-    <h2 class="section-title white">Why Choose Take Your Seat?</h2>
+    <h2 class="section-title white">Why Choose Digital Tourism Platform?</h2>
 
     <div class="why-grid">
 

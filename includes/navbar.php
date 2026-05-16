@@ -22,6 +22,17 @@
       <li><a href="gallery">Gallery</a></li>
       <li><a href="contact">Contact</a></li>
       <li><a href="about">About Us</a></li>
+
+      <?php if (isset($_SESSION['user_id'])): ?>
+
+        <li><a href="signout">Sign Out</a></li>
+
+      <?php else: ?>
+
+        <li><a href="signin">Sign In</a></li>
+
+      <?php endif; ?>
+
     </ul>
 
     <!-- HAMBURGER -->
@@ -48,6 +59,17 @@
         <li><a href="gallery">Gallery</a></li>
         <li><a href="contact">Contact</a></li>
         <li><a href="about">About Us</a></li>
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+
+          <li><a href="signout">Sign Out</a></li>
+
+        <?php else: ?>
+
+          <li><a href="signin">Sign In</a></li>
+
+        <?php endif; ?>
+
       </ul>
     </div>
 
@@ -64,10 +86,9 @@
   });
 
   document.querySelectorAll(".mobile-dropdown > a").forEach(item => {
-  item.addEventListener("click", function(e) {
-    e.preventDefault();
-    this.parentElement.classList.toggle("active");
+    item.addEventListener("click", function(e) {
+      e.preventDefault();
+      this.parentElement.classList.toggle("active");
+    });
   });
-});
-
 </script>

@@ -103,16 +103,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
       <div class="contact-info">
         <h2>Get in Touch</h2>
         <p>
-          Feel free to contact <strong>Take Your Seat</strong> for tour inquiries,
+          Feel free to contact us for tour inquiries,
           bookings, or any travel-related questions.
         </p>
 
         <ul>
-          <li><strong><i class="fa-solid fa-location-dot"></i> Address:</strong> Bharatpur-1, Chitwan, Nepal</li>
-          <li><strong><i class="fa-solid fa-phone"></i> Telephone:</strong> 056-511777</li>
-          <li><strong><i class="fa-solid fa-phone"></i> Phone / <i class="fa-brands fa-square-whatsapp"></i> Whatsapp:</strong> +977-9764667165</li>
-          <li><strong><i class="fa-solid fa-envelope"></i> Email:</strong> contact.takeyourseat@gmail.com</li>
-          <li><strong><i class="fa-solid fa-clock"></i> Working Hours:</strong> Sun–Fri | 10:00 AM – 6:00 PM</li>
+          <li><strong><i class="fa-solid fa-location-dot"></i> Address:</strong> Chitwan, Nepal</li>
+          <li><strong><i class="fa-solid fa-phone"></i> Telephone:</strong> 056-123456</li>
+          <li><strong><i class="fa-solid fa-phone"></i> Phone / <i class="fa-brands fa-square-whatsapp"></i> Whatsapp:</strong> +977-9812345678</li>
+          <li><strong><i class="fa-solid fa-envelope"></i> Email:</strong> contact.dtp@gmail.com</li>
+          <li><strong><i class="fa-solid fa-clock"></i> Working Hours:</strong> Sun–Fri | 10:00 AM – 5:00 PM</li>
         </ul>
       </div>
 
@@ -122,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
       <h2 class="map-title">Find Us on Map</h2>
 
       <div class="map-box">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d514.1725170795428!2d84.42609521821994!3d27.69352602815289!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994fbc2ee459c9d%3A0x448dfca49a2caaa1!2sTake%20Your%20Seat%20Tours%20and%20Travels%20Pvt%20Ltd!5e0!3m2!1sen!2snp!4v1766342489448!5m2!1sen!2snp" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d467.46101159637254!2d84.43384670509566!3d27.68345207834983!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994fb2d933d355d%3A0x5e79bbe09d977ee3!2sSaptagandaki%20Multiple%20Campus!5e1!3m2!1sen!2snp!4v1778753106784!5m2!1sen!2snp" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
 
     </div>
@@ -131,10 +131,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
       <div class="contact-social">
         <h2>Follow Us</h2>
         <div class="social-icons">
-          <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
-          <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://wa.me/+9779812345678" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
 

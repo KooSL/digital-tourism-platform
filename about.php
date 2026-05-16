@@ -31,7 +31,7 @@
     <div class="about-text">
       <h2>Who We Are</h2>
       <p>
-        <strong>Take Your Seat Tours and Travels Pvt. Ltd.</strong> is a professionally
+        <strong>Digital Tourism Platform</strong> is a professionally
         managed travel company based in Nepal, offering complete travel solutions
         for domestic and international travelers.
       </p>
@@ -55,7 +55,7 @@
 
     <!-- RIGHT -->
     <div class="about-image">
-      <img src="assets/images/logo/TakeyourSeat_Logo-Color.png" alt="Travel in Nepal">
+      <!-- <img src="assets/images/logo/TakeyourSeat_Logo-Color.png" alt="Travel in Nepal"> -->
     </div>
 
   </div>
@@ -91,11 +91,10 @@
 
     <h2 class="section-title">Meet Our Team</h2>
     <p class="section-subtitle">
-      The people behind Take Your Seat who make every journey memorable
+      The people behind Digital Tourism Platform who make every journey memorable
     </p>
 
-    <div class="team-grid founder">
-      <!-- Team Member -->
+    <!-- <div class="team-grid founder">
       <div class="team-card">
         <img src="assets/images/team/founder-2.png" alt="Team Member">
         <h3>Amrit Sagar Bhattarai</h3>
@@ -104,10 +103,9 @@
           Leads the company with a clear vision, oversees operations, and ensures quality service across all travel solutions.
         </p>
       </div>
-    </div>
+    </div> -->
 
-    <div class="team-grid">
-      <!-- Team Member -->
+    <!-- <div class="team-grid">
       <div class="team-card">
         <img src="assets/images/team/himal.jpeg" alt="Team Member">
         <h3>Himal Dahal</h3>
@@ -125,7 +123,7 @@
           Manages daily operations, coordination, and planning to ensure smooth and efficient service delivery.
         </p>
       </div>
-    </div>
+    </div> -->
 
     <!-- <div class="team-grid founder">
       <div class="team-card">
@@ -143,7 +141,7 @@
       <div class="team-card">
         <img src="assets/images/team/kushal.jpg" alt="Team Member">
         <h3>Kushal Acharya</h3>
-        <p class="team-role">Web & Digital Administrator (Intern)</p>
+        <p class="team-role">Web & Digital Administrator</p>
         <p class="role-description">
           Handles web development specially back-end, system maintenance, hosting management, and overall digital operations to ensure smooth and secure performance.
         </p>
@@ -152,15 +150,14 @@
       <div class="team-card">
         <img src="assets/images/team/bipin.png" alt="Team Member">
         <h3>Bipin Chapai</h3>
-        <p class="team-role">Web & Digital Administrator (Intern)</p>
+        <p class="team-role">Web & Digital Administrator</p>
         <p class="role-description">
           Focuses on graphic designs and user experience, handling social media,  building clean, responsive, and user-friendly interfaces to ensure smooth navigation and an engaging digital experience for users.
         </p>
       </div>
     </div>
 
-    <div class="team-grid">
-      <!-- Team Member -->
+    <!-- <div class="team-grid">
       <div class="team-card">
         <img src="assets/images/team/female.png" alt="Team Member">
         <h3>Gita Bhattarai</h3>
@@ -177,13 +174,13 @@
         <p class="role-description">
           Assist travelers, provide destination information, and ensure a smooth and enjoyable travel experience.
         </p>
-      </div>
+      </div> -->
     </div>
 
   </div>
 </section>
 
-<section class="founder-message">
+<!-- <section class="founder-message">
   <div class="container founder-flex">
 
     <div class="founder-image">
@@ -196,7 +193,7 @@
       <p class="founder-title">Founder & Managing Director</p>
 
       <p>
-        Welcome to <strong>Take Your Seat</strong>.
+        Welcome to <strong>Digital Tourism Platform</strong>.
         We believe that travel should be seamless, inspiring, and truly memorable.
         Our goal is to make every journey, whether a holiday tour, trekking adventure,
         or international flight, simple and stress-free for our clients.
@@ -209,11 +206,11 @@
       </p>
 
 
-      <!-- <img src="/TakeYourSeat/assets/images/signature.png" class="signature" alt="Signature"> -->
+      <img src="/TakeYourSeat/assets/images/signature.png" class="signature" alt="Signature">
     </div>
 
   </div>
-</section>
+</section> -->
 
 
 <?php include 'includes/footer.php'; ?>

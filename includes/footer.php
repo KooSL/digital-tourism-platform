@@ -69,7 +69,7 @@
       <!-- SOCIAL ICONS -->
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank"aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
         <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
         <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
       </div>
@@ -120,7 +120,27 @@
   </div>
 </footer>
 
+<div id="chatToggle"><i class="fa-solid fa-robot"></i></div>
+
+<div id="chatContainer">
+  <div id="chatHeader">
+    <div>
+      <strong>Guide Dai</strong><br>
+      <small>AI Assistant</small>
+    </div>
+    <span id="closeChat"><i class="fa-solid fa-xmark"></i></span>
+  </div>
+
+  <div id="chatMessages"></div>
+
+  <div id="chatInputArea">
+    <input type="text" id="userInput" placeholder="Ask about tours, buses..." />
+    <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script src="assets/js/chatbot.js"></script>
 
 </body>
-</html>
-  
+
+</html> 

@@ -16,7 +16,7 @@ $type = $_GET['type'] ?? '';
     <?php else : ?>
       <h1>Our All Packages</h1>
     <?php endif; ?>
-    <p>Explore Nepal & beyond with Take Your Seat</p>
+    <p>Explore Nepal & beyond through digital tourism platform</p>
   </div>
 </section>
 
@@ -76,9 +76,16 @@ $type = $_GET['type'] ?? '';
 
         <h3><?= $row['title'] ?></h3>
         <p class="duration"><?= $row['duration'] ?></p>
-        <p class="desc">
-          Experience the best of Nepal with this carefully designed tour package.
-        </p>
+        <?php if ($row['type'] === 'domestic') : ?>
+          <p class="desc">
+            Experience the best of Nepal with this carefully designed tour package.
+          </p>
+        <?php else : ?>
+          <p class="desc">
+            Explore the world with our exclusive international tour package.
+          </p>
+        <?php endif; ?>
+
 
         <span class="price">From: <span class="price-num"> NPR <?= $row['price'] ?> | USD $<?= $row['price_usd'] ?></span></span>
 

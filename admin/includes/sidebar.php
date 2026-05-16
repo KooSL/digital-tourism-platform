@@ -1,5 +1,5 @@
 <aside class="admin-sidebar">
-  <h2>TYS Admin</h2>
+  <h2>DTP Admin</h2>
 
 <?php if (isset($_SESSION['admin'])) { ?>
   <ul class="sidebar-menu">

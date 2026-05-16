@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>TYS Admin Panel</title>
+  <title>DTP Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ADMIN CSS -->
@@ -35,7 +35,7 @@
     <div class="admin-user">
       <!-- <span>Admin</span> -->
 
-      <a href="/TakeYourSeat" target="_blank">Our Site</a>
+      <a href="/Digital_Tourism_Platform" target="_blank">Our Site</a>
 
       <?php if (isset($_SESSION['admin'])) { ?>
         <a href="logout">Logout</a>
