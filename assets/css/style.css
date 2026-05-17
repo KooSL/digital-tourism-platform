@@ -3325,8 +3325,83 @@ a {
   border-radius: 6px;
 }
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  background-color: #f9fbfd;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.3s;
+}
+
+/* .form-group input:focus {
+  border-color: var(--orange);
+} */
+
+.auth-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.auth-btn:hover {
+  background: var(--orange);
+}
+
+.auth-switch {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-switch a:hover {
+  color: var(--orange);
+}
+=======
+>>>>>>> Stashed changes
   .top-left .logo{
     font-size: 40px;
     font-weight: bold;
     color: var(--blue);
+<<<<<<< Updated upstream
   }
+=======
+  }
+>>>>>>> 095d66f2fbba84911049c00768d6718427013832
+>>>>>>> Stashed changes
