@@ -102,10 +102,51 @@ a {
   animation: fadeIn 0.4s ease;
 }
 
+.success-box p,
+.error-box p {
+  font-size: 14px !important;
+  font-family: "Inter", sans-serif !important;
+  text-shadow: none !important;
+}
+
 .success-box strong,
 .success-box-contact strong {
   display: block;
   margin-bottom: 4px;
+}
+
+.error-box {
+  position: absolute;
+  right: 20px;
+  background: #dc3545;
+  border-left: 4px solid var(--orange);
+  padding: 12px 14px;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  animation: fadeIn 0.4s ease;
+}
+
+.error-box.package {
+  top: 20px;
+}
+
+.error-box strong,
+.error-box-contact strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.error-box-contact {
+  position: absolute;
+  right: 20px;
+  background: #dc3545;
+  border-left: 4px solid var(--orange);
+  padding: 12px 14px;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  animation: fadeIn 0.4s ease;
 }
 
 @keyframes fadeIn {
@@ -202,6 +243,12 @@ a {
 
 .top-left span {
   margin-right: 20px;
+}
+
+.top-left .logo {
+  font-size: 40px;
+  font-weight: bold;
+  color: var(--blue);
 }
 
 .top-right a {
@@ -663,7 +710,7 @@ a {
   height: 100%;
   display: flex;
   align-items: center;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
 }
 
 .home-hero p {
@@ -1596,7 +1643,6 @@ a {
   align-items: center;
   font-size: 40px;
   font-weight: bold;
-
 }
 
 .footer-box img {
@@ -1734,7 +1780,6 @@ a {
     display: flex;
     justify-content: center;
     /* width: 100%; */
-
   }
 
   .footer-box img {
@@ -3325,9 +3370,6 @@ a {
   border-radius: 6px;
 }
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
 .auth-container {
   display: flex;
   justify-content: center;
@@ -3393,15 +3435,3 @@ a {
 .auth-switch a:hover {
   color: var(--orange);
 }
-=======
->>>>>>> Stashed changes
-  .top-left .logo{
-    font-size: 40px;
-    font-weight: bold;
-    color: var(--blue);
-<<<<<<< Updated upstream
-  }
-=======
-  }
->>>>>>> 095d66f2fbba84911049c00768d6718427013832
->>>>>>> Stashed changes

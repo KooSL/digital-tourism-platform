@@ -1,6 +1,6 @@
 <?php
 
-session_start();
+include 'includes/header.php';
 
 if (isset($_SESSION['admin'])) {
   header("Location: dashboard");
@@ -12,7 +12,6 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 include '../config/db.php';
-include 'includes/header.php';
 include 'includes/sidebar.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

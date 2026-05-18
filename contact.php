@@ -1,5 +1,6 @@
+<?php include 'includes/header.php'; ?>
+
 <?php
-session_start();
 
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -51,21 +52,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
       sendAdminMail($subject, $body);
 
-      header("Location: contact?success=1");
+      header("Location: contact?success=sent");
       exit;
     } else {
-      die("Database execution failed.");
+      header("Location: contact?error=failed");
+      exit;
     }
 
     $stmt->close();
   } else {
-    die("Database prepare failed.");
+    header("Location: contact?error=failed");
+    exit;
   }
 }
 ?>
 
 
-<?php include 'includes/header.php'; ?>
 <div class="header-wrapper">
   <?php include 'includes/topbar.php'; ?>
   <?php include 'includes/navbar.php'; ?>
@@ -86,7 +88,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
   <?php if (isset($_GET['success'])): ?>
     <div class="success-box-contact" id="successBox">
       <strong>Success!</strong>
-      <p>Your message has been sent successfully. We’ll contact you soon.</p>
+      <?php
+      if ($_GET['success'] === 'sent') echo "Your message has been sent successfully. We’ll contact you soon.";
+      ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if (isset($_GET['error'])): ?>
+    <div class="error-box-contact" id="errorBox">
+      <strong>Error!</strong>
+      <?php
+      if ($_GET['error'] === 'failed') echo "Message failed to send. Please try again.";
+      ?>
     </div>
   <?php endif; ?>
 

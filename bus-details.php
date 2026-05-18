@@ -1,6 +1,6 @@
-<?php
+<?php include 'includes/header.php'; ?>
 
-session_start();
+<?php
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -49,15 +49,16 @@ if (isset($_POST['send_inquiry'])) {
 
         sendAdminMail($subject, $body);
 
-        header("Location: bus-details?id=$id&success=1");
+        header("Location: bus-details?id=$id&success=sent");
         exit;
     } else {
-        die("Failed to submit inquiry. Please try again.");
+        header("Location: bus-details?id=$id&error=failed");
+        exit;
     }
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
+
 
 <div class="header-wrapper">
     <?php include 'includes/topbar.php'; ?>
@@ -90,10 +91,21 @@ if (!$bus) {
 
         <div id="notify"></div>
 
-        <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-            <div class="success-box" id="successBox">
+        <?php if (isset($_GET['success'])): ?>
+            <div class="success-box-contact" id="successBox">
                 <strong>Success!</strong>
-                <p>Your inquiry has been sent successfully. We’ll contact you soon.</p>
+                <?php
+                if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['error'])): ?>
+            <div class="error-box-contact" id="errorBox">
+                <strong>Error!</strong>
+                <?php
+                if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
+                ?>
             </div>
         <?php endif; ?>
 

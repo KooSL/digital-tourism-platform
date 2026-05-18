@@ -1,6 +1,6 @@
-<?php
+<?php include 'includes/header.php'; ?>
 
-session_start();
+<?php
 
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -65,10 +65,11 @@ if (isset($_POST['send_inquiry'])) {
     ";
     sendAdminMail($subject, $body);
 
-    header("Location: tour-details?id=$id&success=1");
+    header("Location: tour-details?id=$id&success=sent");
     exit;
   } else {
-    die("Failed to submit inquiry. Please try again.");
+    header("Location: tour-details?id=$id&error=failed");
+    exit;
   }
 }
 
@@ -86,7 +87,6 @@ function renderList($text)
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
 <div class="header-wrapper">
   <?php include 'includes/topbar.php'; ?>
   <?php include 'includes/navbar.php'; ?>
@@ -112,10 +112,21 @@ if (!$tour) {
   <div class="overlay">
     <div class="container">
 
-      <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+      <?php if (isset($_GET['success']) && $_GET['success'] === 'sent'): ?>
         <div class="success-box" id="successBox">
           <strong>Success!</strong>
-          <p>Your inquiry has been sent successfully. We’ll contact you soon.</p>
+          <?php
+          if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
+          ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if (isset($_GET['error'])): ?>
+        <div class="error-box package" id="errorBox">
+          <strong>Error!</strong>
+          <?php
+          if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
+          ?>
         </div>
       <?php endif; ?>
 
@@ -194,6 +205,15 @@ if (!$tour) {
 
       <a href="download-pdf?file=<?= urlencode($tour['pdf_file']); ?>" class="download-btn">
         <i class="fas fa-file-pdf"></i> Download PDF
+      </a>
+    </div>
+
+    <div class="download-box sidebar-download">
+      <h3>Book Now</h3>
+      <p>Secure your spot on this amazing trip!</p>
+
+      <a href="" class="download-btn">
+        Book
       </a>
     </div>
 
