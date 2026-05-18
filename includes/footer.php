@@ -4,8 +4,9 @@
     <!-- ABOUT -->
     <div class="footer-box">
       <div class="footer-box-logo">
-        <a href="/TakeYourSeat" class="logo">
-          <img src="assets/images/logo/Take your Seat Logo- White.png" alt="Take Your Seat Logo">
+        <a href="/Digital_Tourism_Platform" class="logo">
+          <!-- <img src="assets/images/logo/Take your Seat Logo- White.png" alt="Take Your Seat Logo"> -->
+           DTP
         </a>
       </div>
       <!-- <p class="footer-lgt">"LET'S GO TOGETHER"</p> -->
@@ -62,16 +63,16 @@
     <div class="footer-box">
       <h3>Contact Info</h3>
       <div class="footer-contacts">
-        <p><i class="fa-solid fa-location-dot"></i> Bharatpur-1, Chitwan, Nepal</p>
-        <p><i class="fa-solid fa-phone"></i> / <i class="fa-brands fa-whatsapp"></i> +977-9764667165</p>
-        <p><i class="fa-solid fa-envelope"></i>contact.takeyourseat@gmail.com</p>
+        <p><i class="fa-solid fa-location-dot"></i> Chitwan, Nepal</p>
+        <p><i class="fa-solid fa-phone"></i> / <i class="fa-brands fa-whatsapp"></i> +977-9812345678</p>
+        <p><i class="fa-solid fa-envelope"></i> contact.dtp@gmail.com</p>
       </div>
       <!-- SOCIAL ICONS -->
       <div class="footer-social">
-        <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-        <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
-        <a href="https://wa.me/+9779764667165" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="https://wa.me/+9779812345678" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
       </div>
     </div>
   </div>
@@ -116,7 +117,7 @@
 
   <!-- COPYRIGHT -->
   <div class="footer-bottom">
-    <p>© <?php echo date("Y"); ?> Take Your Seat. All Rights Reserved.</p>
+    <p>© <?php echo date("Y"); ?> Digital Tourism Platform. All Rights Reserved.</p>
   </div>
 </footer>
 
@@ -143,4 +144,4 @@
 
 </body>
 
-</html> 
+</html>
