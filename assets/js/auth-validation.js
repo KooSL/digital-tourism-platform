@@ -23,6 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
     confirm_password: {
       match: "password",
       message: "Passwords do not match"
+    },
+    travel_date: {
+      regex: /^\d{4}-\d{2}-\d{2}$/,
+      message: "Select a valid date"
+    },
+    persons: {
+      regex: /^[1-9]\d*$/,
+      message: "Enter a valid number of people"
     }
   };
 
