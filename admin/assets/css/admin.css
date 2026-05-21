@@ -148,7 +148,8 @@ h3,
 
 /* STATS */
 .dashboard-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }

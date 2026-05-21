@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     persons: {
       regex: /^[1-9]\d*$/,
       message: "Enter a valid number of people"
+    },
+    otp: {
+      regex: /^\d{6}$/,
+      message: "OTP must be 6 digits"
     }
   };
 
