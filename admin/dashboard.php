@@ -15,15 +15,26 @@ include 'auth.php';
 
     <?php
     $tourCount = $conn->query("SELECT COUNT(*) AS total FROM tours")->fetch_assoc();
+    $busCount = $conn->query("SELECT COUNT(*) AS total FROM buses")->fetch_assoc();
     $flightCount = $conn->query("SELECT COUNT(*) AS total FROM flights")->fetch_assoc();
     $inqCount  = $conn->query("SELECT COUNT(*) AS total FROM inquiries")->fetch_assoc();
     $albumCount = $conn->query("SELECT COUNT(*) AS total FROM gallery_albums")->fetch_assoc();
     $testCount = $conn->query("SELECT COUNT(*) AS total FROM testimonials")->fetch_assoc();
     $cliCount = $conn->query("SELECT COUNT(*) AS total FROM clients")->fetch_assoc();
     $busInqCount = $conn->query("SELECT COUNT(*) AS total FROM bus_inquiries")->fetch_assoc();
+    $pckgbookCount  = $conn->query("SELECT COUNT(*) AS total FROM package_bookings")->fetch_assoc();
+    $faqCount = $conn->query("SELECT COUNT(*) AS total FROM faqs")->fetch_assoc();
 
     $activeTours = mysqli_fetch_assoc(
       mysqli_query($conn, "SELECT COUNT(*) as total FROM tours WHERE status=1")
+    )['total'];
+
+    $activeBuses = mysqli_fetch_assoc(
+      mysqli_query($conn, "SELECT COUNT(*) as total FROM buses WHERE status=1")
+    )['total'];
+
+    $inactiveBuses = mysqli_fetch_assoc(
+      mysqli_query($conn, "SELECT COUNT(*) as total FROM buses WHERE status=0")
     )['total'];
 
     $inactiveTours = mysqli_fetch_assoc(
@@ -48,6 +59,13 @@ include 'auth.php';
     </div>
 
     <div class="stat-box">
+      <p class="stat-title">Total Buses</p>
+      <h3><?php echo $busCount['total']; ?></h3>
+      <p><span class="active">Active: <?php echo $activeBuses; ?></span></p>
+      <p><span class="inactive">Inactive: <?php echo $inactiveBuses; ?></span></p>
+    </div>
+
+    <div class="stat-box">
       <p class="stat-title">Total Flights Post</p>
       <h3><?php echo $flightCount['total']; ?></h3>
       <p><span class="active">Active: <?php echo $activeFlights; ?></span></p>
@@ -55,8 +73,8 @@ include 'auth.php';
     </div>
 
     <div class="stat-box">
-      <p class="stat-title">Total Albums</p>
-      <h3><?php echo $albumCount['total']; ?></h3>
+      <p class="stat-title">Total Package Bookings</p>
+      <h3><?php echo $pckgbookCount['total']; ?></h3>
     </div>
 
     <div class="stat-box">
@@ -64,6 +82,18 @@ include 'auth.php';
       <h3><?php echo $inqCount['total']; ?></h3>
       <p><span class="bus-inquiries">Bus Inquiries: <?php echo $busInqCount['total']; ?></span></p>
     </div>
+
+    <div class="stat-box">
+      <p class="stat-title">Total Users</p>
+      <h3><?php echo $albumCount['total']; ?></h3>
+    </div>
+
+    <div class="stat-box">
+      <p class="stat-title">Total Albums</p>
+      <h3><?php echo $albumCount['total']; ?></h3>
+    </div>
+
+
 
     <div class="stat-box">
       <p class="stat-title">Total Testimonials</p>
@@ -74,13 +104,18 @@ include 'auth.php';
       <h3><?php echo $cliCount['total']; ?></h3>
     </div>
 
-    
+    <div class="stat-box">
+      <p class="stat-title">Total FAQs</p>
+      <h3><?php echo $faqCount['total']; ?></h3>
+    </div>
+
+
 
   </div>
 
   <!-- RECENT INQUIRIES -->
   <div class="recent-box">
-    <h2>Recent Inquiries</h2>
+    <h2>Recent package Inquiries</h2>
 
     <table>
       <tr>
@@ -92,15 +127,15 @@ include 'auth.php';
 
       <?php
       // $result = $conn->query("SELECT * FROM inquiries WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY id DESC LIMIT 5");
-      $result = $conn->query("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5") ;
-      while($row = $result->fetch_assoc()):
+      $result = $conn->query("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5");
+      while ($row = $result->fetch_assoc()):
       ?>
-      <tr>
-        <td><?php echo $row['name']; ?></td>
-        <td><?php echo $row['email']; ?></td>
-        <td><?php echo $row['tour_name']; ?></td>
-        <td><?= htmlspecialchars($row['created_at']) ?></td>
-      </tr>
+        <tr>
+          <td><?php echo $row['name']; ?></td>
+          <td><?php echo $row['email']; ?></td>
+          <td><?php echo $row['tour_name']; ?></td>
+          <td><?= htmlspecialchars($row['created_at']) ?></td>
+        </tr>
       <?php endwhile; ?>
     </table>
   </div>
