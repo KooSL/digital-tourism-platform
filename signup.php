@@ -56,24 +56,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         exit;
     }
 
-    $stmt = $conn->prepare("
-        INSERT INTO users (name, email, phone, password)
-        VALUES (?, ?, ?, ?)
-    ");
+    $otp = random_int(100000, 999999);
 
-    $stmt->bind_param("ssss", $name, $email, $phone, $hashedPassword);
+    $_SESSION['otp'] = $otp;
+    $_SESSION['otp_expire'] = time() + 300;
 
-    if ($stmt->execute()) {
+    $_SESSION['signup_data'] = [
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+        'password' => $hashedPassword
+    ];
 
-        $_SESSION['user_id'] = $stmt->insert_id;
-        $_SESSION['user_name'] = $name;
+    sendOtpMail($email, $otp);
 
-        header("Location: index?success=signup");
-        exit;
-    } else {
-        header("Location: signup?error=invalid");
-        exit;
-    }
+    header("Location: verify-otp");
+    exit;
 }
 ?>
 
@@ -99,6 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
             <?php
             if ($_GET['error'] === 'email_exist') echo "Email already exists.";
             if ($_GET['error'] === 'invalid') echo "Registration failed! Please try again.";
+            if ($_GET['error'] === 'otp_expired') echo "OTP has been expired! Please signup again.";
             ?>
         </div>
     <?php endif; ?>

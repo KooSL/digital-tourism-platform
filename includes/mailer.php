@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 
-function sendAdminMail($subject, $body) {
+function sendMail($to, $subject, $body) {
 
     $env = parse_ini_file(__DIR__ . '/../.env');
 
@@ -22,9 +22,8 @@ function sendAdminMail($subject, $body) {
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
 
-        $mail->setFrom($env['SEND_MAIL_USERNAME'], 'Take Your Seat');
-        // $mail->addAddress($env['RECVE_MAIL_USERNAME']);
-        $mail->addAddress($env['SEND_MAIL_USERNAME']);
+        $mail->setFrom($env['SEND_MAIL_USERNAME'], 'Digital Tourism Platform');
+        $mail->addAddress($to);
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
@@ -36,4 +35,27 @@ function sendAdminMail($subject, $body) {
     } catch (Exception $e) {
         return false;
     }
+}
+
+function sendAdminMail($subject, $body) {
+    $env = parse_ini_file(__DIR__ . '/../.env');
+    return sendMail($env['RECVE_MAIL_USERNAME'], $subject, $body);
+}
+
+function sendOtpMail($email, $otp) {
+
+    $subject = "OTP Verification - Digital Tourism Platform";
+
+    $body = "
+        <h2>Email Verification</h2>
+        <p>Your OTP code is:</p>
+        <h1 style='color:#ff6600;'>$otp</h1>
+        <p>This code will expire in 5 minutes.</p>
+    ";
+
+    return sendMail($email, $subject, $body);
+}
+
+function sendUserMail($email, $subject, $body) {
+    return sendMail($email, $subject, $body);
 }

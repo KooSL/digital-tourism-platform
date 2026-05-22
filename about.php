@@ -139,7 +139,7 @@
     <div class="team-grid">
       <!-- Team Member -->
       <div class="team-card">
-        <img src="assets/images/team/kushal.jpg" alt="Team Member">
+        <img src="assets/images/team/kushal.png" alt="Team Member">
         <h3>Kushal Acharya</h3>
         <p class="team-role">Web & Digital Administrator</p>
         <p class="role-description">

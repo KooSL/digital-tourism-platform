@@ -3436,6 +3436,15 @@ a {
   color: var(--orange);
 }
 
+.auth-form h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
 /* Toggle Button */
 #chatToggle {
   position: fixed;
@@ -3572,3 +3581,98 @@ a {
 #closeChat:hover {
   color: var(--orange);
 }
+
+
+.table-section {
+  padding: 30px 0;
+  background: #f9fbfd;
+}
+
+/* CONTAINER */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  /* margin: 30px 0; */
+}
+
+/* TABLE BASE */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  /* border-radius: 10px; */
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* HEADER */
+.table-head {
+  background: var(--blue);
+  color: #fff;
+}
+
+.table-head th {
+  padding: 14px;
+  text-align: left;
+}
+
+/* BODY */
+.table-body td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.table-body tr:hover {
+  background: #f9f9f9;
+}
+
+/* BADGES */
+.badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge.success {
+  background: #28a745;
+  color: #fff;
+}
+
+.badge.warning {
+  background: #ffc107;
+  color: #000;
+}
+
+.badge.danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* EMPTY STATE */
+.no-bookings {
+  text-align: center;
+  padding: 20px;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* .btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #fff;
+}
+
+.btn.view {
+  background: #007bff;
+}
+
+.btn.cancel {
+  background: #dc3545;
+} */
+
