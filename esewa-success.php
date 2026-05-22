@@ -1,6 +1,7 @@
 <?php
 include 'includes/header.php';
 include 'config/db.php';
+include 'includes/mailer.php';
 
 $data = $_SESSION['booking_data'];
 $package_id = $data['package_id'];
@@ -32,8 +33,35 @@ $stmt->bind_param(
 
 $stmt->execute();
 
+$adminsubject = "New Booking for Package ID: " . $data['package_id'];
+$adminbody = "
+        <h3>New Booking Received</h3>
+        <p><strong>Package ID:</strong> " . $data['package_id'] . "</p>
+        <p><strong>Name:</strong> " . $data['name'] . "</p>
+        <p><strong>Email:</strong> " . $data['email'] . "</p>
+        <p><strong>Phone:</strong> " . $data['phone'] . "</p>
+        <p><strong>Travel Date:</strong> " . $data['date'] . "</p>
+        <p><strong>Persons:</strong> " . $data['persons'] . "</p>
+        <p><strong>Transaction ID:</strong> " . $pid . "</p>
+    ";
+sendAdminMail($adminsubject, $adminbody);
+
+$usersubject = "New Booking for Package ID: " . $data['package_id'] . " - Confirmation";
+$userbody = "
+        <h3>New Booking Received</h3>
+        <p><strong>Package ID:</strong> " . $data['package_id'] . "</p>
+        <p><strong>Name:</strong> " . $data['name'] . "</p>
+        <p><strong>Email:</strong> " . $data['email'] . "</p>
+        <p><strong>Phone:</strong> " . $data['phone'] . "</p>
+        <p><strong>Travel Date:</strong> " . $data['date'] . "</p>
+        <p><strong>Persons:</strong> " . $data['persons'] . "</p>
+        <p><strong>Transaction ID:</strong> " . $pid . "</p>
+    ";
+sendUserMail($data['email'], $usersubject, $userbody);
+
+
 unset($_SESSION['booking_data']);
 unset($_SESSION['pid']);
 
 header("Location: tour-details?id=" . $data['package_id'] . "&success=booked");
-exit; 
+exit;
