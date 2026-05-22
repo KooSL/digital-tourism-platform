@@ -28,8 +28,8 @@
           <a href=""><?php echo $_SESSION['user_name']; ?></a>
 
           <ul class="dropdown-menu">
-            <li><a href="">Profile</a></li>
-            <li><a href="">Bookings</a></li>
+            <li><a href="profile">Profile</a></li>
+            <li><a href="my-bookings">Bookings</a></li>
             <li><a href="signout">Sign Out</a></li>
           </ul>
         </li>
@@ -73,8 +73,8 @@
             <a href=""><?php echo $_SESSION['user_name']; ?></a>
 
             <ul class="mobile-submenu">
-              <li><a href="">Profile</a></li>
-              <li><a href="">Bookings</a></li>
+              <li><a href="profile">Profile</a></li>
+              <li><a href="my-bookings">Bookings</a></li>
               <li><a href="signout">Sign Out</a></li>
             </ul>
           </li>
