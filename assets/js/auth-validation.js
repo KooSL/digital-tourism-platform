@@ -1,53 +1,56 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const form = document.querySelector("form");
   if (!form) return;
 
   const fields = {
     name: {
       regex: /^[A-Za-z\s]{3,}$/,
-      message: "Name must be at least 3 letters"
+      message: "Name must be at least 3 letters",
     },
     email: {
       regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      message: "Enter valid email"
+      message: "Enter valid email",
     },
     phone: {
       regex: /^\d{10}$/,
-      message: "Phone must be 10 digits"
+      message: "Phone must be 10 digits",
     },
     password: {
       regex: /^.{8,}$/,
-      message: "Password must be at least 8 characters"
+      message: "Password must be at least 8 characters",
     },
     confirm_password: {
       match: "password",
-      message: "Passwords do not match"
+      message: "Passwords do not match",
     },
     travel_date: {
       regex: /^\d{4}-\d{2}-\d{2}$/,
-      message: "Select a valid date"
+      message: "Select a valid date",
     },
     persons: {
       regex: /^[1-9]\d*$/,
-      message: "Enter a valid number of people"
+      message: "Enter a valid number of people",
     },
     otp: {
       regex: /^\d{6}$/,
-      message: "OTP must be 6 digits"
-    }
+      message: "OTP must be 6 digits",
+    },
+    address: {
+      regex: /^.{5,}$/,
+      message: "Address must be at least 5 characters",
+    },
   };
 
   const activeFields = {};
 
   // Detect fields in current form (login/register)
-  Object.keys(fields).forEach(key => {
+  Object.keys(fields).forEach((key) => {
     const input = document.getElementById(key);
 
     if (input) {
       activeFields[key] = {
         ...fields[key],
-        input: input
+        input: input,
       };
 
       // Live validation
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", (e) => {
     let valid = true;
 
-    Object.values(activeFields).forEach(field => {
+    Object.values(activeFields).forEach((field) => {
       if (!validateField(field)) valid = false;
     });
 
@@ -101,5 +104,4 @@ document.addEventListener("DOMContentLoaded", () => {
     error.textContent = "";
     return true;
   }
-
 });

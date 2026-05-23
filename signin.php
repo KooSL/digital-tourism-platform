@@ -36,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
 
+            $stmt = $conn->prepare("UPDATE users SET last_signin=NOW() WHERE id=?");
+            $stmt->bind_param("i", $user['id']);
+            $stmt->execute();
+
             header("Location: index?success=signin");
             exit;
 
