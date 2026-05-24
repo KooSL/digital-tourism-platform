@@ -70,6 +70,7 @@ $total_pages = ceil($total_result['total'] / $limit);
                             <th>Package</th>
                             <th>Travel Date</th>
                             <th>Persons</th>
+                            <th>Transaction ID</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -84,6 +85,7 @@ $total_pages = ceil($total_result['total'] / $limit);
                                 <td><?php echo htmlspecialchars($row['title']); ?></td>
                                 <td><?php echo htmlspecialchars($row['travel_date']); ?></td>
                                 <td><?php echo htmlspecialchars($row['persons']); ?></td>
+                                <td><?php echo htmlspecialchars($row['transaction_id']); ?></td>
                                 <td>
                                     <?php if ($row['payment_status'] == 'paid'): ?>
                                         <span class="badge success">Paid</span>

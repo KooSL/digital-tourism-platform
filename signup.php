@@ -21,10 +21,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
+    $address = trim($_POST['address']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (empty($name) || empty($email) || empty($phone) || empty($password)) {
+    if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($password)) {
         die("All fields are required");
     }
 
@@ -34,6 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
     if (!preg_match('/^[0-9]{7,15}$/', $phone)) {
         die("Invalid phone number");
+    }
+
+    if (strlen($address) < 5) {
+        die("Address must be at least 5 characters");
     }
 
     if ($password !== $confirm_password) {
@@ -65,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         'name' => $name,
         'email' => $email,
         'phone' => $phone,
+        'address' => $address,
         'password' => $hashedPassword
     ];
 
@@ -127,6 +133,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
             <div class="form-group">
                 <input type="text" name="phone" id="phone" placeholder="Phone Number">
+                <small class="error"></small>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="address" id="address" placeholder="Address">
                 <small class="error"></small>
             </div>
 

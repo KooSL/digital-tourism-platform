@@ -34,15 +34,16 @@ if (isset($_POST['verify'])) {
         $data = $_SESSION['signup_data'];
 
         $stmt = $conn->prepare("
-            INSERT INTO users (name, email, phone, password)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO users (name, email, phone, address, password)
+            VALUES (?, ?, ?, ?, ?)
         ");
 
         $stmt->bind_param(
-            "ssss",
+            "sssss",
             $data['name'],
             $data['email'],
             $data['phone'],
+            $data['address'],
             $data['password']
         );
 

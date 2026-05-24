@@ -1,3 +1,110 @@
+<?php
+
+include 'includes/header.php';
+include 'config/db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: signin");
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
+
+$stmt = $conn->prepare("SELECT * FROM users WHERE id=?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if (isset($_POST['update_profile'])) {
+
+    if (
+        !isset($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    ) {
+        header("Location: profile?error=failed");
+        exit;
+    }
+
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $address = trim($_POST['address']);
+
+    if (empty($name) || empty($email) || empty($phone) || empty($address)) {
+        header("Location: profile?error=required");
+        exit;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: profile?error=invalid_email");
+        exit;
+    }
+
+    $stmt = $conn->prepare("
+        UPDATE users 
+        SET name=?, email=?, phone=?, address=?, last_update=NOW()
+        WHERE id=?
+    ");
+
+    $stmt->bind_param("ssssi", $name, $email, $phone, $address, $user_id);
+
+    if ($stmt->execute()) {
+
+        $_SESSION['user_name'] = $name;
+
+        header("Location: profile?success=updated");
+        exit;
+    } else {
+        header("Location: profile?error=failed");
+        exit;
+    }
+}
+
+if (isset($_POST['change_password'])) {
+
+    if (
+        !isset($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    ) {
+        header("Location: profile?error=failed");
+        exit;
+    }
+
+    $current = $_POST['current_password'];
+    $new = $_POST['new_password'];
+    $confirm = $_POST['confirm_password'];
+
+    $stmt = $conn->prepare("SELECT password FROM users WHERE id=?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $dbUser = $stmt->get_result()->fetch_assoc();
+
+    if (!password_verify($current, $dbUser['password'])) {
+        header("Location: profile?error=wrong_password");
+        exit;
+    }
+
+    if ($new !== $confirm) {
+        header("Location: profile?error=not_match");
+        exit;
+    }
+
+    $hashed = password_hash($new, PASSWORD_DEFAULT);
+
+    $stmt = $conn->prepare("UPDATE users SET password=?, last_update=NOW() WHERE id=?");
+    $stmt->bind_param("si", $hashed, $user_id);
+    $stmt->execute();
+
+    header("Location: profile?success=password_changed");
+    exit;
+}
+?>
+
 <div class="header-wrapper">
     <?php include 'includes/topbar.php'; ?>
     <?php include 'includes/navbar.php'; ?>
