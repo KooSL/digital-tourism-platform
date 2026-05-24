@@ -812,7 +812,7 @@ a {
   width: 100%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(6px);
-  border-radius: 14px;
+  border-radius: 6px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   max-height: 320px;
   overflow-y: auto;
@@ -831,7 +831,8 @@ a {
 }
 
 .search-item:hover {
-  background: #f4f4f4;
+  background: var(--orange);
+  color: white;
 }
 
 .btn-primary-vtp {

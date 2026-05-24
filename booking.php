@@ -186,7 +186,7 @@ if (!$tour) {
             </div>
 
             <div class="form-group">
-                <input type="number" name="persons" placeholder="Number of People" min="1" id="persons">
+                <input type="number" name="persons" placeholder="Number of Persons" min="1" id="persons">
                 <small class="error"></small>
             </div>
 

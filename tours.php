@@ -83,7 +83,7 @@ $result = $stmt->get_result();
       <!-- SEARCH -->
       <form method="GET" class="search-bar">
         <input type="text" name="q" placeholder="Search packages..."
-          value="<?= $_GET['q'] ?? '' ?>">
+          value="<?= $_GET['q'] ?? '' ?>" required>
         <button type="submit"><i class="fa fa-search"></i></button>
       </form>
 

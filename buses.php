@@ -11,6 +11,54 @@
         <h1>Bus Bookings</h1>
         <p>Explore our buses with best fare deals with professional assistance</p>
     </div>
+
+    <div class="container">
+
+        <div class="filter-wrapper">
+
+            <!-- SEARCH -->
+            <form method="GET" class="search-bar">
+                <input type="text" name="q" placeholder="Search buses..."
+                    value="<?= $_GET['q'] ?? '' ?>" required>
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+
+            <!-- FILTER -->
+            <div class="filter-dropdown">
+
+                <button type="button" id="filterToggle" class="filter-btn">
+                    <i class="fa fa-sliders"></i> Filters
+                </button>
+
+                <form method="GET" class="filter-box" id="filterBox">
+
+                    <input type="hidden" name="q" value="<?= $_GET['q'] ?? '' ?>">
+
+                    <div class="filter-group">
+                        <select name="type">
+                            <option value="">All Types</option>
+                            <option value="domestic">Domestic</option>
+                            <option value="international">International</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <input type="number" name="price" placeholder="Max Price">
+                    </div>
+
+                    <div class="filter-group small">
+                        <label><input type="checkbox" name="popular"> Popular</label>
+                        <label><input type="checkbox" name="latest"> Latest</label>
+                    </div>
+
+                    <button type="submit" class="apply-btn">Apply</button>
+
+                </form>
+
+            </div>
+
+        </div>
+
 </section>
 
 <section class="home-buses">
@@ -64,5 +112,20 @@
 
     </div>
 </section>
+
+<script>
+    const btn = document.getElementById("filterToggle");
+    const box = document.getElementById("filterBox");
+
+    btn.onclick = () => {
+        box.classList.toggle("active");
+    };
+
+    document.addEventListener("click", (e) => {
+        if (!btn.contains(e.target) && !box.contains(e.target)) {
+            box.classList.remove("active");
+        }
+    });
+</script>
 
 <?php include 'includes/footer.php'; ?>

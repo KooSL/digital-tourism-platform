@@ -45,7 +45,7 @@ if (isset($_GET['i'])) {
 
       <div class="hero-search">
         <form class="search-bar">
-          <input type="text" id="tourSearch" placeholder="Search tours">
+          <input type="text" id="tourSearch" placeholder="Search">
           <button type="submit" disabled>
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
