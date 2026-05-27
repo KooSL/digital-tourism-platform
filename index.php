@@ -44,8 +44,8 @@ if (isset($_GET['i'])) {
       <!-- <img src="assets/images/logo/airplane-icon_white.png" class="airplane-icon" alt="Airplane"> -->
 
       <div class="hero-search">
-        <form>
-          <input type="text" id="tourSearch" placeholder="Search tours">
+        <form class="search-bar">
+          <input type="text" id="tourSearch" placeholder="Search">
           <button type="submit" disabled>
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -53,7 +53,7 @@ if (isset($_GET['i'])) {
         <div id="searchResults" class="search-results"></div>
       </div>
 
-      <p class="hero-lgt">Jane Vaye Jaam Maya, <br>Ghumera Aam Maya</p>
+      <!-- <p class="hero-lgt">Jane Vaye Jaam Maya, <br>Ghumera Aam Maya</p> -->
 
       <!-- <div class="view-btn">
         <a href="tours.php" class="btn-primary-vtp">View Tour Packages</a>

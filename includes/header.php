@@ -9,7 +9,15 @@ session_start();
       <meta charset="UTF-8">
       <title>Digital Tourism Platform</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
       <link rel="stylesheet" href="assets/css/style.css">
+      <link rel="stylesheet" href="assets/css/tour-details.css">
+      <link rel="stylesheet" href="assets/css/search-filter.css">
+      <link rel="stylesheet" href="assets/css/pagination.css">
+      <link rel="stylesheet" href="assets/css/auth-form.css">
+      <link rel="stylesheet" href="assets/css/chatbot.css">
+      <link rel="stylesheet" href="assets/css/table.css">
+
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
       <link rel="preconnect" href="https://fonts.googleapis.com">

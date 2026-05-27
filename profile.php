@@ -137,7 +137,7 @@ if (isset($_POST['change_password'])) {
 
     <div class="overlay">
         <h1>My Profile</h1>
-        <p>Update your personal information</p>
+        <p>View and update your personal information</p>
 
     </div>
 </section>
