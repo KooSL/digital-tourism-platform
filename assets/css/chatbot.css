@@ -1,0 +1,136 @@
+/* Toggle Button */
+#chatToggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--blue);
+  color: #fff;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+#chatToggle:hover {
+  background: var(--orange);
+}
+
+/* Chat Container */
+#chatContainer {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  height: 420px;
+  background: #ffffff;
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Header */
+#chatHeader {
+  background: var(--blue);
+  color: #fff;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#chatHeader small {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* Messages Area */
+#chatMessages {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  background: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Message Bubble */
+.msg {
+  max-width: 75%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* User Message */
+.user {
+  align-self: flex-end;
+  background: var(--blue);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+/* Bot Message */
+.bot {
+  align-self: flex-start;
+  background: #fff;
+  color: #333;
+  border: 1px solid #eee;
+  border-bottom-left-radius: 4px;
+}
+
+/* Input Area */
+#chatInputArea {
+  display: flex;
+  border-top: 1px solid #eee;
+  padding: 8px;
+  background: #fff;
+}
+
+#chatInputArea input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 12px;
+  outline: none;
+  font-size: 13px;
+}
+
+#chatInputArea input:focus {
+  border-color: var(--orange);
+}
+
+#chatInputArea button {
+  background: var(--blue);
+  border: none;
+  color: #fff;
+  margin-left: 6px;
+  padding: 12px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#chatInputArea button:hover {
+  background: var(--orange);
+}
+
+#closeChat {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#closeChat:hover {
+  color: var(--orange);
+}
