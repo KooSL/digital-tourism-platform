@@ -13,32 +13,31 @@ $where = ["status = 1"];
 $params = [];
 $types = "";
 
-// SEARCH
-if (!empty($_GET['q'])) {
-  $where[] = "(title LIKE ?)";
-  $search = "%" . $_GET['q'] . "%";
-  $params[] = $search;
+// TOUR TYPE
+if ($type === 'domestic' || $type === 'international') {
+  $where[] = "type = ?";
+  $params[] = $type;
   $types .= "s";
 }
 
-// TYPE
-if (!empty($_GET['type'])) {
-  $where[] = "type = ?";
-  $params[] = $_GET['type'];
+// SEARCH
+if (!empty($_GET['q'])) {
+  $where[] = "title LIKE ?";
+  $params[] = "%" . $_GET['q'] . "%";
   $types .= "s";
 }
 
 // DAYS
 if (!empty($_GET['days'])) {
   $where[] = "duration <= ?";
-  $params[] = $_GET['days'];
+  $params[] = (int)$_GET['days'];
   $types .= "i";
 }
 
 // PRICE
 if (!empty($_GET['price'])) {
   $where[] = "price <= ?";
-  $params[] = $_GET['price'];
+  $params[] = (int)$_GET['price'];
   $types .= "i";
 }
 
@@ -47,12 +46,11 @@ if (isset($_GET['popular'])) {
   $where[] = "is_popular = 1";
 }
 
-// LATEST (last 7 days)
+// LATEST
 if (isset($_GET['latest'])) {
   $where[] = "created_at >= NOW() - INTERVAL 7 DAY";
 }
 
-// FINAL QUERY
 $sql = "SELECT * FROM tours WHERE " . implode(" AND ", $where);
 $sql .= " ORDER BY is_popular DESC, created_at DESC";
 
@@ -82,9 +80,19 @@ $result = $stmt->get_result();
 
       <!-- SEARCH -->
       <form method="GET" class="search-bar">
-        <input type="text" name="q" placeholder="Search packages..."
-          value="<?= $_GET['q'] ?? '' ?>" required>
-        <button type="submit"><i class="fa fa-search"></i></button>
+
+        <input type="hidden" name="type" value="<?= htmlspecialchars($type) ?>">
+
+        <input type="text"
+          name="q"
+          placeholder="Search packages..."
+          value="<?= $_GET['q'] ?? '' ?>"
+          required>
+
+        <button type="submit">
+          <i class="fa fa-search"></i>
+        </button>
+
       </form>
 
       <!-- FILTER -->
@@ -131,10 +139,6 @@ $result = $stmt->get_result();
     <?php
     if ($result->num_rows > 0):
       while ($row = mysqli_fetch_assoc($result)) {
-
-        if ($type && $row['type'] !== $type) {
-          continue;
-        }
     ?>
         <div class="tour-row">
 
