@@ -61,7 +61,7 @@ sendUserMail($data['email'], $usersubject, $userbody);
 
 $stmt = $conn->prepare("
   INSERT INTO user_activity (user_id, package_id, action)
-  VALUES (?, ?, 'booked')
+  VALUES (?, ?, 'book')
 ");
 $stmt->bind_param("ii", $_SESSION['user_id'], $package_id);
 $stmt->execute();
