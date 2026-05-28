@@ -17,3 +17,27 @@
 
   </div>
 </section>
+
+<section class="recommend-section">
+  <h3>People Also Booked</h3>
+
+  <div class="recommend-grid">
+
+    <?php while($row = $also_booked->fetch_assoc()): ?>
+
+      <div class="recommend-card">
+        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
+
+        <h4><?= $row['title'] ?></h4>
+
+        <p>NPR <?= $row['price'] ?></p>
+
+        <a href="tour-details?id=<?= $row['id'] ?>" class="btn-sm">
+          View
+        </a>
+      </div>
+
+    <?php endwhile; ?>
+
+  </div>
+</section>

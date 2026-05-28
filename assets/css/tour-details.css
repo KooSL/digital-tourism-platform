@@ -94,10 +94,13 @@
   font-weight: 500;
 }
 
+/* .recommend-section{
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+} */
+
 .recommend-section h3{
   text-align: center;
-  align-items: center;
-  justify-content: center ;
 }
 
 .recommend-grid {
@@ -114,6 +117,12 @@
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.recommend-card:hover {
+  transform: translateY(-6px);
 }
 
 .recommend-card img {

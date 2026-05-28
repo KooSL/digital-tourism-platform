@@ -88,6 +88,8 @@ function renderList($text)
   echo "</ul>";
 }
 
+$recommended = getRecommendations($conn, $tour['id']);
+
 ?>
 
 <div class="header-wrapper">
@@ -309,33 +311,12 @@ if (!$tour) {
 </section>
 
 <section class="container recommend-section">
+
   <h3>Recommended for You</h3>
 
-  <?php if (!empty($preferred_type)): ?>
-    <p class="rec-note">
-      Based on your interest in <strong><?= ucfirst($preferred_type) ?></strong> tours
-    </p>
-  <?php endif; ?>
-
   <div class="recommend-grid">
 
-    <?php while ($row = $recommended->fetch_assoc()): ?>
-      <div class="recommend-card">
-        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
-        <h4><?= $row['title'] ?></h4>
-        <p>NPR <?= $row['price'] ?></p>
-      </div>
-    <?php endwhile; ?>
-
-  </div>
-</section>
-
-<section class="recommend-section">
-  <h3>People Also Booked</h3>
-
-  <div class="recommend-grid">
-
-    <?php while($row = $also_booked->fetch_assoc()): ?>
+    <?php while($row = $recommended->fetch_assoc()): ?>
 
       <div class="recommend-card">
         <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
@@ -344,16 +325,14 @@ if (!$tour) {
 
         <p>NPR <?= $row['price'] ?></p>
 
-        <a href="tour-details?id=<?= $row['id'] ?>" class="btn-sm">
-          View
-        </a>
+        <a href="tour-details?id=<?= $row['id'] ?>">View</a>
       </div>
 
     <?php endwhile; ?>
 
   </div>
-</section>
 
+</section>
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
