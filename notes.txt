@@ -1,0 +1,19 @@
+<section class="container recommend-section">
+  <h3>Recommended for You</h3>
+
+  <div class="recommend-grid">
+
+    <?php while ($rec = $recommended->fetch_assoc()): ?>
+
+      <div class="recommend-card">
+        <img src="admin/uploads/images/tours/<?= $rec['banner_image'] ?>">
+        <h4><?= $rec['title'] ?></h4>
+        <p>NPR <?= $rec['price'] ?></p>
+
+        <a href="tour-details?id=<?= $rec['id'] ?>">View</a>
+      </div>
+
+    <?php endwhile; ?>
+
+  </div>
+</section>

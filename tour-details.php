@@ -2,15 +2,16 @@
 
 <?php
 
+// Get tour ID from URL
+$id = intval($_GET['id'] ?? 0);
+
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 include 'config/db.php';
 include 'includes/mailer.php';
-
-// Get tour ID from URL
-$id = intval($_GET['id'] ?? 0);
+include 'api/recommendation.php';
 
 
 // Fetch tour details using prepared statement
@@ -21,6 +22,7 @@ $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 
+$current_tour_id = $tour['id'];
 
 
 // Handle inquiry form submission
@@ -85,6 +87,7 @@ function renderList($text)
   }
   echo "</ul>";
 }
+
 ?>
 
 <div class="header-wrapper">
@@ -195,11 +198,6 @@ if (!$tour) {
 
   <div class="tour-sidebar">
 
-    <div class="price-box sidebar-price">
-      <h3>Trip Cost</h3>
-      <p><strong>From:</strong> NPR <?= $tour['price'] ?> | USD $<?= $tour['price_usd'] ?></p>
-    </div>
-
     <div class="download-box sidebar-download">
       <h3>Trip Brochure</h3>
       <p>Download the full itinerary and trip details.</p>
@@ -207,19 +205,71 @@ if (!$tour) {
       <a href="download-pdf?file=<?= urlencode($tour['pdf_file']); ?>" class="download-btn">
         <i class="fas fa-file-pdf"></i> Download PDF
       </a>
+
     </div>
 
-    <div class="download-box sidebar-download">
+    <div class="price-box sidebar-price">
+
+      <h3>Trip Cost</h3>
+
+      <!-- ORIGINAL PRICE (optional for discount) -->
+      <?php if (!empty($tour['old_price'])): ?>
+        <p class="old-price">NPR <?= $tour['old_price'] ?></p>
+      <?php endif; ?>
+
+      <!-- CURRENT PRICE -->
+      <p class="current-price">
+        NPR <?= $tour['price'] ?>
+        <span>| USD $<?= $tour['price_usd'] ?> PP</span>
+      </p>
+
+      <!-- DISCOUNT BADGE -->
+      <?php if (!empty($tour['old_price'])):
+        $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
+      ?>
+        <span class="discount-badge">
+          <?= $discount ?>% OFF
+        </span>
+      <?php endif; ?>
+
+      <div class="group-discount">
+        <p><strong>Group Discounts:</strong></p>
+        <ul>
+          <li>5+ persons - <span>10% OFF</span></li>
+          <li>10+ persons - <span>20% OFF</span></li>
+        </ul>
+      </div>
+
+      <!-- EXTRA INFO -->
+      <ul class="price-features">
+        <li><i class="fa fa-check"></i> Best price guarantee</li>
+        <li><i class="fa fa-check"></i> No hidden charges</li>
+        <li><i class="fa fa-check"></i> Instant confirmation</li>
+      </ul>
+
+      <!-- NOTE -->
+      <p class="note">
+        * Final price may vary based on taxes and travelers.
+      </p>
+
+      <a href="booking?id=<?= $tour['id'] ?>" class="download-btn booking">
+        Book Now
+      </a>
+
+    </div>
+
+
+    <!-- <div class="download-box sidebar-download">
       <h3>Book Package</h3>
       <p>Secure your spot on this amazing trip!</p>
 
       <a href="booking?id=<?= $tour['id'] ?>" class="download-btn">
         Book Now
       </a>
-      <!-- <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
+      <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
         Book Now
-      </a> -->
-    </div>
+      </a>
+    </div> -->
 
     <div class="inquiry-box sidebar-inquiry">
       <h3>Trip Inquiry</h3>
@@ -257,6 +307,53 @@ if (!$tour) {
   </div>
 
 </section>
+
+<section class="container recommend-section">
+  <h3>Recommended for You</h3>
+
+  <?php if (!empty($preferred_type)): ?>
+    <p class="rec-note">
+      Based on your interest in <strong><?= ucfirst($preferred_type) ?></strong> tours
+    </p>
+  <?php endif; ?>
+
+  <div class="recommend-grid">
+
+    <?php while ($row = $recommended->fetch_assoc()): ?>
+      <div class="recommend-card">
+        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
+        <h4><?= $row['title'] ?></h4>
+        <p>NPR <?= $row['price'] ?></p>
+      </div>
+    <?php endwhile; ?>
+
+  </div>
+</section>
+
+<section class="recommend-section">
+  <h3>People Also Booked</h3>
+
+  <div class="recommend-grid">
+
+    <?php while($row = $also_booked->fetch_assoc()): ?>
+
+      <div class="recommend-card">
+        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
+
+        <h4><?= $row['title'] ?></h4>
+
+        <p>NPR <?= $row['price'] ?></p>
+
+        <a href="tour-details?id=<?= $row['id'] ?>" class="btn-sm">
+          View
+        </a>
+      </div>
+
+    <?php endwhile; ?>
+
+  </div>
+</section>
+
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
