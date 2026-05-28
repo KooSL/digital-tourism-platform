@@ -1,16 +1,24 @@
 <?php
 
-function getRecommendations($conn, $current_tour_id, $limit = 6) {
+if (isset($_SESSION['user_id'])) {
+  $uid = $_SESSION['user_id'];
 
-    $user_id = $_SESSION['user_id'] ?? null;
+  $stmt = $conn->prepare("
+    INSERT INTO user_activity (user_id, package_id, action)
+    VALUES (?, ?, 'viewed')
+  ");
+  $stmt->bind_param("ii", $uid, $id);
+  $stmt->execute();
+}
 
-    // ===============================
-    // 🔐 IF USER LOGGED IN
-    // ===============================
-    if ($user_id) {
+function getRecommendations($conn, $current_tour_id, $limit = 6)
+{
 
-        // 1. Get user's preferred type (weighted)
-        $stmt = $conn->prepare("
+  $user_id = $_SESSION['user_id'] ?? null;
+
+  if ($user_id) {
+
+    $stmt = $conn->prepare("
             SELECT t.type,
             SUM(CASE 
                 WHEN ua.action = 'book' THEN 3
@@ -25,14 +33,14 @@ function getRecommendations($conn, $current_tour_id, $limit = 6) {
             LIMIT 1
         ");
 
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $pref = $stmt->get_result()->fetch_assoc();
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $pref = $stmt->get_result()->fetch_assoc();
 
-        $preferred_type = $pref['type'] ?? null;
+    $preferred_type = $pref['type'] ?? null;
 
-        // 2. Hybrid query (user + collaborative + related)
-        $stmt = $conn->prepare("
+    // 2. Hybrid query (user + collaborative + related)
+    $stmt = $conn->prepare("
             SELECT t.*, COUNT(pb2.id) as popularity
 
             FROM tours t
@@ -58,27 +66,21 @@ function getRecommendations($conn, $current_tour_id, $limit = 6) {
             LIMIT ?
         ");
 
-        $stmt->bind_param("isii", $current_tour_id, $preferred_type, $current_tour_id, $limit);
-        $stmt->execute();
-        return $stmt->get_result();
-    }
+    $stmt->bind_param("isii", $current_tour_id, $preferred_type, $current_tour_id, $limit);
+    $stmt->execute();
+    return $stmt->get_result();
+  } else {
 
-    // ===============================
-    // 👥 IF USER NOT LOGGED IN
-    // ===============================
-    else {
+    $stmt = $conn->prepare("SELECT type, price FROM tours WHERE id=?");
+    $stmt->bind_param("i", $current_tour_id);
+    $stmt->execute();
+    $tour = $stmt->get_result()->fetch_assoc();
 
-        // Get current tour type
-        $stmt = $conn->prepare("SELECT type, price FROM tours WHERE id=?");
-        $stmt->bind_param("i", $current_tour_id);
-        $stmt->execute();
-        $tour = $stmt->get_result()->fetch_assoc();
+    $type = $tour['type'];
+    $price = $tour['price'];
 
-        $type = $tour['type'];
-        $price = $tour['price'];
-
-        // Related + popular
-        $stmt = $conn->prepare("
+    // Related + popular
+    $stmt = $conn->prepare("
             SELECT t.*, COUNT(pb.id) as popularity
 
             FROM tours t
@@ -94,8 +96,8 @@ function getRecommendations($conn, $current_tour_id, $limit = 6) {
             LIMIT ?
         ");
 
-        $stmt->bind_param("isiii", $current_tour_id, $type, $price, $price, $limit);
-        $stmt->execute();
-        return $stmt->get_result();
-    }
+    $stmt->bind_param("isiii", $current_tour_id, $type, $price, $price, $limit);
+    $stmt->execute();
+    return $stmt->get_result();
+  }
 }
