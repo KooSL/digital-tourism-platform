@@ -59,6 +59,13 @@ $userbody = "
     ";
 sendUserMail($data['email'], $usersubject, $userbody);
 
+$stmt = $conn->prepare("
+  INSERT INTO user_activity (user_id, package_id, action)
+  VALUES (?, ?, 'booked')
+");
+$stmt->bind_param("ii", $_SESSION['user_id'], $package_id);
+$stmt->execute();
+
 
 unset($_SESSION['booking_data']);
 unset($_SESSION['pid']);
