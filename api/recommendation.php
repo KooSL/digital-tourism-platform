@@ -1,228 +1,200 @@
 <?php
 
-// ==============================
-// 📊 TRACK USER ACTIVITY (FIXED)
-// ==============================
-if (isset($_SESSION['user_id'])) {
-  $uid = $_SESSION['user_id'];
-
-  $stmt = $conn->prepare("
-    INSERT INTO user_activity (user_id, package_id, action, time_spent)
-    VALUES (?, ?, 'view', 0)
-    ON DUPLICATE KEY UPDATE action = 'view'
-  ");
-  $stmt->bind_param("ii", $uid, $id);
-  $stmt->execute();
-}
-
-
-// ==============================
-// 🎯 HYBRID RECOMMENDATION ENGINE
-// ==============================
-function getRecommendations($conn, $current_tour_id)
+function getRecommendations($conn, $current_tour_id, $limit = 6)
 {
-  $user_id = $_SESSION['user_id'] ?? null;
-  $limit = 6; // Number of recommendations to return
-
-
-  // ==========================
-  // 🔐 LOGGED-IN USER
-  // ==========================
-  if ($user_id) {
-
-    // 👉 Get user preferred type (weighted)
-    $stmt = $conn->prepare("
-      SELECT t.type,
-      SUM(CASE
-          WHEN ua.action = 'book' THEN 3
-          WHEN ua.action = 'view' THEN 1
-      END) as score
-
-      FROM user_activity ua
-      JOIN tours t ON ua.package_id = t.id
-      WHERE ua.user_id = ?
-      GROUP BY t.type
-      ORDER BY score DESC
-      LIMIT 1
-    ");
-
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $pref = $stmt->get_result()->fetch_assoc();
-
-    $preferred_type = $pref['type'] ?? null;
-
-    // 👉 MOST viewed type (frequency-based)
-    $stmt = $conn->prepare("
-      SELECT t.type,
-      SUM(ua.time_spent) as total_time
-      FROM user_activity ua
-      JOIN tours t ON ua.package_id = t.id
-      WHERE ua.user_id = ?
-      AND ua.action = 'view'
-      GROUP BY t.type
-      ORDER BY total_time DESC
-      LIMIT 1
-    ");
-
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $top = $stmt->get_result()->fetch_assoc();
-
-    $most_viewed_type = $top['type'] ?? null;
-
-    // 👉 Get current tour price
-    $stmt = $conn->prepare("SELECT price FROM tours WHERE id=?");
-    $stmt->bind_param("i", $current_tour_id);
-    $stmt->execute();
-    $tour = $stmt->get_result()->fetch_assoc();
-
-    $price = $tour['price'] ?? 0;
-
-
-    $stmt = $conn->prepare("
-      SELECT t.type, SUM(ua.time_spent) as total_time
-      FROM user_activity ua
-      JOIN tours t ON ua.package_id = t.id
-      WHERE ua.user_id = ?
-      GROUP BY t.type
-      ORDER BY total_time DESC
-      LIMIT 1
-    ");
-
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result()->fetch_assoc();
-
-    $time_based_type = $result['type'] ?? null;
+    $user_id = $_SESSION['user_id'] ?? null;
 
     // ==========================
-    // 🚀 SMART SCORE QUERY
+    // 🔐 LOGGED-IN USER
     // ==========================
-    $stmt = $conn->prepare("
-      SELECT t.*,
+    if ($user_id) {
 
-      (
-        -- user preference
-        (CASE WHEN t.type = ? THEN 5 ELSE 0 END)
+        // ✅ 1. MOST VIEWED PACKAGE (frequency)
+        $stmt = $conn->prepare("
+            SELECT package_id, COUNT(*) as views
+            FROM user_activity
+            WHERE user_id = ? AND action = 'view'
+            GROUP BY package_id
+            ORDER BY views DESC
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $viewed = $stmt->get_result()->fetch_assoc();
+        $most_viewed_package = $viewed['package_id'] ?? 0;
 
-        +
+        // ✅ 2. MOST TIME SPENT PACKAGE
+        $stmt = $conn->prepare("
+            SELECT package_id, SUM(time_spent) as total_time
+            FROM user_activity
+            WHERE user_id = ?
+            GROUP BY package_id
+            ORDER BY total_time DESC
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $time = $stmt->get_result()->fetch_assoc();
+        $time_based_package = $time['package_id'] ?? 0;
 
-        -- price similarity
-        (CASE WHEN t.price BETWEEN ? - 5000 AND ? + 5000 THEN 3 ELSE 0 END)
+        // ✅ 3. USER BOOKED PACKAGE
+        $stmt = $conn->prepare("
+            SELECT package_id, COUNT(*) as total
+            FROM package_bookings
+            WHERE user_id = ?
+            GROUP BY package_id
+            ORDER BY total DESC
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $book = $stmt->get_result()->fetch_assoc();
+        $booked_package = $book['package_id'] ?? 0;
 
-        +
+        // ✅ 4. CURRENT TOUR PRICE
+        $stmt = $conn->prepare("SELECT price FROM tours WHERE id=?");
+        $stmt->bind_param("i", $current_tour_id);
+        $stmt->execute();
+        $tour = $stmt->get_result()->fetch_assoc();
+        $price = $tour['price'] ?? 0;
 
-        -- collaborative filtering
-        (CASE WHEN t.id IN (
-            SELECT pb2.package_id
-            FROM package_bookings pb1
-            JOIN package_bookings pb2 
-              ON pb1.user_id = pb2.user_id
-            WHERE pb1.package_id = ?
-        ) THEN 4 ELSE 0 END)
+        // ==========================
+        // 🚀 FINAL SCORING QUERY
+        // ==========================
+        $stmt = $conn->prepare("
+            SELECT t.*,
 
-        +
+            (
+                -- 🎯 SIMILAR TO MOST VIEWED
+                (CASE WHEN t.id = ? THEN 10 ELSE 0 END)
 
-        -- popularity
-        (COUNT(pb.id) * 2)
+                +
 
-        +
+                -- ⏱ TIME SPENT INTEREST
+                (CASE WHEN t.id = ? THEN 12 ELSE 0 END)
 
-        -- recent boost
-        (CASE WHEN t.created_at >= NOW() - INTERVAL 7 DAY THEN 1 ELSE 0 END)
+                +
 
-        +
+                -- 🧾 USER BOOKED RELATED
+                (CASE WHEN t.id = ? THEN 15 ELSE 0 END)
 
-        -- MOST VIEWED TYPE BOOST 🔥 (NEW)
-        (CASE WHEN t.type = ? THEN 7 ELSE 0 END)
+                +
 
-        +
+                -- 🤝 COLLABORATIVE FILTERING
+                (CASE WHEN t.id IN (
+                    SELECT pb2.package_id
+                    FROM package_bookings pb1
+                    JOIN package_bookings pb2
+                    ON pb1.user_id = pb2.user_id
+                    WHERE pb1.package_id = ?
+                ) THEN 8 ELSE 0 END)
 
-        -- TIME-BASED INTEREST 🔥
-        (CASE WHEN t.type = ? THEN 8 ELSE 0 END)
+                +
 
-      ) AS score
+                -- 💰 PRICE SIMILARITY
+                (CASE WHEN t.price BETWEEN ? - 5000 AND ? + 5000 THEN 5 ELSE 0 END)
 
-      FROM tours t
-      LEFT JOIN package_bookings pb ON t.id = pb.package_id
+                +
 
-      WHERE t.id != ?
-      AND t.status = 1
+                -- 🔥 POPULARITY
+                (COUNT(pb.id) * 2)
 
-      GROUP BY t.id
-      ORDER BY score DESC
-      LIMIT ?
-    ");
+                +
 
-    $stmt->bind_param(
-      "siiissii",
-      $preferred_type,
-      $price,
-      $price,
-      $current_tour_id,
-      $most_viewed_type,
-      $time_based_type,
-      $current_tour_id,
-      $limit
-    );
+                -- 🆕 RECENT BOOST
+                (CASE WHEN t.created_at >= NOW() - INTERVAL 7 DAY THEN 2 ELSE 0 END)
 
-    $stmt->execute();
-    return $stmt->get_result();
-  }
+            ) AS score
 
-  // ==========================
-  // 👥 GUEST USER
-  // ==========================
-  else {
+            FROM tours t
+            LEFT JOIN package_bookings pb ON t.id = pb.package_id
 
-    // 👉 Get current tour info
-    $stmt = $conn->prepare("SELECT type, price FROM tours WHERE id=?");
-    $stmt->bind_param("i", $current_tour_id);
-    $stmt->execute();
-    $tour = $stmt->get_result()->fetch_assoc();
+            WHERE t.id != ?
+            AND t.status = 1
 
-    $type = $tour['type'];
-    $price = $tour['price'];
+            GROUP BY t.id
+            ORDER BY score DESC
+            LIMIT ?
+        ");
 
-    // 👉 Smart ranking (no user data)
-    $stmt = $conn->prepare("
-      SELECT t.*,
+        $stmt->bind_param(
+            "iiiiiiii",
+            $most_viewed_package,   // 1
+            $time_based_package,   // 2
+            $booked_package,       // 3
+            $current_tour_id,      // 4
+            $price,                // 5
+            $price,                // 6
+            $current_tour_id,      // 7
+            $limit                 // 8
+        );
 
-      (
-        -- type match
-        (CASE WHEN t.type = ? THEN 5 ELSE 0 END)
+        $stmt->execute();
+        return $stmt->get_result();
+    }
 
-        +
+    // ==========================
+    // 👥 GUEST USER
+    // ==========================
+    else {
 
-        -- price similarity
-        (CASE WHEN t.price BETWEEN ? - 5000 AND ? + 5000 THEN 3 ELSE 0 END)
+        $stmt = $conn->prepare("SELECT price FROM tours WHERE id=?");
+        $stmt->bind_param("i", $current_tour_id);
+        $stmt->execute();
+        $tour = $stmt->get_result()->fetch_assoc();
+        $price = $tour['price'] ?? 0;
 
-        +
+        $stmt = $conn->prepare("
+            SELECT t.*,
 
-        -- popularity
-        (COUNT(pb.id) * 2)
+            (
+                -- 💰 PRICE SIMILARITY
+                (CASE WHEN t.price BETWEEN ? - 5000 AND ? + 5000 THEN 5 ELSE 0 END)
 
-        +
+                +
 
-        -- recent boost
-        (CASE WHEN t.created_at >= NOW() - INTERVAL 7 DAY THEN 1 ELSE 0 END)
+                -- 🔥 POPULARITY
+                (COUNT(pb.id) * 2)
 
-      ) AS score
+                +
 
-      FROM tours t
-      LEFT JOIN package_bookings pb ON t.id = pb.package_id
+                -- 🤝 COLLABORATIVE FILTERING
+                (CASE WHEN t.id IN (
+                    SELECT pb2.package_id
+                    FROM package_bookings pb1
+                    JOIN package_bookings pb2
+                    ON pb1.user_id = pb2.user_id
+                    WHERE pb1.package_id = ?
+                ) THEN 6 ELSE 0 END)
 
-      WHERE t.id != ?
-      AND t.status = 1
+                +
 
-      GROUP BY t.id
-      ORDER BY score DESC
-      LIMIT ?
-    ");
+                -- 🆕 RECENT
+                (CASE WHEN t.created_at >= NOW() - INTERVAL 7 DAY THEN 2 ELSE 0 END)
 
-    $stmt->bind_param("siiii", $type, $price, $price, $current_tour_id, $limit);
-    $stmt->execute();
-    return $stmt->get_result();
-  }
+            ) AS score
+
+            FROM tours t
+            LEFT JOIN package_bookings pb ON t.id = pb.package_id
+
+            WHERE t.id != ?
+            AND t.status = 1
+
+            GROUP BY t.id
+            ORDER BY score DESC
+            LIMIT ?
+        ");
+
+        $stmt->bind_param(
+            "iiiii",
+            $price,
+            $price,
+            $current_tour_id,
+            $current_tour_id,
+            $limit
+        );
+
+        $stmt->execute();
+        return $stmt->get_result();
+    }
 }

@@ -1,20 +1,29 @@
 <?php
 session_start();
-include 'config/db.php';
+include '../config/db.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+if (!$data) {
+    exit; // prevent null error
+}
+
 if (isset($_SESSION['user_id'])) {
+
     $user_id = $_SESSION['user_id'];
-    $package_id = intval($data['package_id']);
-    $time_spent = intval($data['time_spent']);
+    $package_id = intval($data['package_id'] ?? 0);
+    $time_spent = intval($data['time_spent'] ?? 0);
 
-    $stmt = $conn->prepare("
-        UPDATE user_activity
-        SET time_spent = time_spent + ?
-        WHERE user_id = ? AND package_id = ? AND action = 'view'
-    ");
+    if ($package_id > 0 && $time_spent > 0) {
 
-    $stmt->bind_param("iii", $time_spent, $user_id, $package_id);
-    $stmt->execute();
+        $stmt = $conn->prepare("
+            INSERT INTO user_activity (user_id, package_id, action, time_spent)
+            VALUES (?, ?, 'view', ?)
+            ON DUPLICATE KEY UPDATE 
+            time_spent = time_spent + VALUES(time_spent)
+        ");
+
+        $stmt->bind_param("iii", $user_id, $package_id, $time_spent);
+        $stmt->execute();
+    }
 }

@@ -88,6 +88,18 @@ function renderList($text)
   echo "</ul>";
 }
 
+// if (isset($_SESSION['user_id'])) {
+//   $uid = $_SESSION['user_id'];
+
+//   $stmt = $conn->prepare("
+//     INSERT INTO user_activity (user_id, package_id, action, time_spent)
+//     VALUES (?, ?, 'view', 0)
+//     ON DUPLICATE KEY UPDATE action = 'view'
+//   ");
+//   $stmt->bind_param("ii", $uid, $id);
+//   $stmt->execute();
+// }
+
 $recommended = getRecommendations($conn, $tour['id']);
 
 ?>
@@ -338,15 +350,25 @@ if (!$tour) {
 <script src="assets/js/success-errorBox.js"></script>
 
 <script>
-let startTime = Date.now();
+  let startTime = Date.now();
 
-window.addEventListener("beforeunload", () => {
-  let timeSpent = Math.floor((Date.now() - startTime) / 1000);
+  function sendTime() {
+    let timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
-  navigator.sendBeacon("api/track-time", JSON.stringify({
-    package_id: <?= $current_tour_id ?>,
-    time_spent: timeSpent
-  }));
-});
+    if (timeSpent < 2) return;
+
+    navigator.sendBeacon("api/track-time", JSON.stringify({
+      package_id: <?= $current_tour_id ?>,
+      time_spent: timeSpent
+    }));
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      sendTime();
+    }
+  });
+
+  window.addEventListener("beforeunload", sendTime);
 </script>
 <?php include 'includes/footer.php'; ?>
