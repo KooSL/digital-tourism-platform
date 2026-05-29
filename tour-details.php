@@ -316,7 +316,7 @@ if (!$tour) {
 
   <div class="recommend-grid">
 
-    <?php while($row = $recommended->fetch_assoc()): ?>
+    <?php while ($row = $recommended->fetch_assoc()): ?>
 
       <div class="recommend-card">
         <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
@@ -337,4 +337,16 @@ if (!$tour) {
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
 
+<script>
+let startTime = Date.now();
+
+window.addEventListener("beforeunload", () => {
+  let timeSpent = Math.floor((Date.now() - startTime) / 1000);
+
+  navigator.sendBeacon("api/track-time", JSON.stringify({
+    package_id: <?= $current_tour_id ?>,
+    time_spent: timeSpent
+  }));
+});
+</script>
 <?php include 'includes/footer.php'; ?>

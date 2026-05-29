@@ -3,7 +3,7 @@
   padding: 18px;
   border-radius: 10px;
   border: 1px solid #eee;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
   position: relative;
 }
 
@@ -99,7 +99,7 @@
   padding: 20px;
 } */
 
-.recommend-section h3{
+.recommend-section h3 {
   text-align: center;
 }
 

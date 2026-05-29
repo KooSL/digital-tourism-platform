@@ -7,8 +7,9 @@ if (isset($_SESSION['user_id'])) {
   $uid = $_SESSION['user_id'];
 
   $stmt = $conn->prepare("
-    INSERT INTO user_activity (user_id, package_id, action)
-    VALUES (?, ?, 'view')
+    INSERT INTO user_activity (user_id, package_id, action, time_spent)
+    VALUES (?, ?, 'view', 0)
+    ON DUPLICATE KEY UPDATE action = 'view'
   ");
   $stmt->bind_param("ii", $uid, $id);
   $stmt->execute();
@@ -18,9 +19,11 @@ if (isset($_SESSION['user_id'])) {
 // ==============================
 // 🎯 HYBRID RECOMMENDATION ENGINE
 // ==============================
-function getRecommendations($conn, $current_tour_id, $limit = 6)
+function getRecommendations($conn, $current_tour_id)
 {
   $user_id = $_SESSION['user_id'] ?? null;
+  $limit = 6; // Number of recommendations to return
+
 
   // ==========================
   // 🔐 LOGGED-IN USER
@@ -51,13 +54,14 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
 
     // 👉 MOST viewed type (frequency-based)
     $stmt = $conn->prepare("
-      SELECT t.type
+      SELECT t.type,
+      SUM(ua.time_spent) as total_time
       FROM user_activity ua
       JOIN tours t ON ua.package_id = t.id
       WHERE ua.user_id = ?
       AND ua.action = 'view'
       GROUP BY t.type
-      ORDER BY COUNT(*) DESC
+      ORDER BY total_time DESC
       LIMIT 1
     ");
 
@@ -74,6 +78,23 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
     $tour = $stmt->get_result()->fetch_assoc();
 
     $price = $tour['price'] ?? 0;
+
+
+    $stmt = $conn->prepare("
+      SELECT t.type, SUM(ua.time_spent) as total_time
+      FROM user_activity ua
+      JOIN tours t ON ua.package_id = t.id
+      WHERE ua.user_id = ?
+      GROUP BY t.type
+      ORDER BY total_time DESC
+      LIMIT 1
+    ");
+
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    $time_based_type = $result['type'] ?? null;
 
     // ==========================
     // 🚀 SMART SCORE QUERY
@@ -116,6 +137,11 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
         -- MOST VIEWED TYPE BOOST 🔥 (NEW)
         (CASE WHEN t.type = ? THEN 7 ELSE 0 END)
 
+        +
+
+        -- TIME-BASED INTEREST 🔥
+        (CASE WHEN t.type = ? THEN 8 ELSE 0 END)
+
       ) AS score
 
       FROM tours t
@@ -130,12 +156,13 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
     ");
 
     $stmt->bind_param(
-      "ssiiiii",
-      $preferred_type,    
-      $most_viewed_type,   
+      "siiissii",
+      $preferred_type,
       $price,
       $price,
       $current_tour_id,
+      $most_viewed_type,
+      $time_based_type,
       $current_tour_id,
       $limit
     );
@@ -194,7 +221,7 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
       LIMIT ?
     ");
 
-    $stmt->bind_param("siiiii", $type, $price, $price, $current_tour_id, $limit);
+    $stmt->bind_param("siiii", $type, $price, $price, $current_tour_id, $limit);
     $stmt->execute();
     return $stmt->get_result();
   }
