@@ -5,7 +5,7 @@ include '../config/db.php';
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data) {
-    exit; // prevent null error
+    exit;
 }
 
 if (isset($_SESSION['user_id'])) {
@@ -17,10 +17,15 @@ if (isset($_SESSION['user_id'])) {
     if ($package_id > 0 && $time_spent > 0) {
 
         $stmt = $conn->prepare("
-            INSERT INTO user_activity (user_id, package_id, action, time_spent)
-            VALUES (?, ?, 'view', ?)
-            ON DUPLICATE KEY UPDATE 
-            time_spent = time_spent + VALUES(time_spent)
+            INSERT INTO user_activity
+            (user_id, package_id, action, view_count, time_spent)
+
+            VALUES (?, ?, 'view', 1, ?)
+
+            ON DUPLICATE KEY UPDATE
+                view_count = view_count + 1,
+                time_spent = time_spent + VALUES(time_spent),
+                last_viewed_at = NOW();
         ");
 
         $stmt->bind_param("iii", $user_id, $package_id, $time_spent);

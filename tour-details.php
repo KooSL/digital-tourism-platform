@@ -348,27 +348,10 @@ if (!$tour) {
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
-
 <script>
-  let startTime = Date.now();
-
-  function sendTime() {
-    let timeSpent = Math.floor((Date.now() - startTime) / 1000);
-
-    if (timeSpent < 2) return;
-
-    navigator.sendBeacon("api/track-time", JSON.stringify({
-      package_id: <?= $current_tour_id ?>,
-      time_spent: timeSpent
-    }));
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-      sendTime();
-    }
-  });
-
-  window.addEventListener("beforeunload", sendTime);
+    const currentTripId = <?= $current_tour_id ?>;
 </script>
+
+<script src="assets/js/track-time.js"></script>
+
 <?php include 'includes/footer.php'; ?>

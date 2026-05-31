@@ -11,7 +11,7 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
 
         // ✅ 1. MOST VIEWED PACKAGE (frequency)
         $stmt = $conn->prepare("
-            SELECT package_id, COUNT(*) as views
+            SELECT package_id, MAX(view_count) as views
             FROM user_activity
             WHERE user_id = ? AND action = 'view'
             GROUP BY package_id
@@ -23,19 +23,53 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
         $viewed = $stmt->get_result()->fetch_assoc();
         $most_viewed_package = $viewed['package_id'] ?? 0;
 
+        // details of the most-viewed package
+        $stmt = $conn->prepare("
+            SELECT t.*
+            FROM tours t
+            JOIN user_activity ua ON t.id = ua.package_id
+            WHERE ua.user_id = ?
+            ORDER BY ua.view_count DESC
+            LIMIT 1
+        ");
+
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $refTour = $stmt->get_result()->fetch_assoc();
+
+        $refPrice = $refTour['price'] ?? 0;
+        $refDuration = $refTour['duration'] ?? '';
+
         // ✅ 2. MOST TIME SPENT PACKAGE
         $stmt = $conn->prepare("
-            SELECT package_id, SUM(time_spent) as total_time
+            SELECT package_id, time_spent as total_time
             FROM user_activity
             WHERE user_id = ?
-            GROUP BY package_id
-            ORDER BY total_time DESC
+            ORDER BY time_spent DESC
             LIMIT 1
         ");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $time = $stmt->get_result()->fetch_assoc();
         $time_based_package = $time['package_id'] ?? 0;
+
+        // time-spent package as another reference for price/duration similarity
+        $stmt = $conn->prepare("
+            SELECT t.*
+            FROM tours t
+            JOIN user_activity ua ON t.id = ua.package_id
+            WHERE ua.user_id = ?
+            ORDER BY ua.time_spent DESC
+            LIMIT 1
+        ");
+
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+
+        $timeTour = $stmt->get_result()->fetch_assoc();
+
+        $timePrice = $timeTour['price'] ?? 0;
+        $timeDuration = $timeTour['duration'] ?? '';
 
         // ✅ 3. USER BOOKED PACKAGE
         $stmt = $conn->prepare("
@@ -50,6 +84,20 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
         $stmt->execute();
         $book = $stmt->get_result()->fetch_assoc();
         $booked_package = $book['package_id'] ?? 0;
+
+        $stmt = $conn->prepare("
+            SELECT *
+            FROM tours
+            WHERE id = ?
+        ");
+
+        $stmt->bind_param("i", $booked_package);
+        $stmt->execute();
+
+        $bookTour = $stmt->get_result()->fetch_assoc();
+
+        $bookPrice = $bookTour['price'] ?? 0;
+        $bookDuration = $bookTour['duration'] ?? '';
 
         // ✅ 4. CURRENT TOUR PRICE
         $stmt = $conn->prepare("SELECT price FROM tours WHERE id=?");
@@ -66,17 +114,63 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
 
             (
                 -- 🎯 SIMILAR TO MOST VIEWED
-                (CASE WHEN t.id = ? THEN 10 ELSE 0 END)
+                -- (CASE WHEN t.id = ? THEN 10 ELSE 0 END)
+
+                -- Similar price to most viewed package
+                (CASE
+                    WHEN t.price BETWEEN ? - 5000 AND ? + 5000
+                    THEN 10
+                    ELSE 0
+                END)
+
+                +
+
+                -- Similar duration
+                (CASE
+                    WHEN t.duration = ?
+                    THEN 8
+                    ELSE 0
+                END)
 
                 +
 
                 -- ⏱ TIME SPENT INTEREST
-                (CASE WHEN t.id = ? THEN 12 ELSE 0 END)
+                -- (CASE WHEN t.id = ? THEN 12 ELSE 0 END)
+
+                (CASE
+                    WHEN t.price BETWEEN ? - 5000 AND ? + 5000
+                    THEN 12
+                    ELSE 0
+                END)
+
+                +
+
+                (CASE
+                    WHEN t.duration = ?
+                    THEN 10
+                    ELSE 0
+                END)
 
                 +
 
                 -- 🧾 USER BOOKED RELATED
-                (CASE WHEN t.id = ? THEN 15 ELSE 0 END)
+                -- (CASE WHEN t.id = ? THEN 15 ELSE 0 END)
+
+                -- 🧾 USER BOOKED RELATED
+
+                (CASE
+                    WHEN t.price BETWEEN ? - 5000 AND ? + 5000
+                    THEN 15
+                    ELSE 0
+                END)
+
+                +
+
+                (CASE
+                    WHEN t.duration = ?
+                    THEN 12
+                    ELSE 0
+                END)
 
                 +
 
@@ -118,15 +212,28 @@ function getRecommendations($conn, $current_tour_id, $limit = 6)
         ");
 
         $stmt->bind_param(
-            "iiiiiiii",
-            $most_viewed_package,   // 1
-            $time_based_package,   // 2
-            $booked_package,       // 3
-            $current_tour_id,      // 4
-            $price,                // 5
-            $price,                // 6
-            $current_tour_id,      // 7
-            $limit                 // 8
+            "iisiisisiiiiii",
+
+            $refPrice,
+            $refPrice,
+            $refDuration,
+
+            $timePrice,
+            $timePrice,
+            $timeDuration,
+
+            $bookPrice,
+            $bookPrice,
+            $bookDuration,
+
+            $current_tour_id,
+
+            $price,
+            $price,
+
+            $current_tour_id,
+
+            $limit
         );
 
         $stmt->execute();
