@@ -65,7 +65,8 @@
 }
 
 /* EMPTY STATE */
-.no-bookings, .no-package {
+.no-bookings,
+.no-package {
   text-align: center;
   padding: 20px;
 }
