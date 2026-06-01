@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
       message: "Enter valid email",
     },
     phone: {
-      regex: /^\d{10}$/,
-      message: "Phone must be 10 digits",
+      regex: /^\+?\d{10,15}$/,
+      message: "Phone must be between 10 and 15 digits",
     },
     password: {
       regex: /^.{8,}$/,
@@ -38,6 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
     address: {
       regex: /^.{5,}$/,
       message: "Address must be at least 5 characters",
+    },
+    country: {
+      regex: /^(?!Select Country$).+$/,
+      message: "Please select a country",
     },
   };
 

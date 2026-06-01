@@ -15,16 +15,17 @@ $pid = $_SESSION['pid'] ?? '';
 
 $stmt = $conn->prepare("
     INSERT INTO package_bookings
-    (package_id, user_id, name, email, phone, travel_date, persons, payment_status, payment_method, transaction_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'paid', 'eSewa', ?)
+    (package_id, user_id, name, email, country, phone, travel_date, persons, payment_status, payment_method, transaction_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', 'eSewa', ?)
 ");
 
 $stmt->bind_param(
-    "iissssis",
+    "iisssssis",
     $data['package_id'],
     $data['user_id'],
     $data['name'],
     $data['email'],
+    $data['country'],
     $data['phone'],
     $data['date'],
     $data['persons'],

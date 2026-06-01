@@ -1,14 +1,12 @@
-.auth-container,
-.booking-container {
+.auth-container{
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 60px 20px;
+  padding: 30px 20px;
   background-color: #f9fbfd;
 }
 
-.auth-form,
-.booking-form {
+.auth-form{
   width: 100%;
   max-width: 400px;
   background: #fff;
@@ -23,7 +21,8 @@
   text-align: left;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ddd;
@@ -36,8 +35,7 @@
   border-color: var(--orange);
 } */
 
-.auth-btn,
-.booking-btn {
+.auth-btn{
   width: 100%;
   padding: 10px;
   background: var(--blue);
@@ -48,8 +46,7 @@
   margin-top: 10px;
 }
 
-.auth-btn:hover,
-.booking-btn:hover {
+.auth-btn:hover{
   background: var(--orange);
 }
 
