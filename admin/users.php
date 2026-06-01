@@ -8,13 +8,20 @@ include '../config/db.php';
 
 if(isset($_GET['delete'])){
   $id = $_GET['delete'];
-  mysqli_query($conn, "DELETE FROM users WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM users WHERE id=$id")){
+    $_SESSION['success'] = "User deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete user.";
+  }
   header("Location: users");
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <h2>Users</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -54,5 +61,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

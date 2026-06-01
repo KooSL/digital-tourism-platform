@@ -7,13 +7,20 @@ include 'includes/sidebar.php';
 
 if(isset($_GET['delete'])){
   $id = $_GET['delete'];
-  mysqli_query($conn, "DELETE FROM faqs WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM faqs WHERE id=$id")){
+    $_SESSION['success'] = "FAQ deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete FAQ.";
+  }
   header("Location: manage-faqs");
+  exit();
 }
 ?>
 
 <div class="admin-content">
   <h2>Manage FAQs</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -73,5 +80,6 @@ if(isset($_GET['delete'])){
   </table>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<script src="assets/js/admin-alert.js"></script>
 
+<?php include 'includes/footer.php'; ?>

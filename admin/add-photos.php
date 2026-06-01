@@ -53,13 +53,17 @@ if (isset($_POST['upload'])) {
   }
 
   $stmt->close();
+  $_SESSION['success'] = "Photos uploaded successfully.";
   header("Location: manage-photos?id=" . $album_id . "&slug=" . $album['slug']);
+  exit();
 }
 ?>
 
 <div class="admin-content">
 
   <h2>Upload Photos</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <form method="POST" enctype="multipart/form-data" class="admin-form">
 
@@ -78,3 +82,8 @@ if (isset($_POST['upload'])) {
 
     <button type="submit" name="upload">Upload</button>
   </form>
+
+</div>
+<script src="assets/js/admin-alert.js"></script>
+
+<?php include 'includes/footer.php'; ?>

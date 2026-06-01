@@ -6,7 +6,7 @@ include 'includes/sidebar.php';
 
 
 // DELETE TOUR
-if(isset($_GET['delete'])){
+if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
 
   // $query = mysqli_query($conn, "SELECT image, pdf FROM tours WHERE id=$id");
@@ -17,13 +17,20 @@ if(isset($_GET['delete'])){
   //   @unlink("assets/pdf/".$data['pdf_file']);
   // }
 
-  mysqli_query($conn, "DELETE FROM flights WHERE id=$id");
+  if (mysqli_query($conn, "DELETE FROM flights WHERE id=$id")) {
+    $_SESSION['success'] = "Flight deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete flight.";
+  }
   header("Location: manage-flights");
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <h2>Manage Flights Post</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -45,49 +52,51 @@ if(isset($_GET['delete'])){
       <?php
       $i = 1;
       $result = mysqli_query($conn, "SELECT * FROM flights ORDER BY id DESC");
-      while($row = mysqli_fetch_assoc($result)){
+      while ($row = mysqli_fetch_assoc($result)) {
       ?>
-      <tr>
-        <td><?= $i++ ?></td>
-        <td><?= $row['created_at'] ?></td>
-        <td><?= $row['from_city'] ?></td>
-        <td><?= $row['to_city'] ?></td>
-        <td>
-          <?= implode(' ', array_slice(explode(' ', $row['description']), 0, 5)); ?>...
-        </td>
-        <td>
-          <img src="uploads/images/flights/<?= $row['image'] ?>" height="50">
-        </td>
+        <tr>
+          <td><?= $i++ ?></td>
+          <td><?= $row['created_at'] ?></td>
+          <td><?= $row['from_city'] ?></td>
+          <td><?= $row['to_city'] ?></td>
+          <td>
+            <?= implode(' ', array_slice(explode(' ', $row['description']), 0, 5)); ?>...
+          </td>
+          <td>
+            <img src="uploads/images/flights/<?= $row['image'] ?>" height="50">
+          </td>
 
-        <?php
-          if($row['is_group_fare'] == 1){
+          <?php
+          if ($row['is_group_fare'] == 1) {
             echo '<td>Yes</td>';
           } else {
             echo '<td>No</td>';
           }
-        ?>
-        
-        <?php
-          if($row['status'] == 1){
+          ?>
+
+          <?php
+          if ($row['status'] == 1) {
             echo '<td class="status-col published">Active</td>';
           } else {
             echo '<td class="status-col draft">Inactive</td>';
           }
-        ?>
+          ?>
 
-        <td class="action-col-flight">
-          <a href="edit-flight?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-          <a href="?delete=<?= $row['id'] ?>"
-            onclick="return confirm('Delete this flight?')"
-            class="btn-delete">
-            Delete
-          </a>
-        </td>
+          <td class="action-col-flight">
+            <a href="edit-flight?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
+            <a href="?delete=<?= $row['id'] ?>"
+              onclick="return confirm('Delete this flight?')"
+              class="btn-delete">
+              Delete
+            </a>
+          </td>
 
-      </tr>
+        </tr>
       <?php } ?>
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

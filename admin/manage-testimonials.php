@@ -7,7 +7,12 @@ include 'includes/sidebar.php';
 /* DELETE */
 if(isset($_GET['delete'])){
   $id = (int)$_GET['delete'];
-  mysqli_query($conn, "DELETE FROM testimonials WHERE id=$id");
+
+  if(mysqli_query($conn, "DELETE FROM testimonials WHERE id=$id")){
+    $_SESSION['success'] = "Testimonial deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete testimonial.";
+  }
   header("Location: manage-testimonials");
   exit();
 }
@@ -15,6 +20,8 @@ if(isset($_GET['delete'])){
 
 <div class="admin-content">
   <h2>Manage Testimonials</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -59,5 +66,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

@@ -29,10 +29,6 @@ if (!$data) {
   die("Flight not found.");
 }
 
-// Initialize variables for form
-$error = '';
-$success = '';
-
 // Handle form submission
 if (isset($_POST['update'])) {
 
@@ -68,26 +64,26 @@ if (isset($_POST['update'])) {
   if (!in_array($group_fare, [0, 1], true)) {
     $group_fare = 0;
   }
-  
+
   if (!in_array($status, [0, 1], true)) {
     $status = 0;
   }
 
   // If no validation errors, proceed with update
   if (empty($error)) {
-    
+
     // Keep existing image
     $image = $data['image'];
     $upload_error = '';
 
     // Handle file upload if new image is provided
     if (!empty($_FILES['image']['name'])) {
-      
+
       // File upload validation
       $max_file_size = 2 * 1024 * 1024; // 2MB
       $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-      
+
       $file_size = $_FILES['image']['size'];
       $file_tmp_name = $_FILES['image']['tmp_name'];
       $file_name = $_FILES['image']['name'];
@@ -109,8 +105,7 @@ if (isset($_POST['update'])) {
       // Validate actual image content
       elseif (!getimagesize($file_tmp_name)) {
         $upload_error = "File is not a valid image.";
-      }
-      else {
+      } else {
         // Generate safe filename with random string
         $newImage = bin2hex(random_bytes(8)) . '_' . time() . '.' . $file_ext;
         $upload_path = "uploads/images/flights/" . $newImage;
@@ -136,14 +131,16 @@ if (isset($_POST['update'])) {
       // Use prepared statement for UPDATE query
       $update_stmt = $conn->prepare("UPDATE flights SET from_city = ?, to_city = ?, description = ?, image = ?, is_group_fare = ?, status = ? WHERE id = ?");
       $update_stmt->bind_param("sssssii", $from_city, $to_city, $description, $image, $group_fare, $status, $id);
-      
+
       if ($update_stmt->execute()) {
         $update_stmt->close();
+        $_SESSION['success'] = "Flight updated successfully.";
         header("Location: manage-flights");
         exit;
       } else {
-        $error = "Failed to update flight. Please try again.";
-        $update_stmt->close();
+        $_SESSION['error'] = "Failed to update flight.";
+        header("Location: edit-flight?id=$id");
+        exit;
       }
     }
   }
@@ -153,13 +150,7 @@ if (isset($_POST['update'])) {
 <div class="admin-content">
   <h2>Edit Flight Post</h2>
 
-  <?php if (!empty($error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
-  <?php endif; ?>
-
-  <?php if (!empty($success)): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
-  <?php endif; ?>
+  <?php include 'includes/admin-alert.php'; ?>
 
   <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -209,4 +200,6 @@ if (isset($_POST['update'])) {
 </div>
 
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
 <?php include 'includes/footer.php'; ?>

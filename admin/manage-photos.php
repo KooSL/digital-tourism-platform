@@ -4,6 +4,8 @@ include 'auth.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 
+$id = $_GET['id'];
+$slug = $_GET['slug'];
 
 // DELETE TOUR
 if(isset($_GET['delete'])){
@@ -17,14 +19,22 @@ if(isset($_GET['delete'])){
   //   @unlink("assets/pdf/".$data['pdf_file']);
   // }
 
-  mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$id");
-  header("Location: manage-albums");
+  if(mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$id")){
+    $_SESSION['success'] = "Photo deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete photo.";
+  }
+  header("Location: manage-photos?id=" . $id . "&slug=" . $slug);
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <div class="manage-photos-title-box">
     <h2>Manage Photos</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
+
     <a href="add-photos" class="btn-add-new">Add New Photos</a>
   </div>
 
@@ -73,5 +83,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

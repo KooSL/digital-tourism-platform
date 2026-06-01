@@ -127,7 +127,12 @@ if (isset($_POST['update'])) {
       $itStmt->close();
     }
 
+    $_SESSION['success'] = "Tour updated successfully.";
     header("Location: manage-tours");
+    exit();
+  } else {
+    $_SESSION['error'] = "Failed to update tour.";
+    header("Location: edit-tour?id=$id");
     exit();
   }
 }

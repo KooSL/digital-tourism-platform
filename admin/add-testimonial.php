@@ -31,6 +31,8 @@ if (isset($_POST['submit'])) {
     $stmt->bind_param("sssii", $name, $service, $review, $rating, $status);
 
     if ($stmt->execute()) {
+        $stmt->close();
+        $_SESSION['success'] = "Testimonial added successfully.";
         header("Location: manage-testimonials");
         exit();
     }
@@ -41,6 +43,8 @@ if (isset($_POST['submit'])) {
 
 <div class="admin-content">
     <h2>Add Testimonial</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -78,5 +82,9 @@ if (isset($_POST['submit'])) {
 
         <button type="submit" name="submit">Add Testimonial</button>
     </form>
-    <script src="assets/js/form-validator.js"></script>
-    <?php include 'includes/footer.php'; ?>
+</div>
+
+<script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
+<?php include 'includes/footer.php'; ?>

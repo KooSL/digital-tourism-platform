@@ -170,10 +170,11 @@ if (isset($_POST['update'])) {
 
       if ($updateStmt->execute()) {
         $updateStmt->close();
+        $_SESSION['success'] = "Album updated successfully.";
         header("Location: manage-albums");
         exit;
       } else {
-        $errors[] = "Database update failed: " . $conn->error;
+        $_SESSION['error'] = "Database update failed: " . $conn->error;
       }
       $updateStmt->close();
     }
@@ -192,6 +193,8 @@ if (isset($_POST['update'])) {
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -228,4 +231,6 @@ if (isset($_POST['update'])) {
 </div>
 
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
 <?php include 'includes/footer.php'; ?>

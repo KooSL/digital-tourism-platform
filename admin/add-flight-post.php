@@ -52,10 +52,13 @@ if (isset($_POST['submit'])) {
     );
 
     if ($stmt->execute()) {
+        $_SESSION['success'] = "Flight added successfully.";
         header("Location: manage-flights");
         exit();
     } else {
-        echo "<script>alert('Error adding flight');</script>";
+        $_SESSION['error'] = "Failed to add flight.";
+        header("Location: add-flight-post");
+        exit();
     }
 
     $stmt->close();
@@ -64,6 +67,8 @@ if (isset($_POST['submit'])) {
 
 <div class="admin-content">
     <h2>Add New Flight Post</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -109,4 +114,6 @@ if (isset($_POST['submit'])) {
 </div>
 
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
 <?php include 'includes/footer.php'; ?>

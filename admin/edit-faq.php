@@ -11,7 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 // Validate ID is a valid integer
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($id <= 0) {
-    die("Invalid FAQ ID.");
+  die("Invalid FAQ ID.");
 }
 
 // Use prepared statement to fetch FAQ
@@ -21,14 +21,11 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    die("FAQ not found.");
+  die("FAQ not found.");
 }
 
 $faq = $result->fetch_assoc();
 $stmt->close();
-
-$error = '';
-$success = '';
 
 if (isset($_POST['update'])) {
 
@@ -43,7 +40,7 @@ if (isset($_POST['update'])) {
   // Input validation
   $question = trim($_POST['question']);
   $answer = trim($_POST['answer']);
-  
+
   if (empty($question)) {
     $error = "Question is required.";
   } elseif (strlen($question) > 1000) {
@@ -56,25 +53,19 @@ if (isset($_POST['update'])) {
     // Cast to integers for safety
     $is_featured = intval($_POST['is_featured']);
     $status = intval($_POST['status']);
-    
+
     // Use prepared statement for update
     $stmt = $conn->prepare("UPDATE faqs SET question = ?, answer = ?, is_featured = ?, status = ? WHERE id = ?");
     $stmt->bind_param("ssiii", $question, $answer, $is_featured, $status, $id);
-    
+
     if ($stmt->execute()) {
-      // Regenerate CSRF token after successful update
-      $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-      $success = "FAQ updated successfully!";
-      
-      // Refresh FAQ data
-      $stmt = $conn->prepare("SELECT * FROM faqs WHERE id = ?");
-      $stmt->bind_param("i", $id);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      $faq = $result->fetch_assoc();
-      $stmt->close();
+      $_SESSION['success'] = "FAQ updated successfully.";
+      header("Location: manage-faqs");
+      exit();
     } else {
-      $error = "Error updating FAQ: " . $conn->error;
+      $_SESSION['error'] = "Failed to update FAQ.";
+      header("Location: edit-faq?id=$id");
+      exit();
     }
   }
 }
@@ -83,13 +74,7 @@ if (isset($_POST['update'])) {
 <div class="admin-content">
   <h2>Edit FAQ</h2>
 
-  <?php if (!empty($error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-  <?php endif; ?>
-  
-  <?php if (!empty($success)): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-  <?php endif; ?>
+  <? include 'includes/admin-alert.php'; ?>
 
   <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -120,6 +105,9 @@ if (isset($_POST['update'])) {
 
     <button name="update">Update FAQ</button>
   </form>
+</div>
 
-  <script src="assets/js/form-validator.js"></script>
-  <?php include 'includes/footer.php'; ?>
+<script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
+<?php include 'includes/footer.php'; ?>

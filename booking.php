@@ -8,6 +8,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 include 'config/db.php';
 include 'includes/mailer.php';
+include 'api/countries.php';
 
 $id = intval($_GET['id'] ?? 0);
 
@@ -34,6 +35,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['user_name'] = $user_data['name'];
     $_SESSION['user_email'] = $user_data['email'];
     $_SESSION['user_phone'] = $user_data['phone'];
+    $_SESSION['user_country'] = $user_data['country'];
 }
 
 
@@ -101,6 +103,7 @@ if (isset($_POST['book'])) {
         'user_id' => $_SESSION['user_id'] ?? null,
         'name' => $_POST['name'],
         'email' => $_POST['email'],
+        'country' => $_POST['country'],
         'phone' => $_POST['phone'],
         'date' => $_POST['travel_date'],
         'persons' => intval($_POST['persons']),
@@ -176,12 +179,20 @@ if (!$tour) {
 <div class="booking-container">
     <div class="booking-form">
 
+        <?php
+        if (!isset($_SESSION['user_id'])) { ?>
+            <div class="booking-guest-note">
+                <strong>You are booking as a guest</strong>
+                <p class="note">* Sign in to save your booking history. If you book without signing in, your booking may not appear in the My Bookings.</p>
+            </div>
+        <?php } ?>
+
         <form method="POST" novalidate>
 
             <input type="hidden" name="package_id" value="<?php echo $tour['id']; ?>">
 
             <div class="form-group">
-                <input type="date" name="travel_date" id="travel_date">
+                <input type="date" name="travel_date" id="travel_date" min="<?= date('Y-m-d') ?>">
                 <small class="error"></small>
             </div>
 
@@ -202,10 +213,34 @@ if (!$tour) {
                 <small class="error"></small>
             </div>
 
+            <?php $userCountry = $_SESSION['user_country'] ?? ''; ?>
+            <div class="form-group">
+                <select name="country" id="country">
+                    <option value="" disabled <?= empty($userCountry) ? 'selected' : '' ?>>
+                        Select Country
+                    </option>
+
+                    <?php foreach ($countries as $country): ?>
+                        <option value="<?= htmlspecialchars($country) ?>"
+                            <?= $country === $userCountry ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($country) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="error"></small>
+            </div>
+
             <div class="form-group">
                 <input type="text" name="phone" placeholder="Phone" id="phone"
                     value="<?php echo $_SESSION['user_phone'] ?? ''; ?>">
                 <small class="error"></small>
+            </div>
+
+            <div class="payment-summary">
+                <p>Price: NPR <span id="packagePrice"><?php echo $tour['price']; ?></span> / person</p>
+                <p class="discount-txt">Discount: <span id="discountText">0%</span></p>
+                <hr>
+                <p><strong>Total Payable: NPR <span id="totalAmount"><?php echo $tour['price']; ?></span></strong></p>
             </div>
 
             <button type="submit" class="booking-btn" name="book">Proceed to Payment</button>
@@ -216,5 +251,11 @@ if (!$tour) {
 
 <script src="assets/js/auth-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+
+<script>
+    const pricePerPerson = <?= $tour['price']; ?>;
+</script>
+
+<script src="assets/js/tripCost-calc.js"></script>
 
 <?php include 'includes/footer.php'; ?>

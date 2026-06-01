@@ -6,16 +6,23 @@ include 'includes/sidebar.php';
 include '../config/db.php';
 
 
-// DELETE INQUIRY
+// DELETE INQUIRYs
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    mysqli_query($conn, "DELETE FROM inquiries WHERE id=$id");
+    if (mysqli_query($conn, "DELETE FROM inquiries WHERE id=$id")) {
+        $_SESSION['success'] = "Inquiry deleted successfully.";
+    } else {
+        $_SESSION['error'] = "Failed to delete inquiry.";
+    }
     header("Location: inquiries");
+    exit;
 }
 ?>
 
 <div class="admin-content">
     <h2>Bus Inquiries</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <table class="admin-table">
         <thead>
@@ -73,5 +80,7 @@ if (isset($_GET['delete'])) {
         </tbody>
     </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

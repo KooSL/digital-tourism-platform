@@ -129,10 +129,13 @@ if (isset($_POST['update'])) {
         );
 
         if ($stmt->execute()) {
+            $_SESSION['success'] = "Bus updated successfully.";
             header("Location: manage-buses");
             exit;
         } else {
-            $error = "Update failed.";
+            $_SESSION['error'] = "Failed to update bus.";
+            header("Location: edit-bus?id=$id");
+            exit;
         }
 
         $stmt->close();

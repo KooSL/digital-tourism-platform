@@ -41,3 +41,7 @@
 
   </div>
 </section>
+
+<?php include 'includes/admin-alert.php'; ?>
+
+<script src="assets/js/admin-alert.js"></script>

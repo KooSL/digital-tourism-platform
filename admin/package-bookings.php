@@ -9,21 +9,20 @@ include 'includes/sidebar.php';
 if(isset($_GET['delete'])){
   $id = $_GET['delete'];
 
-  // $query = mysqli_query($conn, "SELECT image, pdf FROM tours WHERE id=$id");
-  // $data = mysqli_fetch_assoc($query);
-
-  // if($data){
-  //   @unlink("assets/images/".$data['banner_image']);
-  //   @unlink("assets/pdf/".$data['pdf_file']);
-  // }
-
-  mysqli_query($conn, "DELETE FROM package_bookings WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM package_bookings WHERE id=$id")){
+    $_SESSION['success'] = "Package booking deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete package booking.";
+  }
   header("Location: package-bookings");
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <h2>Package Bookings</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -89,5 +88,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

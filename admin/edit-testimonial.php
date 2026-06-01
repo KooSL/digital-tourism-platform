@@ -49,16 +49,21 @@ if (isset($_POST['update'])) {
   );
 
   if ($stmt->execute()) {
+    $stmt->close();
+    $_SESSION['success'] = "Testimonial updated successfully.";
     header("Location: manage-testimonials");
     exit();
   } else {
-    echo "<script>alert('Update failed');</script>";
+    $_SESSION['error'] = "Failed to update testimonial.";
+    exit();
   }
 }
 ?>
 
 <div class="admin-content">
   <h2>Edit Testimonial</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <form method="POST" class="admin-form validate-form">
 
@@ -105,4 +110,6 @@ if (isset($_POST['update'])) {
 </div>
 
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
 <?php include 'includes/footer.php'; ?>

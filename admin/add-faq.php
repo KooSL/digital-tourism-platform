@@ -26,7 +26,9 @@ if (isset($_POST['submit'])) {
     mysqli_stmt_bind_param($stmt, "ssii", $q, $a, $f, $s);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
+    $_SESSION['success'] = "FAQ added successfully.";
     header("Location: manage-faqs");
+    exit();
 }
 ?>
 

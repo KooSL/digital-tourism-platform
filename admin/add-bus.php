@@ -64,10 +64,13 @@ if (isset($_POST['submit'])) {
     );
 
     if ($stmt->execute()) {
+        $_SESSION['success'] = "Bus added successfully.";
         header("Location: manage-buses");
         exit();
     } else {
-        echo "<script>alert('Error adding bus');</script>";
+        $_SESSION['error'] = "Failed to add bus.";
+        header("Location: add-bus");
+        exit();
     }
 
     $stmt->close();
@@ -76,6 +79,8 @@ if (isset($_POST['submit'])) {
 
 <div class="admin-content">
     <h2>Add New Bus</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -161,4 +166,6 @@ if (isset($_POST['submit'])) {
 </div>
 
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
 <?php include 'includes/footer.php'; ?>

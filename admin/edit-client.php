@@ -108,6 +108,8 @@ if (isset($_POST['update'])) {
   $stmt->bind_param("sii", $logo, $status, $id);
 
   if ($stmt->execute()) {
+    $stmt->close();
+    $_SESSION['success'] = "Client updated successfully.";
     header("Location: manage-clients");
     exit();
   }

@@ -17,13 +17,20 @@ if(isset($_GET['delete'])){
   //   @unlink("assets/pdf/".$data['pdf_file']);
   // }
 
-  mysqli_query($conn, "DELETE FROM gallery_albums WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM gallery_albums WHERE id=$id")){
+    $_SESSION['success'] = "Album deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete album.";
+  }
   header("Location: manage-albums");
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <h2>Manage Albums</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -58,7 +65,7 @@ if(isset($_GET['delete'])){
         </td>
 
         <td class="action-col-flight">
-          <a href="manage-photos?id=<?= $row['id'] ?>&&slug=<?= $row['slug'] ?>" class="btn-edit">View</a>
+          <a href="manage-photos?id=<?= $row['id'] ?>&slug=<?= $row['slug'] ?>" class="btn-edit">View</a>
         </td>
 
         <td class="action-col-flight">
@@ -75,5 +82,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

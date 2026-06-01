@@ -33,6 +33,8 @@ if (isset($_POST['submit'])) {
     $stmt->bind_param("ssi", $name, $logo, $status);
     $stmt->execute();
 
+    $stmt->close();
+    $_SESSION['success'] = "Client added successfully.";
     header("Location: manage-clients");
     exit();
 }
@@ -42,6 +44,8 @@ if (isset($_POST['submit'])) {
 
 <div class="admin-content">
     <h2>Add Client</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -64,6 +68,9 @@ if (isset($_POST['submit'])) {
 
         <button type="submit" name="submit">Add Client</button>
     </form>
+</div>
 
-    <script src="assets/js/form-validator.js"></script>
-    <?php include 'includes/footer.php'; ?>
+<script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
+<?php include 'includes/footer.php'; ?>

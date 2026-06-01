@@ -35,13 +35,17 @@ if (isset($_POST['create_album'])) {
   mysqli_stmt_execute($stmt);
   mysqli_stmt_close($stmt);
 
+  $_SESSION['success'] = "Album created successfully.";
   header("Location: manage-albums");
+  exit();
 }
 ?>
 
 <div class="admin-content">
 
   <h2>Add Album</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -62,3 +66,6 @@ if (isset($_POST['create_album'])) {
   </form>
 </div>
 <script src="assets/js/form-validator.js"></script>
+<script src="assets/js/admin-alert.js"></script>
+
+<?php include 'includes/footer.php'; ?>

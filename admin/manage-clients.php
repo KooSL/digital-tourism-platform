@@ -10,7 +10,11 @@ $clients = mysqli_query($conn, "SELECT * FROM clients ORDER BY id DESC");
 /* DELETE */
 if(isset($_GET['delete'])){
   $id = (int)$_GET['delete'];
-  mysqli_query($conn, "DELETE FROM clients WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM clients WHERE id=$id")){
+    $_SESSION['success'] = "Client deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete client.";
+  }
   header("Location: manage-clients");
   exit();
 }
@@ -20,6 +24,8 @@ if(isset($_GET['delete'])){
 
 <div class="admin-content">
   <h2>Manage Clients</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
     <table class="admin-table">
     <thead>
@@ -52,5 +58,7 @@ if(isset($_GET['delete'])){
     </table>
 
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

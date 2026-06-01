@@ -8,6 +8,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 require_once 'config/db.php';
 require_once 'includes/mailer.php';
+require_once 'api/countries.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
@@ -22,10 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $address = trim($_POST['address']);
+    $country = trim($_POST['country']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($password)) {
+    if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($country) || empty($password)) {
         die("All fields are required");
     }
 
@@ -47,6 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
     if (strlen($password) < 8) {
         die("Password must be at least 8 characters");
+    }
+
+    if (!in_array($country, $countries)) {
+        die("Invalid country selected");
     }
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -71,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         'email' => $email,
         'phone' => $phone,
         'address' => $address,
+        'country' => $country,
         'password' => $hashedPassword
     ];
 
@@ -132,12 +139,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
             </div>
 
             <div class="form-group">
-                <input type="text" name="phone" id="phone" placeholder="Phone Number">
+                <select name="country" id="country">
+                    <option value="" disabled selected>Select Country</option>
+                    <?php foreach ($countries as $country): ?>
+                        <option value="<?= htmlspecialchars($country) ?>">
+                            <?= htmlspecialchars($country) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
                 <input type="text" name="address" id="address" placeholder="Address">
+                <small class="error"></small>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="phone" id="phone" placeholder="Phone Number">
                 <small class="error"></small>
             </div>
 

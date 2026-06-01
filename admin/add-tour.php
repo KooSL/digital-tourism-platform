@@ -22,6 +22,7 @@ if (isset($_POST['submit'])) {
     $duration   = $_POST['duration'];
     $price      = $_POST['price'];
     $price_usd = $_POST['price_usd'];
+    $old_price = $_POST['old_price'];
     $overview   = $_POST['overview'];
     $highlights = $_POST['highlights'];
     $includes   = $_POST['includes'];
@@ -49,17 +50,18 @@ if (isset($_POST['submit'])) {
     /* INSERT TOUR */
     $stmt = $conn->prepare("
         INSERT INTO tours
-        (title, type, duration, price, price_usd, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        "sssddssssssii",
+        "sssdddssssssii",
         $title,
         $type,
         $duration,
         $price,
         $price_usd,
+        $old_price,
         $overview,
         $highlights,
         $includes,
@@ -102,10 +104,13 @@ if (isset($_POST['submit'])) {
             $itStmt->close();
         }
 
+        $_SESSION['success'] = "Tour added successfully.";
         header("Location: manage-tours");
         exit();
     } else {
-        echo "<script>alert('Error adding tour');</script>";
+        $_SESSION['error'] = "Error adding tour.";
+        header("Location: add-tour");
+        exit();
     }
 
     $stmt->close();
@@ -115,6 +120,8 @@ if (isset($_POST['submit'])) {
 
 <div class="admin-content">
     <h2>Add New Tour</h2>
+
+    <?php include 'includes/admin-alert.php'; ?>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form validate-form">
 
@@ -143,6 +150,11 @@ if (isset($_POST['submit'])) {
 
         <div class="form-group">
             <input type="number" step="0.01" name="price_usd" id="price_usd" placeholder="Price in USD (e.g. 799)" data-validate="price">
+            <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+            <input type="number" step="0.01" name="old_price" id="old_price" placeholder="Old Price in NPR (e.g. 100000)" data-validate="price">
             <small class="error"></small>
         </div>
 
@@ -220,5 +232,6 @@ if (isset($_POST['submit'])) {
 <!-- <script src="assets/js/tour-validation.js"></script> -->
 <script src="assets/js/form-validator.js"></script>
 <script src="assets/js/itinerary-validation.js"></script>
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

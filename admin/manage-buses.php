@@ -17,13 +17,20 @@ if(isset($_GET['delete'])){
   //   @unlink("assets/pdf/".$data['pdf_file']);
   // }
 
-  mysqli_query($conn, "DELETE FROM buses WHERE id=$id");
+  if(mysqli_query($conn, "DELETE FROM buses WHERE id=$id")){
+    $_SESSION['success'] = "Bus deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete bus.";
+  }
   header("Location: manage-buses");
+  exit;
 }
 ?>
 
 <div class="admin-content">
   <h2>Manage Buses</h2>
+
+  <?php include 'includes/admin-alert.php'; ?>
 
   <table class="admin-table">
     <thead>
@@ -94,5 +101,7 @@ if(isset($_GET['delete'])){
     </tbody>
   </table>
 </div>
+
+<script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>

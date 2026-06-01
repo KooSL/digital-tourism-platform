@@ -7,6 +7,8 @@
 
   <!-- ADMIN CSS -->
   <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/admin-alert.css">
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- <link rel="icon" href="../assets/favicon/favicon.ico" type="image/x-icon">
