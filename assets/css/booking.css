@@ -1,0 +1,71 @@
+.booking-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  background-color: #f9fbfd;
+}
+
+.booking-form {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.booking-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.booking-btn:hover {
+  background: var(--orange);
+}
+
+.booking-guest-note {
+  text-align: center;
+  background: #f9fafb;
+  border: 1px solid var(--fade-blue);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.booking-guest-note strong {
+  color: var(--orange);
+}
+
+.booking-guest-note .note {
+  margin-bottom: 0px;
+}
+
+.payment-summary {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f9fafb;
+  border: 1px solid var(--fade-blue);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+hr {
+  margin: 8px 0;
+  border: none;
+  border-top: 1px solid var(--fade-blue);
+}
+
+.discount-txt {
+  color: var(--orange);
+  font-weight: 600;
+}
