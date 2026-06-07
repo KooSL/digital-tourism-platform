@@ -138,6 +138,7 @@
   padding: 8px;
   margin: 0 8px 8px;
   border-radius: 6px;
+  font-size: 14px;
 }
 
 .recommend-card a:hover {
@@ -160,4 +161,33 @@
 
 .current-price.price {
   font-size: 18px;
+}
+
+.popular-badge-detail {
+  /* position: absolute;
+  bottom: 20px;
+  right: 20px; */
+  background: #ff9800;
+  color: #fff;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.banner-bottom-info{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  gap: 20px;
+}
+
+#weatherBox {
+  border: 1px solid var(--fade-blue);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 13px;
 }

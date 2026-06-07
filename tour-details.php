@@ -23,6 +23,9 @@ $tour = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 
 $current_tour_id = $tour['id'];
+$latitude = $tour['latitude'];
+$longitude = $tour['longitude'];
+$location_name = $tour['location_name'];
 
 
 // Handle inquiry form submission
@@ -153,9 +156,19 @@ if (!$tour) {
       <h1><?= $tour['title'] ?></h1>
       <p><?= $tour['duration'] ?></p>
 
-      <?php if ($tour['is_popular'] == 1): ?>
-        <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
-      <?php endif; ?>
+      <div class="banner-bottom-info">
+
+          <div id="weatherBox">
+            <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
+          </div>
+
+        <div class="popular-badge-detail-box">
+          <?php if ($tour['is_popular'] == 1): ?>
+            <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
+          <?php endif; ?>
+        </div>
+
+      </div>
 
     </div>
   </div>
@@ -355,10 +368,15 @@ if (!$tour) {
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+
 <script>
   const currentTripId = <?= $current_tour_id ?>;
+  const latitude = <?= $latitude ?>;
+  const longitude = <?= $longitude ?>;
+  const locationName = "<?= addslashes($location_name) ?>";
 </script>
 
+<script src="api/weather.js"></script>
 <script src="assets/js/track-time.js"></script>
 
 <?php include 'includes/footer.php'; ?>
