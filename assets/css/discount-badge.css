@@ -1,0 +1,20 @@
+/* DISCOUNT */
+.discount-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.discount-badge.home {
+  top: 40px;
+  right: 10px;
+}
+
+.discount-badge.trips {
+  position: static;
+}

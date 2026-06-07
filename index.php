@@ -111,6 +111,15 @@ if (isset($_GET['i'])) {
                   </span>
                 <?php endif; ?>
 
+                <!-- DISCOUNT BADGE -->
+                <?php if (!empty($tour['old_price'])):
+                  $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
+                ?>
+                  <span class="discount-badge home">
+                    <?= $discount ?>% OFF
+                  </span>
+                <?php endif; ?>
+
                 <img
                   src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>"
                   alt="<?= htmlspecialchars($tour['title']); ?>">
@@ -118,7 +127,15 @@ if (isset($_GET['i'])) {
 
               <div class="tour-info">
                 <h3><?= htmlspecialchars($tour['title']); ?></h3>
-                <p>NPR <?= htmlspecialchars($tour['price']); ?> | USD $<?= htmlspecialchars($tour['price_usd']); ?></p>
+
+                <!-- <p>NPR <?= htmlspecialchars($tour['price']); ?> | USD $<?= htmlspecialchars($tour['price_usd']); ?></p> -->
+
+                <p class="current-price price">
+                  NPR <?= htmlspecialchars($tour['price']); ?>
+                  <span>| USD $<?= htmlspecialchars($tour['price_usd']); ?> PP</span>
+                </p>
+
+
               </div>
 
               <div class="tour-card-btn">

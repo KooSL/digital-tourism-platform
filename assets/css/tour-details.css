@@ -29,18 +29,6 @@
   color: #666;
 }
 
-/* DISCOUNT */
-.discount-badge {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: red;
-  color: #fff;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 20px;
-}
-
 /* FEATURES */
 .price-features {
   margin: 12px 0;
@@ -154,4 +142,22 @@
 
 .recommend-card a:hover {
   background: var(--orange);
+}
+
+.current-price.recommend-price {
+  font-size: 16px;
+}
+
+.current-price.recommend-price span {
+  font-size: 12px;
+}
+
+.recommend-info p{
+  font-size: 13px;
+  color: #777;
+  padding: 0 8px 8px;
+}
+
+.current-price.price {
+  font-size: 18px;
 }

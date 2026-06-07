@@ -335,7 +335,14 @@ if (!$tour) {
 
         <h4><?= $row['title'] ?></h4>
 
-        <p>NPR <?= $row['price'] ?></p>
+        <div class="recommend-info">
+          <p><i class="fa-solid fa-clock"></i> <?= $row['duration'] ?></p>
+        </div>
+
+        <p class="current-price recommend-price">
+          NPR <?= $row['price'] ?>
+          <span>| USD $<?= $row['price_usd'] ?> PP</span>
+        </p>
 
         <a href="tour-details?id=<?= $row['id'] ?>">View</a>
       </div>
@@ -349,7 +356,7 @@ if (!$tour) {
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
 <script>
-    const currentTripId = <?= $current_tour_id ?>;
+  const currentTripId = <?= $current_tour_id ?>;
 </script>
 
 <script src="assets/js/track-time.js"></script>

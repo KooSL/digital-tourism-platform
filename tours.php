@@ -169,11 +169,21 @@ $result = $stmt->get_result();
                   <i class="fa-solid fa-star"></i> Latest
                 </span>
               <?php endif; ?>
+
+              <!-- DISCOUNT BADGE -->
+              <?php if (!empty($row['old_price'])):
+                $discount = round((($row['old_price'] - $row['price']) / $row['old_price']) * 100);
+              ?>
+                <span class="discount-badge trips">
+                  <?= $discount ?>% OFF
+                </span>
+              <?php endif; ?>
+
             </div>
 
 
             <h3><?= $row['title'] ?></h3>
-            <p class="duration"><?= $row['duration'] ?></p>
+            <p class="duration"><i class="fa-solid fa-clock"></i> <?= $row['duration'] ?></p>
             <?php if ($row['type'] === 'domestic') : ?>
               <p class="desc">
                 Experience the best of Nepal with this carefully designed tour package.
@@ -184,8 +194,13 @@ $result = $stmt->get_result();
               </p>
             <?php endif; ?>
 
+            <!-- <span class="price">From: <span class="price-num"> NPR <?= $row['price'] ?> | USD $<?= $row['price_usd'] ?></span></span> -->
 
-            <span class="price">From: <span class="price-num"> NPR <?= $row['price'] ?> | USD $<?= $row['price_usd'] ?></span></span>
+            <p class="current-price price">
+              <span class="from">From:</span>
+              NPR <?= $row['price'] ?>
+              <span>| USD $<?= $row['price_usd'] ?> PP</span>
+            </p>
 
             <a href="tour-details?id=<?= $row['id'] ?>" class="btn">
               View Details
