@@ -103,6 +103,20 @@ function renderList($text)
 //   $stmt->execute();
 // }
 
+if (isset($_GET['rec']) && isset($_SESSION['user_id'])) {
+
+  $uid = $_SESSION['user_id'];
+  $pid = $tour['id'];
+
+  mysqli_query($conn, "
+        INSERT INTO recmnd_clicks
+        (user_id, package_id, total_clicks)
+        VALUES
+        ($uid,$pid, 1)
+        ON DUPLICATE KEY UPDATE total_clicks = total_clicks + 1;
+    ");
+}
+
 $recommended = getRecommendations($conn, $tour['id']);
 
 ?>
@@ -158,9 +172,9 @@ if (!$tour) {
 
       <div class="banner-bottom-info">
 
-          <div id="weatherBox">
-            <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
-          </div>
+        <div id="weatherBox">
+          <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
+        </div>
 
         <div class="popular-badge-detail-box">
           <?php if ($tour['is_popular'] == 1): ?>
@@ -286,6 +300,13 @@ if (!$tour) {
     </div>
 
 
+    <div class="map-box sidebar-map">
+      <h3>Trip Location</h3>
+
+      <div id="map" style="height:300px;"></div>
+    </div>
+
+
     <!-- <div class="download-box sidebar-download">
       <h3>Book Package</h3>
       <p>Secure your spot on this amazing trip!</p>
@@ -331,6 +352,7 @@ if (!$tour) {
       </form>
 
     </div>
+
   </div>
 
 </section>
@@ -357,7 +379,8 @@ if (!$tour) {
           <span>| USD $<?= $row['price_usd'] ?> PP</span>
         </p>
 
-        <a href="tour-details?id=<?= $row['id'] ?>">View</a>
+        <!-- <a href="tour-details?id=<?= $row['id'] ?>">View</a> -->
+        <a href="tour-details?id=<?= $row['id'] ?>&rec=1">View</a>
       </div>
 
     <?php endwhile; ?>
@@ -368,6 +391,7 @@ if (!$tour) {
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
   const currentTripId = <?= $current_tour_id ?>;
@@ -376,6 +400,7 @@ if (!$tour) {
   const locationName = "<?= addslashes($location_name) ?>";
 </script>
 
+<script src="api/tripMap.js"></script>
 <script src="api/weather.js"></script>
 <script src="assets/js/track-time.js"></script>
 

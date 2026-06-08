@@ -434,21 +434,6 @@ table td {
   font-size: 14px;
 }
 
-.login-box button {
-  width: 100%;
-  padding: 10px;
-  background: #006db6;
-  border: none;
-  color: #fff;
-  /* font-weight: bold; */
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.login-box button:hover {
-  background: #ffa630;
-}
-
 .error {
   color: red;
   text-align: center;

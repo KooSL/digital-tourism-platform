@@ -73,6 +73,7 @@ a {
   padding: 12px 18px;
   border-radius: 6px;
   display: inline-block;
+  font-size: 14px;
 }
 
 .btn-primary:hover {
@@ -1001,6 +1002,7 @@ a {
   padding: 10px 16px;
   border-radius: 6px;
   display: inline-block;
+  font-size: 14px;
 }
 
 .tour-card-btn a:hover {
@@ -1039,6 +1041,7 @@ a {
   padding: 12px 18px;
   border-radius: 6px;
   display: inline-block;
+  font-size: 14px;
 }
 
 .btn-primary-em:hover {
@@ -1165,6 +1168,7 @@ a {
   padding: 12px 18px;
   border-radius: 6px;
   color: white;
+  font-size: 14px;
 }
 
 .btn-primary-flight:hover {
@@ -1855,18 +1859,6 @@ a {
   text-align: center;
 }
 
-.popular-badge-detail {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: #ff9800;
-  color: #fff;
-  padding: 6px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 4px;
-}
-
 .tour-layout {
   display: grid;
   grid-template-columns: 2.5fr 1fr;
@@ -2008,6 +2000,7 @@ a {
   font-weight: 500;
   border: none;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .download-btn:hover,
@@ -2205,6 +2198,7 @@ a {
   color: #fff;
   text-decoration: none;
   border-radius: 6px;
+  font-size: 14px;
 }
 
 .btn:hover {
@@ -2588,6 +2582,7 @@ a {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .contact-form-box button:hover {
@@ -3217,6 +3212,7 @@ a {
   padding: 12px 18px;
   border-radius: 6px;
   margin-top: 10px;
+  font-size: 14px;
 }
 
 .btn-primary-faq:hover {

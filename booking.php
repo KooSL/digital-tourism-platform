@@ -19,6 +19,10 @@ $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 
+$latitude = $tour['latitude'];
+$longitude = $tour['longitude'];
+$location_name = $tour['location_name'];
+
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
 
@@ -134,39 +138,51 @@ if (!$tour) {
 
 <!-- BANNER -->
 <section class="tour-banner"
-    style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
+  style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
 
-    <div class="overlay">
-        <div class="container">
+  <div class="overlay">
+    <div class="container">
 
-            <?php if (isset($_GET['success']) && $_GET['success'] === 'sent'): ?>
-                <div class="success-box" id="successBox">
-                    <strong>Success!</strong>
-                    <?php
-                    if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (isset($_GET['error'])): ?>
-                <div class="error-box package" id="errorBox">
-                    <strong>Error!</strong>
-                    <?php
-                    if ($_GET['error'] === 'required') echo "Please fill in all required fields.";
-
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <h1><?= $tour['title'] ?></h1>
-            <p><?= $tour['duration'] ?></p>
-
-            <?php if ($tour['is_popular'] == 1): ?>
-                <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
-            <?php endif; ?>
-
+      <?php if (isset($_GET['success'])): ?>
+        <div class="success-box" id="successBox">
+          <strong>Success!</strong>
+          <?php
+          if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
+          if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
+          if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
+          ?>
         </div>
+      <?php endif; ?>
+
+      <?php if (isset($_GET['error'])): ?>
+        <div class="error-box package" id="errorBox">
+          <strong>Error!</strong>
+          <?php
+          if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
+          if ($_GET['error'] === 'booking_failed') echo "Booking failed. Please try again.";
+          ?>
+        </div>
+      <?php endif; ?>
+
+      <h1><?= $tour['title'] ?></h1>
+      <p><?= $tour['duration'] ?></p>
+
+      <div class="banner-bottom-info">
+
+          <div id="weatherBox">
+            <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
+          </div>
+
+        <div class="popular-badge-detail-box">
+          <?php if ($tour['is_popular'] == 1): ?>
+            <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
+          <?php endif; ?>
+        </div>
+
+      </div>
+
     </div>
+  </div>
 </section>
 
 <section class="page-banner">
@@ -255,6 +271,14 @@ if (!$tour) {
 <script>
     const pricePerPerson = <?= $tour['price']; ?>;
 </script>
+
+<script>
+  const latitude = <?= $latitude ?>;
+  const longitude = <?= $longitude ?>;
+  const locationName = "<?= addslashes($location_name) ?>";
+</script>
+
+<script src="api/weather.js"></script>
 
 <script src="assets/js/tripCost-calc.js"></script>
 
