@@ -73,3 +73,39 @@
 .mt-20 {
   margin-top: 20px;
 }
+
+.password-group{
+    position: relative;
+}
+
+.password-group input{
+    padding-right: 45px;
+}
+
+.toggle-password{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    color: #888;
+}
+
+.toggle-password:hover{
+    color: var(--orange);
+}
+
+small.error{
+    display: block;
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea{
+    border-color: #dc3545;
+}
