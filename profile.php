@@ -189,18 +189,27 @@ if (isset($_POST['change_password'])) {
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-            <div class="form-group">
+            <div class="form-group password-group">
                 <input type="password" name="current_password" placeholder="Current Password">
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <small class="error"></small>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-group">
                 <input type="password" name="new_password" id="password" placeholder="New Password">
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <small class="error"></small>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-group">
                 <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password">
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <small class="error"></small>
             </div>
 
@@ -215,5 +224,6 @@ if (isset($_POST['change_password'])) {
 
 <script src="assets/js/auth-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+<script src="assets/js/toggle-password.js"></script>
 
 <?php include 'includes/footer.php'; ?>

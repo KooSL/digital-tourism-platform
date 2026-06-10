@@ -160,13 +160,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
                 <small class="error"></small>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-group">
                 <input type="password" name="password" id="password" placeholder="Password">
+
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
                 <small class="error"></small>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-group">
                 <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password">
+
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
                 <small class="error"></small>
             </div>
 
@@ -182,5 +192,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
 <script src="assets/js/auth-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+<script src="assets/js/toggle-password.js"></script>
 
 <?php include 'includes/footer.php'; ?>

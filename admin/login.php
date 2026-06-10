@@ -90,11 +90,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
       <input type="text" name="username" placeholder="Username" required>
-      <input type="password" name="password" placeholder="Password" required>
-      <button name="login">Login</button>
+
+      <div class="password-group">
+        <input type="password" name="password" placeholder="Password" required>
+
+        <button type="button" class="toggle-password">
+          <i class="fa-solid fa-eye"></i>
+        </button>
+
+      </div>
+
+      <!-- <button name="login">Login</button> -->
+      <button type="submit" name="login" class="auth-btn">Login</button>
     </form>
 
   </div>
+
+<script src="../assets/js/toggle-password.js"></script>
 
 </body>
 
