@@ -4,6 +4,19 @@ include 'auth.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 
+$limit = 10;
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+// Total records
+$totalResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM flights");
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+
+$totalPages = ceil($totalRows / $limit);
+
 
 // DELETE TOUR
 if (isset($_GET['delete'])) {
@@ -50,8 +63,14 @@ if (isset($_GET['delete'])) {
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM flights ORDER BY id DESC");
+      $i = $offset + 1;
+
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM flights
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
       while ($row = mysqli_fetch_assoc($result)) {
       ?>
         <tr>
@@ -95,6 +114,7 @@ if (isset($_GET['delete'])) {
       <?php } ?>
     </tbody>
   </table>
+  <?php include 'includes/admin-pagination.php'; ?>
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

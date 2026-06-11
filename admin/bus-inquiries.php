@@ -5,6 +5,22 @@ include 'includes/header.php';
 include 'includes/sidebar.php';
 include '../config/db.php';
 
+$limit = 10;
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+// Total records
+$totalResult = mysqli_query(
+    $conn,
+    "SELECT COUNT(*) AS total FROM bus_inquiries"
+);
+
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+$totalPages = ceil($totalRows / $limit);
+
 
 // DELETE INQUIRYs
 if (isset($_GET['delete'])) {
@@ -43,8 +59,17 @@ if (isset($_GET['delete'])) {
 
         <tbody>
             <?php
-            $i = 1;
-            $result = mysqli_query($conn, "SELECT * FROM bus_inquiries ORDER BY id DESC");
+            $i = $offset + 1;
+
+            $result = mysqli_query(
+                $conn,
+                "SELECT bi.*, b.bus_name, b.bus_number,
+            b.from_location, b.to_location
+     FROM bus_inquiries bi
+     LEFT JOIN buses b ON bi.bus_id = b.id
+     ORDER BY bi.id DESC
+     LIMIT $limit OFFSET $offset"
+            );
             while ($row = mysqli_fetch_assoc($result)) {
             ?>
                 <tr>
@@ -79,6 +104,9 @@ if (isset($_GET['delete'])) {
             <?php } ?>
         </tbody>
     </table>
+
+    <?php include 'includes/admin-pagination.php'; ?>
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

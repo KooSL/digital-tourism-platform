@@ -4,29 +4,40 @@ include 'auth.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 
-$id = $_GET['id'];
-$slug = $_GET['slug'];
+$albumId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$slug = $_GET['slug'] ?? '';
+
+$limit = 10;
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+// Total photos in this album
+$totalResult = mysqli_query(
+  $conn,
+  "SELECT COUNT(*) AS total
+     FROM gallery_photos
+     WHERE album_id = $albumId"
+);
+
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+$totalPages = ceil($totalRows / $limit);
 
 // DELETE TOUR
-if(isset($_GET['delete'])){
-  $id = $_GET['delete'];
+if (isset($_GET['delete'])) {
+  $photoId = (int)$_GET['delete'];
 
-  // $query = mysqli_query($conn, "SELECT image, pdf FROM tours WHERE id=$id");
-  // $data = mysqli_fetch_assoc($query);
-
-  // if($data){
-  //   @unlink("assets/images/".$data['banner_image']);
-  //   @unlink("assets/pdf/".$data['pdf_file']);
-  // }
-
-  if(mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$id")){
+  if (mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$photoId")) {
     $_SESSION['success'] = "Photo deleted successfully.";
   } else {
     $_SESSION['error'] = "Failed to delete photo.";
   }
-  header("Location: manage-photos?id=" . $id . "&slug=" . $slug);
+  header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug));
   exit;
 }
+
 ?>
 
 <div class="admin-content">
@@ -52,36 +63,55 @@ if(isset($_GET['delete'])){
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM gallery_photos WHERE album_id = " . $_GET['id'] . " ORDER BY id DESC");
-      while($row = mysqli_fetch_assoc($result)){
-      ?>
-      <tr>
-        <td><?= $i++ ?></td>
-        <td><?= $row['created_at'] ?></td>
-        <!-- <td><?= $row['album_id'] ?></td> -->
+      $i = $offset + 1;
 
-        <?php 
-        $slug = $_GET['slug'];
-        ?>
-        <td>
-          <img src="uploads/gallery/<?= $slug ?>/<?= $row['image'] ?>" height="50">
-        </td>
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM gallery_photos
+     WHERE album_id = $albumId
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
+      while ($row = mysqli_fetch_assoc($result)) {
+      ?>
+        <tr>
+          <td><?= $i++ ?></td>
+          <td><?= $row['created_at'] ?></td>
+          <!-- <td><?= $row['album_id'] ?></td> -->
+
+          <?php
+          $slug = $_GET['slug'];
+          ?>
+          <td>
+            <img src="uploads/gallery/<?= $slug ?>/<?= $row['image'] ?>" height="50">
+          </td>
 
           </td>
-        <td class="action-col-flight">
-          <!-- <a href="edit-flight.php?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
-          <a href="?delete=<?= $row['id'] ?>"
-            onclick="return confirm('Delete this Photo?')"
-            class="btn-delete">
-            Delete
-          </a>
-        </td>
+          <td class="action-col-flight">
+            <!-- <a href="edit-flight.php?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
+            <a href="?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>"
+              onclick="return confirm('Delete this Photo?')"
+              class="btn-delete">
+              Delete
+            </a>
+          </td>
 
-      </tr>
+        </tr>
       <?php } ?>
     </tbody>
   </table>
+
+  <div class="pagination">
+
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+      <a href="?id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>&page=<?= $p ?>"
+        class="page-btn <?= $p == $page ? 'active' : '' ?>">
+        <?= $p ?>
+      </a>
+    <?php endfor; ?>
+
+  </div>
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

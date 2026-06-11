@@ -184,9 +184,10 @@ if (isset($_POST['update'])) {
             <small class="error"></small>
         </div>
 
+        <label>Travel Date</label>
         <div class="form-group">
             <input type="date" name="travel_date"
-                value="<?= htmlspecialchars($data['travel_date']) ?>" data-validate="date">
+                value="<?= htmlspecialchars($data['travel_date']) ?>" data-validate="date" min="<?= date('Y-m-d') ?>">
             <small class="error"></small>
         </div>
 

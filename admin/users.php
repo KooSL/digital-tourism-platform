@@ -5,10 +5,26 @@ include 'includes/header.php';
 include 'includes/sidebar.php';
 include '../config/db.php';
 
+$limit = 10;
 
-if(isset($_GET['delete'])){
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+// Total users
+$totalResult = mysqli_query(
+  $conn,
+  "SELECT COUNT(*) AS total FROM users"
+);
+
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+$totalPages = ceil($totalRows / $limit);
+
+
+if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
-  if(mysqli_query($conn, "DELETE FROM users WHERE id=$id")){
+  if (mysqli_query($conn, "DELETE FROM users WHERE id=$id")) {
     $_SESSION['success'] = "User deleted successfully.";
   } else {
     $_SESSION['error'] = "Failed to delete user.";
@@ -31,35 +47,44 @@ if(isset($_GET['delete'])){
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
-        <th>Password</th>
+        <th>Password Status</th>
         <th>Action</th>
       </tr>
     </thead>
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
-      while($row = mysqli_fetch_assoc($result)){
+      $i = $offset + 1;
+
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM users
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
+      while ($row = mysqli_fetch_assoc($result)) {
       ?>
-      <tr>
-        <td><?= $i++ ?></td>
-        <td><?= htmlspecialchars($row['created_at']) ?></td>
-        <td><?= htmlspecialchars($row['name']) ?></td>
-        <td><?= htmlspecialchars($row['email']) ?></td>
-        <td><?= htmlspecialchars($row['phone']) ?></td>
-        <td><?= htmlspecialchars($row['password']) ?></td>
-        <td>
-          <a href="?delete=<?= $row['id'] ?>"
-             class="btn-delete"
-             onclick="return confirm('Delete this user?')">
-            Delete
-          </a>
-        </td>
-      </tr>
+        <tr>
+          <td><?= $i++ ?></td>
+          <td><?= htmlspecialchars($row['created_at']) ?></td>
+          <td><?= htmlspecialchars($row['name']) ?></td>
+          <td><?= htmlspecialchars($row['email']) ?></td>
+          <td><?= htmlspecialchars($row['phone']) ?></td>
+          <td><span style="color:green;">Encrypted</span></td>
+          <td>
+            <a href="?delete=<?= $row['id'] ?>"
+              class="btn-delete"
+              onclick="return confirm('Delete this user?')">
+              Delete
+            </a>
+          </td>
+        </tr>
       <?php } ?>
     </tbody>
   </table>
+
+  <?php include 'includes/admin-pagination.php'; ?>
+  
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

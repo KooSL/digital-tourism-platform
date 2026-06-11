@@ -4,10 +4,26 @@ include 'auth.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 
+$limit = 1;
 
-if(isset($_GET['delete'])){
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+// Total FAQs
+$totalResult = mysqli_query(
+  $conn,
+  "SELECT COUNT(*) AS total FROM faqs"
+);
+
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+$totalPages = ceil($totalRows / $limit);
+
+
+if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
-  if(mysqli_query($conn, "DELETE FROM faqs WHERE id=$id")){
+  if (mysqli_query($conn, "DELETE FROM faqs WHERE id=$id")) {
     $_SESSION['success'] = "FAQ deleted successfully.";
   } else {
     $_SESSION['error'] = "Failed to delete FAQ.";
@@ -38,46 +54,55 @@ if(isset($_GET['delete'])){
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM faqs ORDER BY id DESC");
-      while($row = mysqli_fetch_assoc($result)){
+      $i = $offset + 1;
+
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM faqs
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
+      while ($row = mysqli_fetch_assoc($result)) {
       ?>
-      <tr>
-        <td><?= $i++ ?></td>
-        <td><?= $row['created_at'] ?></td>
-        <td><?= $row['question'] ?></td>
-        <td>
-          <?= implode(' ', array_slice(explode(' ', $row['answer']), 0, 5)); ?>...
-        </td>
-        <?php
-          if($row['is_featured'] == 1){
+        <tr>
+          <td><?= $i++ ?></td>
+          <td><?= $row['created_at'] ?></td>
+          <td><?= $row['question'] ?></td>
+          <td>
+            <?= implode(' ', array_slice(explode(' ', $row['answer']), 0, 5)); ?>...
+          </td>
+          <?php
+          if ($row['is_featured'] == 1) {
             echo '<td class="status-col published">Yes</td>';
           } else {
             echo '<td class="status-col draft">No</td>';
           }
-        ?>
-        
-        <?php
-          if($row['status'] == 1){
+          ?>
+
+          <?php
+          if ($row['status'] == 1) {
             echo '<td class="status-col published">Active</td>';
           } else {
             echo '<td class="status-col draft">Inactive</td>';
           }
-        ?>
+          ?>
 
-        <td class="action-col-flight">
-          <a href="edit-faq?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-          <a href="?delete=<?= $row['id'] ?>"
-            onclick="return confirm('Delete this FAQ?')"
-            class="btn-delete">
-            Delete
-          </a>
-        </td>
+          <td class="action-col-flight">
+            <a href="edit-faq?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
+            <a href="?delete=<?= $row['id'] ?>"
+              onclick="return confirm('Delete this FAQ?')"
+              class="btn-delete">
+              Delete
+            </a>
+          </td>
 
-      </tr>
+        </tr>
       <?php } ?>
     </tbody>
   </table>
+
+  <?php include 'includes/admin-pagination.php'; ?>
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

@@ -107,9 +107,10 @@ if (isset($_POST['submit'])) {
             <small class="error"></small>
         </div>
 
+        <label>Travel Date</label>
         <div class="form-group">
             <input type="date" name="travel_date" id="travel_date" placeholder="Travel Date"
-                data-validate="date">
+                data-validate="date" min="<?= date('Y-m-d') ?>">
             <small class="error"></small>
         </div>
 

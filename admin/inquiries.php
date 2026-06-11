@@ -5,8 +5,18 @@ include 'includes/header.php';
 include 'includes/sidebar.php';
 include '../config/db.php';
 
+$limit = 10;
 
-// DELETE INQUIRY
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+$totalResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM inquiries");
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+
+$totalPages = ceil($totalRows / $limit);
+
 if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
   if (mysqli_query($conn, "DELETE FROM inquiries WHERE id=$id")) {
@@ -40,8 +50,16 @@ if (isset($_GET['delete'])) {
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM inquiries ORDER BY id DESC");
+
+      $i = $offset + 1;
+
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM inquiries
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
+
       while ($row = mysqli_fetch_assoc($result)) {
       ?>
         <tr>
@@ -63,6 +81,9 @@ if (isset($_GET['delete'])) {
       <?php } ?>
     </tbody>
   </table>
+
+  <?php include 'includes/admin-pagination.php'; ?>
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

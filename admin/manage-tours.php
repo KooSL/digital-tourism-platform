@@ -4,6 +4,18 @@ include 'auth.php';
 include 'includes/header.php';
 include 'includes/sidebar.php';
 
+$limit = 5;
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1);
+
+$offset = ($page - 1) * $limit;
+
+$totalResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tours");
+$totalRows = mysqli_fetch_assoc($totalResult)['total'];
+
+$totalPages = ceil($totalRows / $limit);
+
 
 // DELETE TOUR
 if (isset($_GET['delete'])) {
@@ -59,8 +71,16 @@ if (isset($_GET['delete'])) {
 
     <tbody>
       <?php
-      $i = 1;
-      $result = mysqli_query($conn, "SELECT * FROM tours ORDER BY id DESC");
+
+      $i = $offset + 1;
+
+      $result = mysqli_query(
+        $conn,
+        "SELECT * FROM tours
+     ORDER BY id DESC
+     LIMIT $limit OFFSET $offset"
+      );
+
       while ($row = mysqli_fetch_assoc($result)) {
         $itRes = mysqli_query(
           $conn,
@@ -147,7 +167,11 @@ if (isset($_GET['delete'])) {
       <?php } ?>
     </tbody>
   </table>
+
+  <?php include 'includes/admin-pagination.php'; ?>
+  
 </div>
+
 
 <script src="assets/js/admin-alert.js"></script>
 <?php include 'includes/footer.php'; ?>
