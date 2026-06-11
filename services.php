@@ -88,7 +88,8 @@
 
     <div class="service-row ">
       <div class="service-image">
-        <img src="assets/images/services/london.jpg" alt="Flight Booking">
+        <!-- <img src="assets/images/services/london.jpg" alt="Flight Booking"> -->
+         <i class="fa-solid fa-plane-departure" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>International Flight Booking</h3>
@@ -100,7 +101,8 @@
 
     <div class="service-row reverse">
       <div class="service-image">
-        <img src="assets/images/services/tours.jpg" alt="Tour Packages">
+        <!-- <img src="assets/images/services/tours.jpg" alt="Tour Packages"> -->
+         <i class="fa-solid fa-earth-americas" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Tour Packages</h3>
@@ -112,7 +114,8 @@
 
     <div class="service-row">
       <div class="service-image">
-        <img src="assets/images/services/trekking.jpg" alt="Himalayan Trekking">
+        <!-- <img src="assets/images/services/trekking.jpg" alt="Himalayan Trekking"> -->
+         <i class="fa-solid fa-person-hiking" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Trek Packages</h3>
@@ -124,7 +127,8 @@
 
     <div class="service-row reverse">
       <div class="service-image">
-        <img src="assets/images/services/visa.jpg" alt="Visa Services">
+        <!-- <img src="assets/images/services/visa.jpg" alt="Visa Services"> -->
+         <i class="fa-solid fa-passport" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Visa Services</h3>
@@ -136,7 +140,8 @@
 
     <div class="service-row">
       <div class="service-image">
-        <img src="assets/images/services/bus.jpg" alt="Bus Ticketing">
+        <!-- <img src="assets/images/services/bus.jpg" alt="Bus Ticketing"> -->
+         <i class="fa-solid fa-bus-side" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Bus Ticketing</h3>
@@ -148,7 +153,8 @@
 
     <div class="service-row reverse">
       <div class="service-image">
-        <img src="assets/images/services/camping.jpg" alt="Adventure Activities">
+        <!-- <img src="assets/images/services/camping.jpg" alt="Adventure Activities"> -->
+         <i class="fa-solid fa-house-fire" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Camping & Equipments</h3>
@@ -160,7 +166,8 @@
 
     <div class="service-row ">
       <div class="service-image">
-        <img src="assets/images/services/adventure.jpg" alt="Adventure Activities">
+        <!-- <img src="assets/images/services/adventure.jpg" alt="Adventure Activities"> -->
+         <i class="fa-solid fa-mountain" style="color: #006db6;"></i>
       </div>
       <div class="service-content">
         <h3>Adventure Activities</h3>
@@ -172,7 +179,8 @@
 
     <div class="service-row reverse">
       <div class="service-image">
-        <img src="assets/images/services/wildlife.jpg" alt="Adventure Activities">
+        <!-- <img src="assets/images/services/wildlife.jpg" alt="Adventure Activities"> -->
+         <i class="fa-solid fa-paw" style="color: #006db6;"></i>
       </div>
       <div class="service-content wildlife">
         <h3>Wildlife Activities</h3>

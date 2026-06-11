@@ -190,14 +190,16 @@ if (isset($_POST['update'])) {
             <small class="error"></small>
         </div>
 
+        <label>Departure Time</label>
         <div class="form-group">
-            <input type="text" name="departure_time"
+            <input type="time" name="departure_time"
                 value="<?= htmlspecialchars($data['departure_time']) ?>" data-validate="time">
             <small class="error"></small>
         </div>
 
+        <label>Arrival Time</label>
         <div class="form-group">
-            <input type="text" name="arrival_time"
+            <input type="time" name="arrival_time"
                 value="<?= htmlspecialchars($data['arrival_time']) ?>" data-validate="time">
             <small class="error"></small>
         </div>

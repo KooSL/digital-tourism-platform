@@ -9,7 +9,7 @@ input.addEventListener('keyup', () => {
     return;
   }
 
-  fetch(`search-tours?q=${encodeURIComponent(query)}`)
+  fetch(`api/search-tours?q=${encodeURIComponent(query)}`)
     .then(res => res.json())
     .then(data => {
       resultsBox.innerHTML = '';

@@ -44,7 +44,7 @@
 
           <input type="hidden" name="q" value="<?= $_GET['q'] ?? '' ?>">
 
-          <div class="filter-group">
+          <!-- <div class="filter-group">
             <select name="type">
               <option value="">All Types</option>
               <option value="domestic">Domestic</option>
@@ -54,11 +54,29 @@
 
           <div class="filter-group">
             <input type="number" name="price" placeholder="Max Price">
-          </div>
+          </div> -->
 
           <div class="filter-group small">
-            <label><input type="checkbox" name="popular"> Popular</label>
-            <label><input type="checkbox" name="latest"> Latest</label>
+
+            <label>
+              <input type="checkbox" name="group_fare"
+                <?= isset($_GET['group_fare']) ? 'checked' : '' ?>>
+              Group Fare
+            </label>
+
+            <label>
+              <input type="checkbox" name="popular"
+                <?= isset($_GET['popular']) ? 'checked' : '' ?>>
+              Popular
+            </label>
+
+            <label>
+              <input type="checkbox" name="latest"
+                <?= isset($_GET['latest']) ? 'checked' : '' ?>>
+              Latest
+            </label>
+
+
           </div>
 
           <button type="submit" class="apply-btn">Apply</button>
@@ -83,14 +101,70 @@
     <div class="flight-grid">
 
       <?php
-      $query = mysqli_query(
-        $conn,
-        "SELECT * FROM flights WHERE status = 1 ORDER BY id DESC"
-      );
+      $sql = "SELECT * FROM flights WHERE status = 1";
+      $params = [];
+      $types = "";
+
+      // Search
+      if (!empty($_GET['q'])) {
+        $search = "%" . trim($_GET['q']) . "%";
+
+        $sql .= " AND (
+          from_city LIKE ?
+          OR to_city LIKE ?
+          OR description LIKE ?
+      )";
+
+        $params[] = $search;
+        $params[] = $search;
+        $params[] = $search;
+        $types .= "sss";  
+      }
+
+      // Flight Type
+      if (!empty($_GET['type'])) {
+        $sql .= " AND type = ?";
+        $params[] = $_GET['type'];
+        $types .= "s";
+      }
+
+      // Max Price
+      if (!empty($_GET['price'])) {
+        $sql .= " AND price <= ?";
+        $params[] = (float)$_GET['price'];
+        $types .= "d";
+      }
+
+      // Popular Flights
+      if (isset($_GET['popular'])) {
+        $sql .= " AND is_group_fare = 1";
+      }
+
+      // Latest Flights
+      if (isset($_GET['latest'])) {
+        $sql .= " AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+      }
+
+      // Group Fare
+      if (isset($_GET['group_fare'])) {
+        $sql .= " AND is_group_fare = 1";
+      }
+
+      $sql .= " ORDER BY id DESC";
+
+      $stmt = $conn->prepare($sql);
+
+      if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+      }
+
+      $stmt->execute();
+      $query = $stmt->get_result();
 
       if (mysqli_num_rows($query) > 0) {
         while ($flight = mysqli_fetch_assoc($query)) {
       ?>
+
           <div class="flight-card">
             <div class="flight-card-img">
 

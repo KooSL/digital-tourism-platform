@@ -2668,6 +2668,11 @@ a {
   align-items: center;
   /* gap: 50px; */
   /* margin-bottom: 10px; */
+  margin-bottom: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  padding: 20px;
 }
 
 .service-row.reverse {
@@ -2683,6 +2688,11 @@ a {
 .service-row.reverse .service-image {
   display: flex;
   justify-content: right;
+}
+
+.service-image i {
+  width: 100%;
+  font-size: 60px;
 }
 
 .service-image img {

@@ -1,5 +1,5 @@
 <?php
-include 'config/db.php';
+include '../config/db.php';
 
 if (isset($_GET['q'])) {
   $q = mysqli_real_escape_string($conn, $_GET['q']);

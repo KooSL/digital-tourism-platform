@@ -52,7 +52,6 @@ $photos = mysqli_query($conn, "SELECT * FROM gallery_photos WHERE album_id='{$al
   </div>
 </section>
 
-<!-- LIGHTBOX -->
 <div id="lightbox" class="lightbox">
 
   <div class="lightbox-top">

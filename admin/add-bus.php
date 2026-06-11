@@ -113,14 +113,16 @@ if (isset($_POST['submit'])) {
             <small class="error"></small>
         </div>
 
+        <label>Departure Time</label>
         <div class="form-group">
-            <input type="text" name="departure_time" id="departure_time" placeholder="Departure Time"
+            <input type="time" name="departure_time" id="departure_time" placeholder="Departure Time"
                 data-validate="time">
             <small class="error"></small>
         </div>
 
+        <label>Arrival Time</label>
         <div class="form-group">
-            <input type="text" name="arrival_time" id="arrival_time" placeholder="Arrival Time"
+            <input type="time" name="arrival_time" id="arrival_time" placeholder="Arrival Time"
                 data-validate="time">
             <small class="error"></small>
         </div>

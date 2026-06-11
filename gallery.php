@@ -8,15 +8,6 @@ include 'config/db.php';
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<!-- <section class="page-hero">
-  <div class="overlay">
-    <div class="container">
-      <h1>Gallery</h1>
-      <p>Explore our travel memories</p>
-    </div>
-  </div>
-</section> -->
-
 <section class="page-banner">
   <div class="overlay">
     <h1>Gallery</h1>

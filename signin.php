@@ -112,6 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
                 <small class="error"></small>
             </div>
 
+            <p class="forgot-password">
+                <a href="forgot-password">Forgot Password?</a>
+            </p>
+
             <button type="submit" name="signin" class="auth-btn">Sign In</button>
 
             <p class="auth-switch">
