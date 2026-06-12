@@ -19,6 +19,7 @@ session_start();
       <link rel="stylesheet" href="assets/css/table.css">
       <link rel="stylesheet" href="assets/css/booking.css">
       <link rel="stylesheet" href="assets/css/discount-badge.css">
+      <link rel="stylesheet" href="assets/css/reviews.css">
 
       <link rel="stylesheet"
             href="https://unpkg.com/leaflet/dist/leaflet.css">
