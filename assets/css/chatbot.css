@@ -27,7 +27,7 @@
   right: 20px;
   width: 320px;
   height: 420px;
-  background: #ffffff;
+  background: var(--white);
   border-radius: 12px;
   display: none;
   flex-direction: column;

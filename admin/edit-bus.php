@@ -1,8 +1,6 @@
 <?php
-include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 include '../config/db.php';
+include 'auth.php';
 
 // CSRF token
 if (empty($_SESSION['csrf_token'])) {
@@ -143,6 +141,11 @@ if (isset($_POST['update'])) {
         $error = $upload_error ?: $error;
     }
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 ?>
 
 <div class="admin-content">

@@ -1,8 +1,6 @@
 <?php
 include '../config/db.php';
 include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 
 $limit = 10;
 
@@ -33,6 +31,42 @@ if (isset($_GET['delete'])) {
   header("Location: package-bookings");
   exit;
 }
+
+if (isset($_GET['confirm'])) {
+
+  $id = intval($_GET['confirm']);
+
+  mysqli_query(
+    $conn,
+    "UPDATE package_bookings 
+         SET status = 'confirmed' 
+         WHERE id = $id"
+  );
+
+  $_SESSION['success'] = "Booking Confirmed successfully.";
+  header("Location: package-bookings");
+  exit;
+}
+
+if (isset($_GET['cancel'])) {
+
+  $id = intval($_GET['cancel']);
+
+  mysqli_query(
+    $conn,
+    "UPDATE package_bookings 
+         SET status = 'canceled' 
+         WHERE id = $id"
+  );
+
+  $_SESSION['success'] = "Booking canceled successfully.";
+  header("Location: package-bookings");
+  exit;
+}
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
 ?>
 
 <div class="admin-content">
@@ -76,8 +110,8 @@ if (isset($_GET['delete'])) {
      ORDER BY pb.id DESC
      LIMIT $limit OFFSET $offset"
       );
-      
-      while ($row = mysqli_fetch_assoc($result)) {  
+
+      while ($row = mysqli_fetch_assoc($result)) {
       ?>
         <tr>
           <td><?= $i++ ?></td>
@@ -103,7 +137,27 @@ if (isset($_GET['delete'])) {
                 ?> -->
 
           <td class="action-col">
-            <a href="edit-package-booking?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
+            <!-- <a href="edit-package-booking?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
+            <?php if (in_array($row['status'], ['pending', 'canceled'])) { ?>
+
+              <a href="?confirm=<?= $row['id'] ?>"
+                class="btn-approve"
+                onclick="return confirm('Confirm this booking?')">
+                Confirm
+              </a>
+
+
+            <?php } else { ?>
+
+              <a href="?cancel=<?= $row['id'] ?>"
+                class="btn-reject"
+                onclick="return confirm('Cancel this booking?')">
+                Cancel
+              </a>
+              
+
+            <?php } ?>
+
             <a href="?delete=<?= $row['id'] ?>"
               onclick="return confirm('Delete this package booking?')"
               class="btn-delete">

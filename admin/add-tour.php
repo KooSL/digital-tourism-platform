@@ -1,8 +1,6 @@
 <?php
 include '../config/db.php';
 include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -115,6 +113,11 @@ if (isset($_POST['submit'])) {
 
     $stmt->close();
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 
 ?>
 

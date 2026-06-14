@@ -139,6 +139,20 @@ $result = $stmt->get_result();
     <?php
     if ($result->num_rows > 0):
       while ($row = mysqli_fetch_assoc($result)) {
+
+        $tripId = $row['id'];
+        $avg = mysqli_query(
+          $conn,
+          "SELECT
+          ROUND(AVG(rating),1) AS avg_rating,
+          COUNT(*) AS total_reviews
+          FROM trip_reviews
+          WHERE trip_id = $tripId
+          AND status = 1"
+        );
+
+        $ratingData = mysqli_fetch_assoc($avg);
+
     ?>
         <div class="tour-row">
 
@@ -178,6 +192,11 @@ $result = $stmt->get_result();
                   <?= $discount ?>% OFF
                 </span>
               <?php endif; ?>
+
+              <div class="rating-summary trips">
+                <i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                (<?= $ratingData['total_reviews'] ?> reviews)
+              </div>
 
             </div>
 

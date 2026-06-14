@@ -1,8 +1,6 @@
 <?php
 include '../config/db.php';
 include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 
 $albumId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $slug = $_GET['slug'] ?? '';
@@ -37,6 +35,11 @@ if (isset($_GET['delete'])) {
   header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug));
   exit;
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 
 ?>
 

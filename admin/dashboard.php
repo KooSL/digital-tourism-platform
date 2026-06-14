@@ -122,6 +122,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
     $busInqCount = $conn->query("SELECT COUNT(*) AS total FROM bus_inquiries")->fetch_assoc();
     $pckgbookCount  = $conn->query("SELECT COUNT(*) AS total FROM package_bookings")->fetch_assoc();
     $faqCount = $conn->query("SELECT COUNT(*) AS total FROM faqs")->fetch_assoc();
+    $revCount = $conn->query("SELECT COUNT(*) AS total FROM trip_reviews")->fetch_assoc();
 
     $activeTours = mysqli_fetch_assoc(
       mysqli_query($conn, "SELECT COUNT(*) as total FROM tours WHERE status=1")
@@ -191,8 +192,6 @@ $totalRecmndClicks = mysqli_fetch_assoc(
       <h3><?php echo $albumCount['total']; ?></h3>
     </div>
 
-
-
     <div class="stat-box">
       <p class="stat-title">Total Testimonials</p>
       <h3><?php echo $testCount['total']; ?></h3>
@@ -205,6 +204,11 @@ $totalRecmndClicks = mysqli_fetch_assoc(
     <div class="stat-box">
       <p class="stat-title">Total FAQs</p>
       <h3><?php echo $faqCount['total']; ?></h3>
+    </div>
+
+    <div class="stat-box">
+      <p class="stat-title">Total Trip Reviews</p>
+      <h3><?php echo $revCount['total']; ?></h3>
     </div>
 
     <div class="stat-box">

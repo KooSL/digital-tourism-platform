@@ -18,6 +18,7 @@
   /* border-radius: 10px; */
   overflow: hidden;
   font-size: 14px;
+  text-align: center;
 }
 
 /* HEADER */
@@ -28,7 +29,7 @@
 
 .table-head th {
   padding: 14px;
-  text-align: left;
+  text-align: center;
 }
 
 /* BODY */
@@ -55,6 +56,11 @@
 }
 
 .badge.warning {
+  background: #ffc107;
+  color: #000;
+}
+
+.badge.pending {
   background: #ffc107;
   color: #000;
 }

@@ -1,8 +1,6 @@
 <?php
-include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 include '../config/db.php';
+include 'auth.php';
 
 // Generate CSRF token if not exists
 if (empty($_SESSION['csrf_token'])) {
@@ -145,6 +143,11 @@ if (isset($_POST['update'])) {
     }
   }
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 ?>
 
 <div class="admin-content">

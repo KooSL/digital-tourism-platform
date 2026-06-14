@@ -1,8 +1,6 @@
 <?php
 include '../config/db.php';
 include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 
 $limit = 10;
 
@@ -32,6 +30,10 @@ if (isset($_GET['delete'])) {
   header("Location: manage-testimonials");
   exit();
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
 ?>
 
 <div class="admin-content">
@@ -90,7 +92,7 @@ if (isset($_GET['delete'])) {
   </table>
 
   <?php include 'includes/admin-pagination.php'; ?>
-  
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

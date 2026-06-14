@@ -1,8 +1,6 @@
 <?php
-include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 include '../config/db.php';
+include 'auth.php';
 
 // Generate CSRF token if not exists
 if (empty($_SESSION['csrf_token'])) {
@@ -94,7 +92,7 @@ if (isset($_POST['update'])) {
       // Validate paths to prevent directory traversal
       $oldPath = realpath($oldPath);
       $basePath = realpath("uploads/gallery");
-      
+
       // Ensure paths are within allowed directory
       if ($oldPath !== false && $basePath !== false && strpos($oldPath, $basePath) === 0) {
         if (is_dir($oldPath)) {
@@ -126,15 +124,14 @@ if (isset($_POST['update'])) {
       // Validate file size
       elseif ($fileSize > $maxFileSize) {
         $errors[] = "File size must not exceed 2MB.";
-      }
-      else {
+      } else {
         // Get safe filename
         $newCover = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName);
 
         // Validate destination path
         $newPathReal = realpath("uploads/gallery/" . $newSlug);
         $basePath = realpath("uploads/gallery");
-        
+
         if ($newPathReal === false) {
           $newPathReal = "uploads/gallery/" . $newSlug;
         }
@@ -180,6 +177,11 @@ if (isset($_POST['update'])) {
     }
   }
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 ?>
 
 

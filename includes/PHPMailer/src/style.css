@@ -1,8 +1,8 @@
 :root {
-  --blue: #006db6;
-  --orange: #ffa630;
+  --blue: var(--blue);
+  --orange: var(--orange);
   --white: #ffffff;
-  --gray: #f4f4f4;
+  --gray: var(--gray);
 }
 
 * {
@@ -831,7 +831,7 @@ a {
 }
 
 .search-item:hover {
-  background: #f4f4f4;
+  background: var(--gray);
 }
 
 .btn-primary-vtp {
@@ -1141,7 +1141,7 @@ a {
 }
 
 .flight-info h3 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 8px;
 }
 
@@ -1251,7 +1251,7 @@ a {
 
 .service-card h3 {
   margin-bottom: 10px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .service-card p {
@@ -1261,7 +1261,7 @@ a {
 }
 
 .service-link {
-  color: #ffa630;
+  color: var(--orange);
   font-weight: 600;
   text-decoration: none;
 }
@@ -1293,7 +1293,7 @@ a {
 
 .stat-box h3 {
   font-size: 42px;
-  color: #0077cc;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
@@ -1452,7 +1452,7 @@ a {
 
 /* WHY US */
 .why-us {
-  background: linear-gradient(135deg, #006db6, #004e85);
+  background: linear-gradient(135deg, var(--blue), #004e85);
   padding: 80px 0;
 }
 
@@ -1509,7 +1509,7 @@ a {
 
 .destination-card {
   height: 160px;
-  background: #006DB6;
+  background: var(--blue);
   color: #fff;
   font-size: 22px;
   font-weight: 600;
@@ -1523,7 +1523,7 @@ a {
 
 .destination-card:hover {
   transform: translateY(-8px);
-  background: #FFA630;
+  background: var(--orange);
 } */
 
 /* COMMON MARQUEE STYLE */
@@ -1603,7 +1603,7 @@ a {
 }
 
 .btn-primary:hover {
-  background: #006DB6;
+  background: var(--blue);
 } */
 
 /* FOOTER */
@@ -2115,7 +2115,7 @@ a {
   height: 222px;
   flex-shrink: 0;
   overflow: hidden;
-  background: #f4f4f4;
+  background: var(--gray);
   position: relative;
 }
 
@@ -2159,7 +2159,7 @@ a {
 }
 
 .tour-details h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 5px;
 }
 
@@ -2178,7 +2178,7 @@ a {
   display: block;
   margin: 10px 0;
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
 }
 
 .price-num {
@@ -2262,7 +2262,7 @@ a {
 }
 
 .about-text h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 15px;
 }
 
@@ -2340,13 +2340,13 @@ a {
 }
 
 .founder-content h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
 .founder-name {
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
   margin-bottom: 5px;
 }
 
@@ -2420,7 +2420,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -2454,11 +2454,11 @@ a {
 /* CONTACT SOCIAL ICONS */
 .contact-social h2 {
   margin-bottom: 15px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .contact-social h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 12px;
   font-size: 18px;
 }
@@ -2472,7 +2472,7 @@ a {
 .social-icons a {
   width: 40px;
   height: 40px;
-  background: #006db6;
+  background: var(--blue);
   color: #fff;
   display: flex;
   align-items: center;
@@ -2485,7 +2485,7 @@ a {
 }
 
 .social-icons a:hover {
-  background: #ffa630;
+  background: var(--orange);
   transform: translateY(-3px);
 }
 
@@ -2502,7 +2502,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -2531,7 +2531,7 @@ a {
 }
 
 .map-title {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-top: 25px;
 }
 
@@ -2551,7 +2551,7 @@ a {
 }
 
 .contact-form-box h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 20px;
 }
 
@@ -3705,10 +3705,10 @@ a {
 }
 
 :root {
-  --blue: #006db6;
-  --orange: #ffa630;
+  --blue: var(--blue);
+  --orange: var(--orange);
   --white: #ffffff;
-  --gray: #f4f4f4;
+  --gray: var(--gray);
 }
 
 * {
@@ -4537,7 +4537,7 @@ a {
 }
 
 .search-item:hover {
-  background: #f4f4f4;
+  background: var(--gray);
 }
 
 .btn-primary-vtp {
@@ -4847,7 +4847,7 @@ a {
 }
 
 .flight-info h3 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 8px;
 }
 
@@ -4957,7 +4957,7 @@ a {
 
 .service-card h3 {
   margin-bottom: 10px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .service-card p {
@@ -4967,7 +4967,7 @@ a {
 }
 
 .service-link {
-  color: #ffa630;
+  color: var(--orange);
   font-weight: 600;
   text-decoration: none;
 }
@@ -4999,7 +4999,7 @@ a {
 
 .stat-box h3 {
   font-size: 42px;
-  color: #0077cc;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
@@ -5158,7 +5158,7 @@ a {
 
 /* WHY US */
 .why-us {
-  background: linear-gradient(135deg, #006db6, #004e85);
+  background: linear-gradient(135deg, var(--blue), #004e85);
   padding: 80px 0;
 }
 
@@ -5215,7 +5215,7 @@ a {
 
 .destination-card {
   height: 160px;
-  background: #006DB6;
+  background: var(--blue);
   color: #fff;
   font-size: 22px;
   font-weight: 600;
@@ -5229,7 +5229,7 @@ a {
 
 .destination-card:hover {
   transform: translateY(-8px);
-  background: #FFA630;
+  background: var(--orange);
 } */
 
 /* COMMON MARQUEE STYLE */
@@ -5309,7 +5309,7 @@ a {
 }
 
 .btn-primary:hover {
-  background: #006DB6;
+  background: var(--blue);
 } */
 
 /* FOOTER */
@@ -5821,7 +5821,7 @@ a {
   height: 222px;
   flex-shrink: 0;
   overflow: hidden;
-  background: #f4f4f4;
+  background: var(--gray);
   position: relative;
 }
 
@@ -5865,7 +5865,7 @@ a {
 }
 
 .tour-details h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 5px;
 }
 
@@ -5884,7 +5884,7 @@ a {
   display: block;
   margin: 10px 0;
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
 }
 
 .price-num {
@@ -5968,7 +5968,7 @@ a {
 }
 
 .about-text h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 15px;
 }
 
@@ -6046,13 +6046,13 @@ a {
 }
 
 .founder-content h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
 .founder-name {
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
   margin-bottom: 5px;
 }
 
@@ -6126,7 +6126,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -6160,11 +6160,11 @@ a {
 /* CONTACT SOCIAL ICONS */
 .contact-social h2 {
   margin-bottom: 15px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .contact-social h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 12px;
   font-size: 18px;
 }
@@ -6178,7 +6178,7 @@ a {
 .social-icons a {
   width: 40px;
   height: 40px;
-  background: #006db6;
+  background: var(--blue);
   color: #fff;
   display: flex;
   align-items: center;
@@ -6191,7 +6191,7 @@ a {
 }
 
 .social-icons a:hover {
-  background: #ffa630;
+  background: var(--orange);
   transform: translateY(-3px);
 }
 
@@ -6208,7 +6208,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -6237,7 +6237,7 @@ a {
 }
 
 .map-title {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-top: 25px;
 }
 
@@ -6257,7 +6257,7 @@ a {
 }
 
 .contact-form-box h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 20px;
 }
 
@@ -7411,10 +7411,10 @@ a {
 }
 
 :root {
-  --blue: #006db6;
-  --orange: #ffa630;
+  --blue: var(--blue);
+  --orange: var(--orange);
   --white: #ffffff;
-  --gray: #f4f4f4;
+  --gray: var(--gray);
 }
 
 * {
@@ -8243,7 +8243,7 @@ a {
 }
 
 .search-item:hover {
-  background: #f4f4f4;
+  background: var(--gray);
 }
 
 .btn-primary-vtp {
@@ -8553,7 +8553,7 @@ a {
 }
 
 .flight-info h3 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 8px;
 }
 
@@ -8663,7 +8663,7 @@ a {
 
 .service-card h3 {
   margin-bottom: 10px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .service-card p {
@@ -8673,7 +8673,7 @@ a {
 }
 
 .service-link {
-  color: #ffa630;
+  color: var(--orange);
   font-weight: 600;
   text-decoration: none;
 }
@@ -8705,7 +8705,7 @@ a {
 
 .stat-box h3 {
   font-size: 42px;
-  color: #0077cc;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
@@ -8864,7 +8864,7 @@ a {
 
 /* WHY US */
 .why-us {
-  background: linear-gradient(135deg, #006db6, #004e85);
+  background: linear-gradient(135deg, var(--blue), #004e85);
   padding: 80px 0;
 }
 
@@ -8921,7 +8921,7 @@ a {
 
 .destination-card {
   height: 160px;
-  background: #006DB6;
+  background: var(--blue);
   color: #fff;
   font-size: 22px;
   font-weight: 600;
@@ -8935,7 +8935,7 @@ a {
 
 .destination-card:hover {
   transform: translateY(-8px);
-  background: #FFA630;
+  background: var(--orange);
 } */
 
 /* COMMON MARQUEE STYLE */
@@ -9015,7 +9015,7 @@ a {
 }
 
 .btn-primary:hover {
-  background: #006DB6;
+  background: var(--blue);
 } */
 
 /* FOOTER */
@@ -9527,7 +9527,7 @@ a {
   height: 222px;
   flex-shrink: 0;
   overflow: hidden;
-  background: #f4f4f4;
+  background: var(--gray);
   position: relative;
 }
 
@@ -9571,7 +9571,7 @@ a {
 }
 
 .tour-details h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 5px;
 }
 
@@ -9590,7 +9590,7 @@ a {
   display: block;
   margin: 10px 0;
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
 }
 
 .price-num {
@@ -9674,7 +9674,7 @@ a {
 }
 
 .about-text h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 15px;
 }
 
@@ -9752,13 +9752,13 @@ a {
 }
 
 .founder-content h2 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 10px;
 }
 
 .founder-name {
   font-weight: bold;
-  color: #ffa630;
+  color: var(--orange);
   margin-bottom: 5px;
 }
 
@@ -9832,7 +9832,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -9866,11 +9866,11 @@ a {
 /* CONTACT SOCIAL ICONS */
 .contact-social h2 {
   margin-bottom: 15px;
-  /* color: #006DB6; */
+  /* color: var(--blue); */
 }
 
 .contact-social h3 {
-  color: #006db6;
+  color: var(--blue);
   margin-bottom: 12px;
   font-size: 18px;
 }
@@ -9884,7 +9884,7 @@ a {
 .social-icons a {
   width: 40px;
   height: 40px;
-  background: #006db6;
+  background: var(--blue);
   color: #fff;
   display: flex;
   align-items: center;
@@ -9897,7 +9897,7 @@ a {
 }
 
 .social-icons a:hover {
-  background: #ffa630;
+  background: var(--orange);
   transform: translateY(-3px);
 }
 
@@ -9914,7 +9914,7 @@ a {
 }
 
 .contact-info h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 15px;
 }
 
@@ -9943,7 +9943,7 @@ a {
 }
 
 .map-title {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-top: 25px;
 }
 
@@ -9963,7 +9963,7 @@ a {
 }
 
 .contact-form-box h2 {
-  /* color: #006DB6; */
+  /* color: var(--blue); */
   margin-bottom: 20px;
 }
 
