@@ -119,7 +119,8 @@ $total_pages = ceil($total_result['total'] / $limit);
                             <th>Travel Date</th>
                             <th>Persons</th>
                             <th>Transaction ID</th>
-                            <th>Status</th>
+                            <th>Payment Status</th>
+                            <th>Booking Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -139,6 +140,16 @@ $total_pages = ceil($total_result['total'] / $limit);
                                         <span class="badge success">Paid</span>
                                     <?php else: ?>
                                         <span class="badge pending">Pending</span>
+                                    <?php endif; ?>
+                                </td>
+                                <!-- <td><?php echo htmlspecialchars($row['status']); ?></td> -->
+                                <td>
+                                    <?php if ($row['status'] == 'pending'): ?>
+                                        <span class="badge pending">Pending</span>
+                                    <?php elseif ($row['status'] == 'canceled'):  ?>
+                                        <span class="badge danger">Canceled</span>
+                                    <?php else: ?>
+                                        <span class="badge success">Confirmed</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
