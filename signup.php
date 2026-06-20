@@ -26,6 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
     $country = trim($_POST['country']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
+    $redirect = $_POST['redirect'];
 
     if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($country) || empty($password)) {
         die("All fields are required");
@@ -78,7 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         'phone' => $phone,
         'address' => $address,
         'country' => $country,
-        'password' => $hashedPassword
+        'password' => $hashedPassword,
+        'redirect' => $redirect
     ];
 
     sendOtpMail($email, $otp);
@@ -127,6 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         <form method="POST" id="registerForm" novalidate>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect'] ?? '') ?>">
 
             <div class="form-group">
                 <input type="text" name="name" id="name" placeholder="Full Name">

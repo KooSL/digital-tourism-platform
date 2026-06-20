@@ -53,11 +53,23 @@ if (isset($_POST['verify'])) {
             $_SESSION['user_id'] = $stmt->insert_id;
             $_SESSION['user_name'] = $data['name'];
 
-            // clear temp data
+            // header("Location: index?success=signup");
+            // exit;
+
+            if (!empty($data['redirect'])) {
+
+                $redirect = $data['redirect'];
+
+                unset($data['redirect']);
+
+                header("Location: " . $redirect . "?success=signup");
+            } else {
+
+                header("Location: index?success=signup");
+            }
+
             unset($_SESSION['otp']);
             unset($_SESSION['signup_data']);
-
-            header("Location: index?success=signup");
             exit;
         }
     } else {
