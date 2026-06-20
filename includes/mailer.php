@@ -59,3 +59,17 @@ function sendOtpMail($email, $otp) {
 function sendUserMail($email, $subject, $body) {
     return sendMail($email, $subject, $body);
 }
+
+function sendFPOtpMail($email, $otp) {
+
+    $subject = "Password Reset OTP - Digital Tourism Platform";
+
+    $body = "
+        <h2>Password Reset Request</h2>
+        <p>Your OTP code for password reset is:</p>
+        <h1 style='color:#ff6600;'>$otp</h1>
+        <p>This code will expire in 3 minutes.</p>
+    ";
+
+    return sendMail($email, $subject, $body);
+}

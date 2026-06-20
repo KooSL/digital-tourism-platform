@@ -2173,7 +2173,7 @@ a {
 }
 
 .tour-details h3 {
-  color: var(--blue);
+  /* color: var(--blue); */
   margin-bottom: 5px;
 }
 

@@ -158,11 +158,13 @@ include 'includes/sidebar.php';
 
           <td class="action-col">
             <a href="edit-tour?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-            <a href="?delete=<?= $row['id'] ?>"
-              onclick="return confirm('Delete this tour?')"
+
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this package?')"
               class="btn-delete">
               Delete
             </a>
+
           </td>
 
         </tr>
@@ -177,3 +179,4 @@ include 'includes/sidebar.php';
 
 <script src="assets/js/admin-alert.js"></script>
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

@@ -331,6 +331,7 @@ table td {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
+  border-radius: 6px;
 }
 
 .admin-table th,

@@ -72,9 +72,11 @@ include 'includes/sidebar.php';
           <td><?= $row['status'] ? 'Active' : 'Inactive' ?></td>
           <td>
             <a href="edit-client?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-            <a href="?delete=<?= $row['id'] ?>"
-              onclick="return confirm('Delete this client?')"
-              class="btn-delete">Delete</a>
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this client?')"
+              class="btn-delete">
+              Delete
+            </a>
           </td>
         </tr>
       <?php endwhile; ?>
@@ -88,3 +90,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

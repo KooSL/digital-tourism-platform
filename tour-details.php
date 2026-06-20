@@ -38,6 +38,7 @@ if (isset($_POST['send_inquiry'])) {
     die("CSRF validation failed.");
   }
 
+  $trip_id = mysqli_real_escape_string($conn, $_POST['trip_id']);
   $tour_name = mysqli_real_escape_string($conn, $_POST['tour_name']);
   $name      = mysqli_real_escape_string($conn, $_POST['name']);
   $email     = mysqli_real_escape_string($conn, $_POST['email']);
@@ -45,8 +46,8 @@ if (isset($_POST['send_inquiry'])) {
   $message   = mysqli_real_escape_string($conn, $_POST['message']);
 
   // Insert inquiry using prepared statement
-  $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (tour_name, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
-  mysqli_stmt_bind_param($stmt, "sssss", $tour_name, $name, $email, $phone, $message);
+  $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (trip_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
+  mysqli_stmt_bind_param($stmt, "issss", $trip_id, $name, $email, $phone, $message);
   mysqli_stmt_execute($stmt);
   $success = mysqli_stmt_affected_rows($stmt) > 0;
   mysqli_stmt_close($stmt);
@@ -77,6 +78,44 @@ if (isset($_POST['send_inquiry'])) {
     exit;
   }
 }
+
+if (isset($_POST['submit_review'])) {
+
+  if (
+    !isset($_POST['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+  ) {
+    die("CSRF validation failed.");
+  }
+
+  $trip_id = (int)$_POST['trip_id'];
+  $name = mysqli_real_escape_string($conn, $_POST['name']);
+  $rating = (int)$_POST['rating'];
+  $review = mysqli_real_escape_string($conn, $_POST['review']);
+
+  mysqli_query(
+    $conn,
+    "INSERT INTO trip_reviews
+        (trip_id, name, rating, review)
+        VALUES
+        ($trip_id, '$name', $rating, '$review')"
+  );
+
+  header("Location: tour-details?id=$trip_id&success=review_sent");
+  exit;
+}
+
+$avg = mysqli_query(
+  $conn,
+  "SELECT
+        ROUND(AVG(rating),1) AS avg_rating,
+        COUNT(*) AS total_reviews
+     FROM trip_reviews
+     WHERE trip_id = $id
+     AND status = 1"
+);
+
+$ratingData = mysqli_fetch_assoc($avg);
 
 // Define helper function for rendering lists
 function renderList($text)
@@ -153,6 +192,7 @@ if (!$tour) {
           if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
           if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
           if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
+          if ($_GET['success'] === 'review_sent') echo "Thank you for your review. Your review has been sent successfully.";
           ?>
         </div>
       <?php endif; ?>
@@ -167,8 +207,8 @@ if (!$tour) {
         </div>
       <?php endif; ?>
 
-      <h1><?= $tour['title'] ?></h1>
-      <p><?= $tour['duration'] ?></p>
+      <!-- <h1><?= $tour['title'] ?></h1>
+      <p><?= $tour['duration'] ?></p> -->
 
       <div class="banner-bottom-info">
 
@@ -182,12 +222,26 @@ if (!$tour) {
           <?php endif; ?>
         </div>
 
+        <div class="rating-summary">
+          <a href="#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+          (<?= $ratingData['total_reviews'] ?> reviews)</a>
+        </div>
+
       </div>
 
     </div>
   </div>
 </section>
 
+<section class="container title-content">
+
+  <div class="title-content-box">
+    <h1><?= $tour['title'] ?></h1>
+    <p><?= $tour['duration'] ?></p>
+
+  </div>
+
+</section>
 
 <!-- MAIN CONTENT -->
 <section class="container tour-layout">
@@ -327,6 +381,7 @@ if (!$tour) {
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <input type="hidden" name="tour_name" value="<?= $tour['title']; ?>">
+        <input type="hidden" name="trip_id" value="<?= $tour['id']; ?>">
 
         <div class="form-group">
           <input type="text" name="name" id="name" placeholder="Full Name">
@@ -355,7 +410,109 @@ if (!$tour) {
 
   </div>
 
+  <section id="reviews" class="trip-reviews">
+    <div class="container">
+
+      <div class="review-header">
+        <h3>Ratings & Reviews</h3>
+        <p>Share your experience and help other travelers.</p>
+      </div>
+
+      <form method="POST" class="review-form" id="reviewForm" novalidate>
+
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+        <input type="hidden" name="trip_id" value="<?= $tour['id'] ?>">
+
+        <div class="form-group">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full name"
+            id="reviewName">
+          <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+          <!-- <label>Your Rating</label> -->
+
+          <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5">
+            <label for="star5"><i class="fa-solid fa-star"></i></label>
+
+            <input type="radio" id="star4" name="rating" value="4">
+            <label for="star4"><i class="fa-solid fa-star"></i></label>
+
+            <input type="radio" id="star3" name="rating" value="3">
+            <label for="star3"><i class="fa-solid fa-star"></i></label>
+
+            <input type="radio" id="star2" name="rating" value="2">
+            <label for="star2"><i class="fa-solid fa-star"></i></label>
+
+            <input type="radio" id="star1" name="rating" value="1">
+            <label for="star1"><i class="fa-solid fa-star"></i></label>
+          </div>
+
+          <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+          <textarea
+            id="review"
+            name="review"
+            rows="5"
+            placeholder="Tell us about your experience..."></textarea>
+          <small class="error"></small>
+        </div>
+
+        <?php if (isset($_SESSION['user_id'])) { ?>
+          <button type="submit" name="submit_review">
+            Submit Review
+          </button>
+        <?php } else { ?>
+          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
+            Submit Review
+          </a>
+        <?php } ?>
+
+      </form>
+
+      <?php
+
+      $reviews = mysqli_query(
+        $conn,
+        "SELECT *
+     FROM trip_reviews
+     WHERE trip_id = $id
+     AND status = 1
+     ORDER BY created_at DESC"
+      );
+
+      while ($review = mysqli_fetch_assoc($reviews)):
+      ?>
+
+        <div class="review-card">
+
+          <h4><?= htmlspecialchars($review['name']) ?></h4>
+          <small><?= $review['created_at'] ?></small>
+
+
+          <div class="stars">
+            <?= str_repeat('<i class="fa-solid fa-star"></i>', $review['rating']) ?>
+          </div>
+
+          <p><?= nl2br(htmlspecialchars($review['review'])) ?></p>
+
+        </div>
+
+      <?php endwhile; ?>
+
+    </div>
+  </section>
+
+
+
 </section>
+
 
 <section class="container recommend-section">
 
@@ -390,6 +547,7 @@ if (!$tour) {
 </section>
 
 <script src="assets/js/inq-cnt-validation.js"></script>
+<script src="assets/js/review-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
