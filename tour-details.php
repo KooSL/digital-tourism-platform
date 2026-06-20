@@ -238,7 +238,6 @@ if (!$tour) {
   <div class="title-content-box">
     <h1><?= $tour['title'] ?></h1>
     <p><?= $tour['duration'] ?></p>
-
   </div>
 
 </section>
