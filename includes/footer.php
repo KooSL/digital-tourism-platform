@@ -135,7 +135,7 @@
   <div id="chatMessages"></div>
 
   <div id="chatInputArea">
-    <input type="text" id="userInput" placeholder="Ask about tours, buses..." />
+    <input type="text" id="userInput" placeholder="Ask about trips, buses..." />
     <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
 </div>
