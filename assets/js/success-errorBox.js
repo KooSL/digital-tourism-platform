@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         box.remove();
       }, 500);
-    }, 4000);
+    }, 5000);
 
     if (window.history.replaceState) {
       const url = new URL(window.location);

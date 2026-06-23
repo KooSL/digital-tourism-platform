@@ -126,3 +126,8 @@ small.error {
 .forgot-password a:hover {
   color: var(--orange);
 }
+
+.last-signin{
+  font-size: 14px;
+  margin-bottom: 12px;
+}

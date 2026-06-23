@@ -121,7 +121,7 @@
   </div>
 </footer>
 
-<div id="chatToggle"><i class="fa-solid fa-robot"></i></div>
+<div id="chatToggle"><img src="assets/images/chatbot/icon.png" alt=""></div>
 
 <div id="chatContainer">
   <div id="chatHeader">
@@ -138,6 +138,11 @@
     <input type="text" id="userInput" placeholder="Ask about trips, buses..." />
     <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
+
+  <div class="chatFooter">
+    <p>Guide Dai is a AI Assistant and can make mistakes. Please check responses carefully.</p>
+  </div>
+
 </div>
 
 <script src="assets/js/chatbot.js"></script>
@@ -154,11 +159,11 @@
 
     <div class="confirm-actions">
 
-      <button id="cancelBtn" class="confirm-cancel">
+      <button id="cancelBtn" class="cancel">
         Cancel
       </button>
 
-      <a id="confirmBtn" href="#" class="confirm-delete">
+      <a id="confirmBtn" href="#" class="confirm">
         Confirm
       </a>
 

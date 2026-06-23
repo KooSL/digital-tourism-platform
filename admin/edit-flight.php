@@ -206,3 +206,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<!-- <script src="../assets/js/confirmation.js"></script> -->

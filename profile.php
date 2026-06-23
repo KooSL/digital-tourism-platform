@@ -151,7 +151,7 @@ if (isset($_POST['change_password'])) {
         </p>
 
 
-        <form method="POST" id="profileForm" novalidate autocomplete="off">
+        <form method="POST" id="profileForm" novalidate autocomplete="off" onsubmit="return showConfirm('','Update your profile?')">
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
@@ -222,8 +222,9 @@ if (isset($_POST['change_password'])) {
     </div>
 </div>
 
-<script src="assets/js/auth-validation.js"></script>
+<script src="assets/js/profile-auth-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
 <script src="assets/js/toggle-password.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<!-- <script src="assets/js/confirmation.js"></script> -->

@@ -18,9 +18,9 @@
         Cancel
       </button>
 
-      <a id="confirmBtn" href="#" class="confirm">
+      <button id="confirmBtn" class="confirm">
         Confirm
-      </a>
+      </button>
 
     </div>
 

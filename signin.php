@@ -79,10 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box" id="successBox">
+        <div class="success-box-contact" id="successBox">
             <strong>Success!</strong>
             <?php
             if ($_GET['success'] === 'signin') echo "Sign in successful!";
+            if ($_GET['success'] === 'pw_reset') echo "Password reset successful!";
             ?>
         </div>
     <?php endif; ?>
