@@ -9,10 +9,34 @@ if (empty($_SESSION['csrf_token'])) {
 require_once 'config/db.php';
 require_once 'includes/mailer.php';
 
-$conn->query(
-    "DELETE FROM password_resets 
-     WHERE expires_at < NOW()"
+
+$token = $_GET['token'];
+
+$stmt = $conn->prepare(
+    "SELECT user_id 
+FROM password_resets
+WHERE token=?
+AND expires_at > NOW()"
 );
+
+$stmt->bind_param("s", $token);
+
+$stmt->execute();
+
+$result = $stmt->get_result()->fetch_assoc();
+
+$user_id = $result['user_id'];
+
+if (!$result) {
+    $delete = $conn->prepare(
+        "DELETE FROM password_resets WHERE token=?"
+    );
+    $delete->bind_param("s", $token);
+    $delete->execute();
+
+    header("Location: forgot-password?error=invalid_expired");
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
@@ -23,61 +47,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
         die("CSRF validation failed.");
     }
 
-    $email = trim($_POST['email']);
-
-    if (empty($email)) {
-        die("Email is required");
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid email format");
-    }
-
-    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $user = $stmt->get_result()->fetch_assoc();
-
-    if (!$user) {
-        header("Location: forgot-password?error=email_doesnt_exist");
-        exit;
-    }
-
-    // $otp = random_int(100000, 999999);
-
-    // $_SESSION['otp'] = $otp;
-    // $_SESSION['otp_expire'] = time() + 300;
-
-    // $_SESSION['forgot_password_data'] = [
-    //     'email' => $email,
-    // ];
-
-    // sendFPOtpMail($email, $otp);
-
-    // header("Location: verify-otp");
-    // exit;
-
-    $token = bin2hex(random_bytes(32));
+    $newPassword =
+        password_hash(
+            $_POST['password'],
+            PASSWORD_DEFAULT
+        );
 
     $stmt = $conn->prepare(
-        "INSERT INTO password_resets
-        (user_id, token, expires_at)
-        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))"
+        "UPDATE users
+        SET password=?
+        WHERE id=?"
     );
 
     $stmt->bind_param(
-        "is",
-        $user['id'],
+        "si",
+        $newPassword,
+        $user_id
+    );
+
+    $stmt->execute();
+
+    $stmt = $conn->prepare(
+        "DELETE FROM password_resets
+        WHERE token=?"
+    );
+
+    $stmt->bind_param(
+        "s",
         $token
     );
 
     $stmt->execute();
 
-    $link = "http://localhost/Digital_Tourism_Platform/reset-password?token=" . $token;
-
-    sendResetPWMail($email, $link);
-
-    header("Location: forgot-password?success=link_sent");
+    header("Location: signin?success=pw_reset");
     exit;
 }
 ?>
@@ -90,11 +92,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box-contact" id="successBox">
+        <div class="success-box" id="successBox">
             <strong>Success!</strong>
             <?php
             if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
-            if ($_GET['success'] === 'link_sent') echo "Reset link has been sent to your email.";
             ?>
         </div>
     <?php endif; ?>
@@ -106,14 +107,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
             if ($_GET['error'] === 'email_doesnt_exist') echo "Account does not exist.";
             if ($_GET['error'] === 'invalid') echo "Registration failed! Please try again.";
             if ($_GET['error'] === 'otp_expired') echo "OTP has been expired! Please signup again.";
-            if ($_GET['error'] === 'invalid_expired') echo "Link is invalid or has been expired! Please try again.";
             ?>
         </div>
     <?php endif; ?>
 
     <div class="overlay">
-        <h1>Forgot Password?</h1>
-        <p>Enter your email to get password reset link.</p>
+        <h1>Reset Password</h1>
+        <p>Enter your new password.</p>
     </div>
 </section>
 
@@ -124,12 +124,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-            <div class="form-group">
-                <input type="email" name="email" id="email" placeholder="Email">
+            <div class="form-group password-group">
+                <input type="password" name="password" id="password" placeholder="Password">
+
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
                 <small class="error"></small>
             </div>
 
-            <button type="submit" name="send" class="auth-btn">Send Link</button>
+            <div class="form-group password-group">
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password">
+
+                <button type="button" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <small class="error"></small>
+            </div>
+
+            <button type="submit" name="send" class="auth-btn">Update</button>
 
         </form>
     </div>
