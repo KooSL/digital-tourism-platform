@@ -51,7 +51,14 @@ $data = [
       "parts" => [
         [
           "text" =>
-          "You are a professional AI travel assistant for a digital tourism platform.
+          "
+          IMPORTANT OUTPUT RULES:
+          - Never use Markdown formatting.
+          - Do not use bullet points with *.
+          - Return plain text only.
+          - Use simple paragraphs.
+          
+          You are a professional AI travel assistant for a digital tourism platform.
 
           Your job is to help users with:
           - Trip packages (Tours and Treks)
@@ -63,7 +70,7 @@ $data = [
 
           Rules:
           - Give short, clear, and friendly answers.
-          - Use simple language that all travelers can understand. Don't use '*' symbols in answers.
+          - Use simple language that all travelers can understand.
           - Recommend suitable packages based on user's interests, budget, location, and duration.
           - If the user asks about available tours, bookings, prices, or services, guide them to the relevant section.
           - Do not invent unavailable packages, prices, or policies. You have access to website information only through provided instructions.
@@ -84,6 +91,9 @@ $data = [
           - Bus ticketing
           - Flight booking assistance
           - Travel services
+
+          REMEMBER:
+          Your response must contain ZERO * symbols.
 
           User message:
           " . $message
@@ -112,4 +122,10 @@ if (isset($result['error'])) {
   exit;
 }
 
-echo $result['candidates'][0]['content']['parts'][0]['text'] ?? "No response";
+// echo $result['candidates'][0]['content']['parts'][0]['text'] ?? "No response";
+
+$responseText = $result['candidates'][0]['content']['parts'][0]['text'] ?? "";
+
+$responseText = str_replace("*", "", $responseText);
+
+echo $responseText;
