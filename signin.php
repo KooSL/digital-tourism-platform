@@ -40,13 +40,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             $stmt->bind_param("i", $user['id']);
             $stmt->execute();
 
-            header("Location: index?success=signin");
-            exit;
+            // header("Location: index?success=signin");
+            // exit;
 
             // $redirect = $_GET['redirect'] ?? 'index?success=signin';
 
             // header("Location: " . $redirect . (strpos($redirect, '?') === false ? '?' : '&') . "success=signin");
             // exit;
+
+            $redirect = $_POST['redirect'] ?? 'index?success=signin';
+
+            if (
+                !str_starts_with($redirect, '/')
+                && !str_starts_with($redirect, 'tour-details')
+                && !str_starts_with($redirect, 'booking')
+            ) {
+                $redirect = 'index?success=signin';
+            }
+
+            header("Location: " . $redirect . (strpos($redirect, '?') === false ? '?' : '&') . "success=signin");
+            exit;
         } else {
             header("Location: signin?error=invalid");
             exit;
@@ -66,10 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box" id="successBox">
+        <div class="success-box-contact" id="successBox">
             <strong>Success!</strong>
             <?php
             if ($_GET['success'] === 'signin') echo "Sign in successful!";
+            if ($_GET['success'] === 'pw_reset') echo "Password reset successful!";
             ?>
         </div>
     <?php endif; ?>
@@ -96,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
         <form method="POST" id="loginForm" novalidate>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect'] ?? '') ?>">
 
             <div class="form-group">
                 <input type="email" name="email" id="email" placeholder="Email">
@@ -120,7 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 
             <p class="auth-switch">
                 Don’t have an account?
-                <a href="signup">Sign Up</a>
+                <a href="signup<?= isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : '' ?>">
+                    Sign Up
+                </a>
             </p>
 
         </form>

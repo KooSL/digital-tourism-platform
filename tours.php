@@ -194,8 +194,8 @@ $result = $stmt->get_result();
               <?php endif; ?>
 
               <div class="rating-summary trips">
-                <i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-                (<?= $ratingData['total_reviews'] ?> reviews)
+                <a href="tour-details?id=<?= $row['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                  (<?= $ratingData['total_reviews'] ?> reviews)</a>
               </div>
 
             </div>

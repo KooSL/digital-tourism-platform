@@ -237,7 +237,16 @@ $totalRecmndClicks = mysqli_fetch_assoc(
 
       <?php
       // $result = $conn->query("SELECT * FROM inquiries WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY id DESC LIMIT 5");
-      $result = $conn->query("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5");
+      $result = $conn->query("SELECT 
+        inquiries.*,
+        tours.title AS tour_name
+
+        FROM inquiries
+
+        LEFT JOIN tours 
+        ON inquiries.trip_id = tours.id
+
+        ORDER BY inquiries.id DESC LIMIT 5");
       while ($row = $result->fetch_assoc()):
       ?>
         <tr>

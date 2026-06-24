@@ -74,9 +74,9 @@ include 'includes/sidebar.php';
           <td><?= htmlspecialchars($row['phone']) ?></td>
           <td><span style="color:green;">Encrypted</span></td>
           <td>
-            <a href="?delete=<?= $row['id'] ?>"
-              class="btn-delete"
-              onclick="return confirm('Delete this user?')">
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this user?')"
+              class="btn-delete">
               Delete
             </a>
           </td>
@@ -92,3 +92,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

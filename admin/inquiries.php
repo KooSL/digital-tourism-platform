@@ -1,9 +1,7 @@
 <?php
 
-include 'auth.php';
-include 'includes/header.php';
-include 'includes/sidebar.php';
 include '../config/db.php';
+include 'auth.php';
 
 $limit = 10;
 
@@ -27,6 +25,11 @@ if (isset($_GET['delete'])) {
   header("Location: inquiries");
   exit;
 }
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+
+
 ?>
 
 <div class="admin-content">
@@ -38,7 +41,7 @@ if (isset($_GET['delete'])) {
     <thead>
       <tr>
         <th>S.N.</th>
-        <th>Tour Name</th>
+        <th>Trip Name</th>
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
@@ -55,9 +58,18 @@ if (isset($_GET['delete'])) {
 
       $result = mysqli_query(
         $conn,
-        "SELECT * FROM inquiries
-     ORDER BY id DESC
-     LIMIT $limit OFFSET $offset"
+        "SELECT 
+        inquiries.*,
+        tours.title AS tour_name
+
+        FROM inquiries
+
+        LEFT JOIN tours 
+        ON inquiries.trip_id = tours.id
+
+        ORDER BY inquiries.id DESC
+
+        LIMIT $limit OFFSET $offset"
       );
 
       while ($row = mysqli_fetch_assoc($result)) {
@@ -71,9 +83,9 @@ if (isset($_GET['delete'])) {
           <td class="msg-cell"><?= nl2br(htmlspecialchars($row['message'])) ?></td>
           <td><?= htmlspecialchars($row['created_at']) ?></td>
           <td>
-            <a href="?delete=<?= $row['id'] ?>"
-              class="btn-delete"
-              onclick="return confirm('Delete this inquiry?')">
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this inquiry?')"
+              class="btn-delete">
               Delete
             </a>
           </td>
@@ -89,3 +101,5 @@ if (isset($_GET['delete'])) {
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+
+<script src="../assets/js/confirmation.js"></script>

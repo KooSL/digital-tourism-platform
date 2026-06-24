@@ -92,8 +92,13 @@ include 'includes/sidebar.php';
           </td>
           <td class="action-col-flight">
             <!-- <a href="edit-flight.php?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
-            <a href="?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>"
+            <!-- <a href="?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>"
               onclick="return confirm('Delete this Photo?')"
+              class="btn-delete">
+              Delete
+            </a> -->
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>','Delete this photo?')"
               class="btn-delete">
               Delete
             </a>
@@ -120,3 +125,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

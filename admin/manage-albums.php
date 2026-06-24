@@ -110,8 +110,8 @@ include 'includes/sidebar.php';
 
           <td class="action-col-flight">
             <a href="edit-album?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-            <a href="?delete=<?= $row['id'] ?>"
-              onclick="return confirm('Delete this album?')"
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this album?')"
               class="btn-delete">
               Delete
             </a>
@@ -129,3 +129,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

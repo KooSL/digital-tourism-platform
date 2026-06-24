@@ -221,3 +221,11 @@
 .rating-summary.trips {
   color: var(--black);
 }
+
+html {
+    scroll-behavior: smooth;
+}
+
+.rating-summary:hover a{
+  color: var(--orange);
+}

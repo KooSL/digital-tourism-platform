@@ -14,7 +14,9 @@ if (isset($_GET['i'])) {
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<?php include 'config/db.php'; ?>
+<?php include 'config/db.php';
+include 'api/recommendation.php';
+?>
 
 <!-- HERO SECTION -->
 <section class="home-hero" style="background-image: url('assets/images/home_page/home_page_6.jpg');">
@@ -63,10 +65,339 @@ if (isset($_GET['i'])) {
   </div>
 </section>
 
+<?php
 
+$recommendedTours = [];
+
+
+/*
+ Logged in user:
+ use recommendation engine
+*/
+if (isset($_SESSION['user_id'])) {
+
+
+  $user_id = $_SESSION['user_id'];
+
+
+  $sql = "
+    SELECT t.*,
+
+    (
+        -- POPULAR
+        (CASE 
+            WHEN t.is_popular = 1 
+            THEN 15 
+            ELSE 0 
+        END)
+
+
+        +
+
+        -- RECENT
+        (CASE
+            WHEN t.created_at >= NOW() - INTERVAL 7 DAY
+            THEN 10
+            ELSE 0
+        END)
+
+
+        +
+
+        -- BOOKING POPULARITY
+        (COUNT(pb.id) * 2)
+
+
+        +
+
+        -- RATINGS
+        (
+            SELECT IFNULL(AVG(tr.rating),0) * 5
+            FROM trip_reviews tr
+            WHERE tr.trip_id=t.id
+            AND tr.status=1
+        )
+
+
+        +
+
+        -- REVIEW COUNT
+        (
+            SELECT LEAST(COUNT(tr.id),20)
+            FROM trip_reviews tr
+            WHERE tr.trip_id=t.id
+            AND tr.status=1
+        )
+
+
+        +
+
+        -- USER HISTORY
+        (CASE
+            WHEN t.id IN
+            (
+                SELECT package_id
+                FROM user_activity
+                WHERE user_id=$user_id
+            )
+            THEN 20
+            ELSE 0
+        END)
+
+
+    ) AS score
+
+
+    FROM tours t
+
+
+    LEFT JOIN package_bookings pb
+    ON t.id = pb.package_id
+
+
+    WHERE t.status=1
+
+
+    GROUP BY t.id
+
+
+    ORDER BY score DESC
+
+
+    LIMIT 6
+    ";
+} else {
+
+
+  /*
+    Guest user
+    */
+
+  $sql = "
+
+    SELECT t.*,
+
+    (
+
+        (CASE
+            WHEN t.is_popular=1
+            THEN 20
+            ELSE 0
+        END)
+
+
+        +
+
+
+        (CASE
+            WHEN t.created_at >= NOW() - INTERVAL 7 DAY
+            THEN 15
+            ELSE 0
+        END)
+
+
+        +
+
+
+        (
+            SELECT IFNULL(AVG(tr.rating),0)*5
+            FROM trip_reviews tr
+            WHERE tr.trip_id=t.id
+            AND tr.status=1
+        )
+
+
+        +
+
+
+        (
+            SELECT LEAST(COUNT(tr.id),20)
+            FROM trip_reviews tr
+            WHERE tr.trip_id=t.id
+            AND tr.status=1
+        )
+
+
+        +
+
+        (COUNT(pb.id)*2)
+
+
+    ) AS score
+
+
+    FROM tours t
+
+
+    LEFT JOIN package_bookings pb
+    ON t.id=pb.package_id
+
+
+    WHERE t.status=1
+
+
+    GROUP BY t.id
+
+
+    ORDER BY score DESC
+
+
+    LIMIT 6
+
+    ";
+}
+
+
+
+$recommendedTours = mysqli_query($conn, $sql);
+
+?>
+
+<section class="home-tours recommendation-section">
+
+  <div class="container">
+
+
+    <h2 class="section-title">
+      Explore Our Latest and Popular Packages
+    </h2>
+
+
+    <p class="section-subtitle-explore">
+      Digital Tourism Platform offers carefully designed packages focusing on comfort,
+      safety, and unforgettable travel experiences.
+    </p>
+
+
+    <div class="tour-slider-wrapper">
+
+      <button class="slider-btn prev domestic-prev">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+
+      <div class="tour-slider-viewport">
+
+        <div class="tour-slider-track">
+
+
+          <?php while ($tour = mysqli_fetch_assoc($recommendedTours)): ?>
+
+
+            <div class="tour-card">
+
+
+              <div class="tour-card-img">
+
+
+                <?php if ($tour['is_popular'] == 1): ?>
+
+                  <span class="popular-badge-home">
+                    <i class="fa-solid fa-fire"></i> Popular
+                  </span>
+
+                <?php endif; ?>
+
+
+                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
+
+                  <span class="latest-badge-home">
+                    <i class="fa-solid fa-star"></i> Latest
+                  </span>
+
+                <?php endif; ?>
+
+                <?php
+                $tripId = $tour['id'];
+                $avg = mysqli_query(
+                  $conn,
+                  "SELECT
+                  ROUND(AVG(rating),1) AS avg_rating,
+                  COUNT(*) AS total_reviews
+                    FROM trip_reviews
+                    WHERE trip_id = $tripId
+                    AND status = 1"
+                );
+                $ratingData = mysqli_fetch_assoc($avg); ?>
+
+                <div class="trip-card-banner-img">
+                  <img src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>">
+                  <div class="image-bottom-fade"></div>
+                </div>
+
+                <?php if (!empty($tour['old_price'])):
+                  $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
+                ?>
+                  <span class="discount-badge home">
+                    <?= $discount ?>% OFF
+                  </span>
+                <?php endif; ?>
+
+
+                <div class="rating-summary home">
+                  <a href="tour-details?id=<?= $tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                  (<?= $ratingData['total_reviews'] ?> reviews)</a>
+                </div>
+
+              </div>
+
+
+              <div class="tour-info">
+
+
+                <h3>
+                  <?= htmlspecialchars($tour['title']) ?>
+                </h3>
+
+
+
+                <p class="current-price price home">
+
+                  NPR <?= $tour['price'] ?>
+
+                  <span>
+                    | USD $<?= $tour['price_usd'] ?> PP
+                  </span>
+
+                </p>
+
+
+
+              </div>
+
+
+
+              <div class="tour-card-btn">
+
+                <a href="tour-details?id=<?= $tour['id'] ?>">
+                  View Details
+                </a>
+
+              </div>
+
+
+            </div>
+
+
+          <?php endwhile; ?>
+
+
+        </div>
+
+      </div>
+
+      <button class="slider-btn next international-next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
 
 <!-- POPULAR TOURS -->
-<section class="home-tours">
+<!-- <section class="home-tours">
   <div class="container">
 
     <h2 class="section-title">Explore Our Latest and Popular Packages</h2>
@@ -75,7 +406,6 @@ if (isset($_GET['i'])) {
       safety, and unforgettable travel experiences.
     </p>
 
-    <!-- DOMESTIC TOURS -->
     <h2 class="section-title type">Our Domestic Packages</h2>
 
     <div class="tour-slider-wrapper">
@@ -96,6 +426,19 @@ if (isset($_GET['i'])) {
           );
 
           while ($tour = mysqli_fetch_assoc($domestic)) {
+
+            $tripId = $tour['id'];
+            $avg = mysqli_query(
+              $conn,
+              "SELECT
+                  ROUND(AVG(rating),1) AS avg_rating,
+                  COUNT(*) AS total_reviews
+              FROM trip_reviews
+              WHERE trip_id = $tripId
+              AND status = 1"
+            );
+            $ratingData = mysqli_fetch_assoc($avg);
+
           ?>
             <div class="tour-card">
               <div class="tour-card-img">
@@ -111,7 +454,6 @@ if (isset($_GET['i'])) {
                   </span>
                 <?php endif; ?>
 
-                <!-- DISCOUNT BADGE -->
                 <?php if (!empty($tour['old_price'])):
                   $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
                 ?>
@@ -120,6 +462,11 @@ if (isset($_GET['i'])) {
                   </span>
                 <?php endif; ?>
 
+                <div class="rating-summary home">
+                  <i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                  (<?= $ratingData['total_reviews'] ?> reviews)
+                </div>
+
                 <img
                   src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>"
                   alt="<?= htmlspecialchars($tour['title']); ?>">
@@ -127,8 +474,6 @@ if (isset($_GET['i'])) {
 
               <div class="tour-info">
                 <h3><?= htmlspecialchars($tour['title']); ?></h3>
-
-                <!-- <p>NPR <?= htmlspecialchars($tour['price']); ?> | USD $<?= htmlspecialchars($tour['price_usd']); ?></p> -->
 
                 <p class="current-price price">
                   NPR <?= htmlspecialchars($tour['price']); ?>
@@ -154,7 +499,6 @@ if (isset($_GET['i'])) {
     </div>
 
 
-    <!-- INTERNATIONAL TOURS -->
     <h2 class="section-title type">Our International Packages</h2>
 
     <div class="tour-slider-wrapper">
@@ -220,7 +564,7 @@ if (isset($_GET['i'])) {
     </div>
 
   </div>
-</section>
+</section> -->
 
 
 <!-- INTERNATIONAL FLIGHTS -->
@@ -317,49 +661,49 @@ if (isset($_GET['i'])) {
 
 
       <div class="service-card">
-        <span><i class="fa-solid fa-plane-departure" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-plane-departure" style="color: var(--blue);"></i></span>
         <h3>Flight Ticketing</h3>
         <p>International & domestic flight booking assistance.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-earth-americas" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-earth-americas" style="color: var(--blue);"></i></span>
         <h3>Tour Packages</h3>
         <p>Domestic & international tour packages tailored for you.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-person-hiking" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-person-hiking" style="color: var(--blue);"></i></span>
         <h3>Trek Packages</h3>
         <p>Everest, Annapurna & many more trekking adventures.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-passport" style="color: #006db6;"></i> </span>
+        <span><i class="fa-solid fa-passport" style="color: var(--blue);"></i> </span>
         <h3>Visa Services</h3>
         <p>Professional visa consultation & documentation support.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-bus-side" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-bus-side" style="color: var(--blue);"></i></span>
         <h3>Bus Ticketing</h3>
         <p>Easy bus ticketing for domestic & international destinations.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-house-fire" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-house-fire" style="color: var(--blue);"></i></span>
         <h3>Camping & Equipments</h3>
         <p>Camping trips and rental of quality camping gear.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-person-skiing-nordic" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-person-skiing-nordic" style="color: var(--blue);"></i></span>
         <h3>Adventure Activities</h3>
         <p>Bungee Jumping, Rafting, paragliding & more.</p>
       </div>
 
       <div class="service-card">
-        <span><i class="fa-solid fa-paw" style="color: #006db6;"></i></span>
+        <span><i class="fa-solid fa-paw" style="color: var(--blue);"></i></span>
         <h3>Wildlife Activities</h3>
         <p>Jungle safari, wildlife tours & nature experiences.</p>
       </div>
@@ -552,25 +896,25 @@ $faqs = mysqli_query(
     <div class="why-grid">
 
       <div class="why-box">
-        <span class="why-icon"><i class="fa-solid fa-earth-americas" style="color: #006db6;"></i></span>
+        <span class="why-icon"><i class="fa-solid fa-earth-americas" style="color: var(--blue);"></i></span>
         <h3>Local Expertise</h3>
         <p>Experienced team with deep local knowledge.</p>
       </div>
 
       <div class="why-box">
-        <span class="why-icon"><i class="fa-solid fa-hand-holding-dollar" style="color: #006db6;"></i></span>
+        <span class="why-icon"><i class="fa-solid fa-hand-holding-dollar" style="color: var(--blue);"></i></span>
         <h3>Affordable Pricing</h3>
         <p>Best value packages without compromising quality.</p>
       </div>
 
       <div class="why-box">
-        <span class="why-icon"><i class="fa-solid fa-star" style="color: #006db6;"></i></span>
+        <span class="why-icon"><i class="fa-solid fa-star" style="color: var(--blue);"></i></span>
         <h3>Trusted Service</h3>
         <p>Customer satisfaction and safety first.</p>
       </div>
 
       <div class="why-box">
-        <span class="why-icon"><i class="fa-solid fa-phone" style="color: #006db6;"></i></span>
+        <span class="why-icon"><i class="fa-solid fa-phone" style="color: var(--blue);"></i></span>
         <h3>24/7 Support</h3>
         <p>We are always available for our travelers.</p>
       </div>

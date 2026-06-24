@@ -6,7 +6,7 @@
       <div class="footer-box-logo">
         <a href="/Digital_Tourism_Platform" class="logo">
           <!-- <img src="assets/images/logo/Take your Seat Logo- White.png" alt="Take Your Seat Logo"> -->
-           DTP
+          DTP
         </a>
       </div>
       <!-- <p class="footer-lgt">"LET'S GO TOGETHER"</p> -->
@@ -121,7 +121,7 @@
   </div>
 </footer>
 
-<div id="chatToggle"><i class="fa-solid fa-robot"></i></div>
+<div id="chatToggle"><img src="assets/images/chatbot/icon.png" alt=""></div>
 
 <div id="chatContainer">
   <div id="chatHeader">
@@ -135,12 +135,43 @@
   <div id="chatMessages"></div>
 
   <div id="chatInputArea">
-    <input type="text" id="userInput" placeholder="Ask about tours, buses..." />
+    <input type="text" id="userInput" placeholder="Ask about trips, buses..." />
     <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
+
+  <div class="chatFooter">
+    <p>Guide Dai is a AI Assistant and can make mistakes. Please check responses carefully.</p>
+  </div>
+
 </div>
 
 <script src="assets/js/chatbot.js"></script>
+
+<div id="confirmModal" class="confirm-overlay">
+
+  <div class="confirm-box">
+
+    <h3 id="confirmTitle">Are you sure?</h3>
+
+    <p id="confirmMessage">
+      This action cannot be undone.
+    </p>
+
+    <div class="confirm-actions">
+
+      <button id="cancelBtn" class="cancel">
+        Cancel
+      </button>
+
+      <a id="confirmBtn" href="#" class="confirm">
+        Confirm
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
 
 </body>
 

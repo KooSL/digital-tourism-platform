@@ -117,6 +117,19 @@ if (isset($_POST['book'])) {
     header("Location: esewa-payment?package_id=" . $_POST['package_id']);
     exit;
 }
+
+$avg = mysqli_query(
+    $conn,
+    "SELECT
+        ROUND(AVG(rating),1) AS avg_rating,
+        COUNT(*) AS total_reviews
+     FROM trip_reviews
+     WHERE trip_id = $id
+     AND status = 1"
+);
+
+$ratingData = mysqli_fetch_assoc($avg);
+
 ?>
 
 <div class="header-wrapper">
@@ -138,51 +151,56 @@ if (!$tour) {
 
 <!-- BANNER -->
 <section class="tour-banner"
-  style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
+    style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
 
-  <div class="overlay">
-    <div class="container">
+    <div class="overlay">
+        <div class="container">
 
-      <?php if (isset($_GET['success'])): ?>
-        <div class="success-box" id="successBox">
-          <strong>Success!</strong>
-          <?php
-          if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
-          if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
-          if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
-          ?>
+            <?php if (isset($_GET['success'])): ?>
+                <div class="success-box" id="successBox">
+                    <strong>Success!</strong>
+                    <?php
+                    if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
+                    if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
+                    if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['error'])): ?>
+                <div class="error-box package" id="errorBox">
+                    <strong>Error!</strong>
+                    <?php
+                    if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
+                    if ($_GET['error'] === 'booking_failed') echo "Booking failed. Please try again.";
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <h1><?= $tour['title'] ?></h1>
+            <p><?= $tour['duration'] ?></p>
+
+            <div class="banner-bottom-info">
+
+                <div id="weatherBox">
+                    <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
+                </div>
+
+                <div class="popular-badge-detail-box">
+                    <?php if ($tour['is_popular'] == 1): ?>
+                        <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="rating-summary">
+                    <a href="tour-details?id=<?= $tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                        (<?= $ratingData['total_reviews'] ?> reviews)</a>
+                </div>
+
+            </div>
+
         </div>
-      <?php endif; ?>
-
-      <?php if (isset($_GET['error'])): ?>
-        <div class="error-box package" id="errorBox">
-          <strong>Error!</strong>
-          <?php
-          if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
-          if ($_GET['error'] === 'booking_failed') echo "Booking failed. Please try again.";
-          ?>
-        </div>
-      <?php endif; ?>
-
-      <h1><?= $tour['title'] ?></h1>
-      <p><?= $tour['duration'] ?></p>
-
-      <div class="banner-bottom-info">
-
-          <div id="weatherBox">
-            <p><i class="fa-solid fa-temperature-full"></i>Temperature: Loading weather...</p>
-          </div>
-
-        <div class="popular-badge-detail-box">
-          <?php if ($tour['is_popular'] == 1): ?>
-            <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
-          <?php endif; ?>
-        </div>
-
-      </div>
-
     </div>
-  </div>
 </section>
 
 <section class="page-banner">
@@ -273,9 +291,9 @@ if (!$tour) {
 </script>
 
 <script>
-  const latitude = <?= $latitude ?>;
-  const longitude = <?= $longitude ?>;
-  const locationName = "<?= addslashes($location_name) ?>";
+    const latitude = <?= $latitude ?>;
+    const longitude = <?= $longitude ?>;
+    const locationName = "<?= addslashes($location_name) ?>";
 </script>
 
 <script src="api/weather.js"></script>

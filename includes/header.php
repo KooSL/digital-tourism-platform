@@ -21,6 +21,7 @@ session_start();
       <link rel="stylesheet" href="assets/css/discount-badge.css">
       <link rel="stylesheet" href="assets/css/reviews.css">
       <link rel="stylesheet" href="assets/css/confirmation-box.css">
+      <link rel="stylesheet" href="assets/css/home.css">
 
       <link rel="stylesheet"
             href="https://unpkg.com/leaflet/dist/leaflet.css">

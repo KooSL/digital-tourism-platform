@@ -2,7 +2,7 @@
 include '../config/db.php';
 include 'auth.php';
 
-$limit = 1;
+$limit = 10;
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $page = max($page, 1);
@@ -92,8 +92,8 @@ include 'includes/sidebar.php';
 
           <td class="action-col-flight">
             <a href="edit-faq?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-            <a href="?delete=<?= $row['id'] ?>"
-              onclick="return confirm('Delete this FAQ?')"
+            <a href="javascript:void(0)"
+              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this FAQ?')"
               class="btn-delete">
               Delete
             </a>
@@ -111,3 +111,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>

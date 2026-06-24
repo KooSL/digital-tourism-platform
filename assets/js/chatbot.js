@@ -7,7 +7,7 @@ chatToggle.onclick = () => {
     chatContainer.style.display = "flex";
 
     if (!chatMessages.innerHTML) {
-        addMessage("bot", "Hi 👋 How can I help you with?");
+        addMessage("bot", "Namaste, How can I help you with?");
     }
 };
 closeChat.onclick = () => (chatContainer.style.display = "none");
@@ -24,7 +24,7 @@ function sendMessage() {
     addMessage("user", text);
     input.value = "";
 
-    fetch("chatbot", {
+    fetch("api/chatbot", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",

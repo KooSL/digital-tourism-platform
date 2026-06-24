@@ -38,6 +38,7 @@ if (isset($_POST['send_inquiry'])) {
     die("CSRF validation failed.");
   }
 
+  $trip_id = mysqli_real_escape_string($conn, $_POST['trip_id']);
   $tour_name = mysqli_real_escape_string($conn, $_POST['tour_name']);
   $name      = mysqli_real_escape_string($conn, $_POST['name']);
   $email     = mysqli_real_escape_string($conn, $_POST['email']);
@@ -45,8 +46,8 @@ if (isset($_POST['send_inquiry'])) {
   $message   = mysqli_real_escape_string($conn, $_POST['message']);
 
   // Insert inquiry using prepared statement
-  $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (tour_name, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
-  mysqli_stmt_bind_param($stmt, "sssss", $tour_name, $name, $email, $phone, $message);
+  $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (trip_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
+  mysqli_stmt_bind_param($stmt, "issss", $trip_id, $name, $email, $phone, $message);
   mysqli_stmt_execute($stmt);
   $success = mysqli_stmt_affected_rows($stmt) > 0;
   mysqli_stmt_close($stmt);
@@ -222,8 +223,8 @@ if (!$tour) {
         </div>
 
         <div class="rating-summary">
-          <i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-          (<?= $ratingData['total_reviews'] ?> reviews)
+          <a href="#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+          (<?= $ratingData['total_reviews'] ?> reviews)</a>
         </div>
 
       </div>
@@ -237,7 +238,6 @@ if (!$tour) {
   <div class="title-content-box">
     <h1><?= $tour['title'] ?></h1>
     <p><?= $tour['duration'] ?></p>
-    
   </div>
 
 </section>
@@ -380,6 +380,7 @@ if (!$tour) {
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <input type="hidden" name="tour_name" value="<?= $tour['title']; ?>">
+        <input type="hidden" name="trip_id" value="<?= $tour['id']; ?>">
 
         <div class="form-group">
           <input type="text" name="name" id="name" placeholder="Full Name">
@@ -408,7 +409,7 @@ if (!$tour) {
 
   </div>
 
-  <section class="trip-reviews">
+  <section id="reviews" class="trip-reviews">
     <div class="container">
 
       <div class="review-header">
@@ -462,9 +463,15 @@ if (!$tour) {
           <small class="error"></small>
         </div>
 
-        <button type="submit" name="submit_review">
-          Submit Review
-        </button>
+        <?php if (isset($_SESSION['user_id'])) { ?>
+          <button type="submit" name="submit_review">
+            Submit Review
+          </button>
+        <?php } else { ?>
+          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
+            Submit Review
+          </a>
+        <?php } ?>
 
       </form>
 

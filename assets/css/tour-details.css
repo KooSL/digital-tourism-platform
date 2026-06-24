@@ -277,4 +277,14 @@
 
     margin-top: 3px;
   }
+
+  .page-banner .overlay p,
+  .page-banner .overlay h1 {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+html {
+    scroll-behavior: smooth;
 }

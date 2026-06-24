@@ -23,12 +23,12 @@ $totalPages = ceil($totalRows / $limit);
 // DELETE INQUIRYs
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    if (mysqli_query($conn, "DELETE FROM inquiries WHERE id=$id")) {
+    if (mysqli_query($conn, "DELETE FROM bus_inquiries WHERE id=$id")) {
         $_SESSION['success'] = "Inquiry deleted successfully.";
     } else {
         $_SESSION['error'] = "Failed to delete inquiry.";
     }
-    header("Location: inquiries");
+    header("Location: bus-inquiries");
     exit;
 }
 
@@ -97,9 +97,9 @@ include 'includes/sidebar.php';
                     <td class="msg-cell"><?= nl2br(htmlspecialchars($row['message'])) ?></td>
                     <td><?= htmlspecialchars($row['created_at']) ?></td>
                     <td>
-                        <a href="?delete=<?= $row['id'] ?>"
-                            class="btn-delete"
-                            onclick="return confirm('Delete this inquiry?')">
+                        <a href="javascript:void(0)"
+                            onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this inquiry?')"
+                            class="btn-delete">
                             Delete
                         </a>
                     </td>
@@ -115,3 +115,4 @@ include 'includes/sidebar.php';
 <script src="assets/js/admin-alert.js"></script>
 
 <?php include 'includes/footer.php'; ?>
+<script src="../assets/js/confirmation.js"></script>
