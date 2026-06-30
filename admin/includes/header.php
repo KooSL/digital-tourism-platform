@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>DTP Admin Panel</title>
@@ -17,6 +18,11 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
+
+
   <!-- <link rel="icon" href="../assets/favicon/favicon.ico" type="image/x-icon">
 
   <link rel="icon" type="image/png" sizes="96x96"
@@ -32,26 +38,27 @@
         href="../assets/favicon/web-app-manifest-512x512.png"> -->
 
 </head>
+
 <body>
 
-<!-- TOP HEADER -->
+  <!-- TOP HEADER -->
 
-<header class="admin-header">
-  <div class="admin-header-inner">
-    <h2></h2>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <h2></h2>
 
-    <div class="admin-user">
-      <!-- <span>Admin</span> -->
+      <div class="admin-user">
+        <!-- <span>Admin</span> -->
 
-      <a href="/Digital_Tourism_Platform" target="_blank">Our Site</a>
+        <a href="/Digital_Tourism_Platform" target="_blank">Our Site</a>
 
-      <?php if (isset($_SESSION['admin'])) { ?>
-        <a href="logout">Logout</a>
-      <?php } ?>
+        <?php if (isset($_SESSION['admin'])) { ?>
+          <a href="logout">Logout</a>
+        <?php } ?>
+
+      </div>
 
     </div>
 
-  </div>
 
-
-</header>
+  </header>

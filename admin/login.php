@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       session_regenerate_id(true);
       $_SESSION['admin'] = $admin['username'];
+      $_SESSION['admin_id'] = $admin['id'];
       $_SESSION['last_activity'] = time();
       header("Location: dashboard");
       exit;
@@ -56,14 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 
 <head>
   <title>Admin Login</title>
 
   <link rel="stylesheet" href="assets/admin.css">
-</head>
+</head> -->
 
 <body class="login-body">
 

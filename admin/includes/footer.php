@@ -1,5 +1,7 @@
 <footer class="admin-footer">
   <p>© <?php echo date('Y'); ?> Digital Tourism Platform. All rights reserved.</p>
+
+  <script src="assets/js/firebase-admin.js"></script>
 </footer>
 
 <div id="confirmModal" class="confirm-overlay">

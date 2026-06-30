@@ -404,7 +404,6 @@ $totalRecmndClicks = mysqli_fetch_assoc(
   const typeData = <?php echo json_encode($typedata); ?>;
 </script>
 
-<script type="module" src="../assets/js/firebase-init.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="assets/js/charts.js"></script>
 

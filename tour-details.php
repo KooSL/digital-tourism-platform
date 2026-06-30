@@ -54,10 +54,11 @@ if (isset($_POST['send_inquiry'])) {
 
   if ($success) {
     require_once 'includes/fcm.php';
-    sendFCMToAdmins(
-      $conn,
-      "New Tour Inquiry",
-      "New inquiry received for " . $tour_name
+    $customerName = $name;
+    sendAdminNotification(
+      '📩 New Inquiry Received!',
+      $customerName . ' submitted a new inquiry. Click to view.',
+      '/admin/inquiries.php'
     );
 
     $subject = "New Inquiry from $name for $tour_name";
@@ -69,7 +70,7 @@ if (isset($_POST['send_inquiry'])) {
         <p><strong>Phone:</strong> $phone</p>
         <p><strong>Message:</strong> $message</p>
     ";
-    sendAdminMail($subject, $body);
+    // sendAdminMail($subject, $body);
 
     header("Location: tour-details?id=$id&success=sent");
     exit;
@@ -224,7 +225,7 @@ if (!$tour) {
 
         <div class="rating-summary">
           <a href="#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-          (<?= $ratingData['total_reviews'] ?> reviews)</a>
+            (<?= $ratingData['total_reviews'] ?> reviews)</a>
         </div>
 
       </div>

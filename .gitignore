@@ -3,6 +3,7 @@
 
 # Firebase
 service-account.json
+firebase-service-account.json
 
 # Logs
 *.log
