@@ -99,7 +99,7 @@
 
 small.error {
   display: block;
-  color: #dc3545;
+  color: var(--error-red);
   font-size: 13px;
   margin-top: 5px;
 }
@@ -107,7 +107,7 @@ small.error {
 .form-group.error input,
 .form-group.error select,
 .form-group.error textarea {
-  border-color: #dc3545;
+  border-color: var(--error-red);
 }
 
 .forgot-password {

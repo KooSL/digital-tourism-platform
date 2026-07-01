@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php
+$pageTitle = "Contact";
+include 'includes/header.php'; ?>
 
 <?php
 
@@ -33,11 +35,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
     if ($stmt->execute()) {
 
       // FCM Notification
-      require_once 'includes/fcm.php';
-      sendFCMToAdmins(
-        $conn,
-        "New Contact Message",
-        "New message received from $name"
+      // require_once 'includes/fcm.php';
+      // sendFCMToAdmins(
+      //   $conn,
+      //   "New Contact Message",
+      //   "New message received from $name"
+      // );
+
+      require_once __DIR__ . '/includes/send_fcm_notification.php';
+      $customerName = $name;
+      sendAdminNotification(
+        '📩 New Contact Message Received!',
+        $customerName . ' submitted a new contact message.',
+        '/admin/inquiries.php'
       );
 
       // Email Notification

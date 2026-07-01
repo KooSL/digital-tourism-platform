@@ -51,7 +51,7 @@
 }
 
 .badge.success {
-  background: #28a745;
+  background: var(--success-green);
   color: #fff;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .badge.danger {
-  background: #dc3545;
+  background: var(--error-red);
   color: #fff;
 }
 

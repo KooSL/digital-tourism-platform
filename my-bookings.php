@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "My Bookings";
 include 'includes/header.php';
 
 include 'config/db.php';

@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Home";
+include 'includes/header.php'; ?>
 
 <?php
 if (isset($_GET['i'])) {

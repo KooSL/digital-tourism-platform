@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Album";
 include 'includes/header.php';
 include 'config/db.php';
 

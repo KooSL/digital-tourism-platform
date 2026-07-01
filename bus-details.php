@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Buse Details";
+include 'includes/header.php'; ?>
 
 <?php
 

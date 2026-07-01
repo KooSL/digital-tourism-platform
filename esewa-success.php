@@ -34,6 +34,14 @@ $stmt->bind_param(
 
 $stmt->execute();
 
+require_once __DIR__ . '/includes/send_fcm_notification.php';
+$customerName = $data['name'];
+sendAdminNotification(
+    '🧳 New Booking Received!',
+    $customerName . ' booked a trip.',
+    '/admin/inquiries.php'
+);
+
 $adminsubject = "New Booking for Package ID: " . $data['package_id'];
 $adminbody = "
         <h3>New Booking Received</h3>

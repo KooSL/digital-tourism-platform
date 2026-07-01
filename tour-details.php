@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Tour Details";
+include 'includes/header.php'; ?>
 
 <?php
 
@@ -9,7 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-include 'config/db.php';
+require_once __DIR__ . '/config/db.php';
 include 'includes/mailer.php';
 include 'api/recommendation.php';
 
@@ -53,11 +55,11 @@ if (isset($_POST['send_inquiry'])) {
   mysqli_stmt_close($stmt);
 
   if ($success) {
-    require_once 'includes/fcm.php';
+    require_once __DIR__ . '/includes/send_fcm_notification.php';
     $customerName = $name;
     sendAdminNotification(
       '📩 New Inquiry Received!',
-      $customerName . ' submitted a new inquiry. Click to view.',
+      $customerName . ' submitted a new inquiry.',
       '/admin/inquiries.php'
     );
 
@@ -70,7 +72,7 @@ if (isset($_POST['send_inquiry'])) {
         <p><strong>Phone:</strong> $phone</p>
         <p><strong>Message:</strong> $message</p>
     ";
-    // sendAdminMail($subject, $body);
+    sendAdminMail($subject, $body);
 
     header("Location: tour-details?id=$id&success=sent");
     exit;

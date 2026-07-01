@@ -11,14 +11,14 @@
 }
 
 .admin-alert.success {
-  background: #28a745;
+  background: var(--success-green);
   color: var(--white);
   /* border: 1px solid #abefc6; */
   border-left: 4px solid var(--orange);
 }
 
 .admin-alert.error {
-  background: #dc3545;
+  background: var(--error-red);
   color: var(--white);
   /* border: 1px solid #f5c6cb; */
   border-left: 4px solid var(--orange);

@@ -35,7 +35,7 @@ function getAdminToken() {
         })
         .then((token) => {
           if (token) {
-            console.log("FCM Token:", token);
+            // console.log("FCM Token:", token);
             saveTokenToServer(token);
           } else {
             console.warn("No token. Request permission first.");
@@ -67,10 +67,10 @@ messaging.onMessage((payload) => {
 function showToastNotification(title, body) {
   const toast = document.createElement("div");
   toast.style.cssText = `
-        position: fixed; top: 20px; right: 20px; z-index: 9999;
-        background: #333; color: #fff; padding: 16px 20px;
-        border-radius: 8px; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        font-family: sans-serif; cursor: pointer;
+        position: absolute; top: 70px; right: 30px;
+        background: var(--success-green); color: #fff; padding: 12px 14px;
+        border-radius: 6px; font-size: 14px; animation: fadeIn 0.4s ease;
+        cursor: pointer; font-weight: 500; border-left: 4px solid var(--orange);
     `;
   toast.innerHTML = `<strong>${title}</strong><br><small>${body}</small>`;
   toast.onclick = () => toast.remove();

@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Forgot Password";
+include 'includes/header.php'; ?>
 
 <?php
 

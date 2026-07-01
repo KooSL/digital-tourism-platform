@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Gallery";
 include 'includes/header.php';
 include 'config/db.php';
 ?>

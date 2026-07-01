@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php
+$pageTitle = "About Us";
+include 'includes/header.php'; ?>
 <div class="header-wrapper">
   <?php include 'includes/topbar.php'; ?>
   <?php include 'includes/navbar.php'; ?>
@@ -152,7 +154,7 @@
         <h3>Bipin Chapai</h3>
         <p class="team-role">Web & Digital Administrator</p>
         <p class="role-description">
-          Focuses on graphic designs and user experience, handling social media,  building clean, responsive, and user-friendly interfaces to ensure smooth navigation and an engaging digital experience for users.
+          Focuses on graphic designs and user experience, handling social media, building clean, responsive, and user-friendly interfaces to ensure smooth navigation and an engaging digital experience for users.
         </p>
       </div>
     </div>
@@ -175,7 +177,7 @@
           Assist travelers, provide destination information, and ensure a smooth and enjoyable travel experience.
         </p>
       </div> -->
-    </div>
+  </div>
 
   </div>
 </section>

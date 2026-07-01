@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Verify OTP";
+include 'includes/header.php'; ?>
 
 <?php
 

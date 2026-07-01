@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "Sign In";
+include 'includes/header.php'; ?>
 
 <?php
 

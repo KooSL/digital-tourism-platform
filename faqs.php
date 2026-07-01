@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php 
+$pageTitle = "FAQs";
+include 'includes/header.php'; ?>
 <div class="header-wrapper">
   <?php include 'includes/topbar.php'; ?>
   <?php include 'includes/navbar.php'; ?>

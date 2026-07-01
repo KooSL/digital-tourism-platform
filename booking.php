@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php
+$pageTitle = "Booking";
+include 'includes/header.php'; ?>
 
 <?php
 

@@ -1,4 +1,6 @@
-<?php include 'includes/header.php'; ?>
+<?php
+$pageTitle = "Buses";
+include 'includes/header.php'; ?>
 <div class="header-wrapper">
     <?php include 'includes/topbar.php'; ?>
     <?php include 'includes/navbar.php'; ?>
