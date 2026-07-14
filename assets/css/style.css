@@ -83,6 +83,23 @@ a {
   background: var(--orange);
 }
 
+.btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background: var(--blue);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--orange);
+}
+
 .section-title {
   text-align: center;
   margin-bottom: 10px;
@@ -2200,20 +2217,6 @@ a {
 .price-num {
   color: var(--black);
   font-weight: normal;
-}
-
-.btn {
-  display: inline-block;
-  padding: 10px 16px;
-  background: var(--blue);
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.btn:hover {
-  background: var(--orange);
 }
 
 @media (max-width: 768px) {

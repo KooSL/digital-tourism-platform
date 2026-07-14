@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             </div>
 
             <div class="form-group password-group">
-                <input type="password" name="password" id="password" placeholder="Password">
+                <input type="password" name="password"  placeholder="Password">
 
                 <button type="button" class="toggle-password">
                     <i class="fa-solid fa-eye"></i>

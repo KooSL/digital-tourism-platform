@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Home";
 include 'includes/header.php'; ?>
 
@@ -244,7 +244,7 @@ if (isset($_SESSION['user_id'])) {
     ORDER BY score DESC
 
 
-    LIMIT 6
+    LIMIT 5
 
     ";
 }
@@ -338,7 +338,7 @@ $recommendedTours = mysqli_query($conn, $sql);
 
                 <div class="rating-summary home">
                   <a href="tour-details?id=<?= $tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-                  (<?= $ratingData['total_reviews'] ?> reviews)</a>
+                    (<?= $ratingData['total_reviews'] ?> reviews)</a>
                 </div>
 
               </div>
@@ -392,6 +392,10 @@ $recommendedTours = mysqli_query($conn, $sql);
         <i class="fas fa-chevron-right"></i>
       </button>
 
+    </div>
+
+    <div class="center-btn">
+      <a href="tours" class="btn-primary-em">Explore More</a>
     </div>
 
   </div>

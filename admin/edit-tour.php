@@ -38,10 +38,11 @@ if (isset($_POST['update'])) {
   $excludes   = $_POST['excludes'];
   $status     = $_POST['status'];
   $is_popular = $_POST['is_popular'];
-
-
   $image   = $data['banner_image'];
   $pdfName = $data['pdf_file'];
+  $latitude = $_POST['latitude'];
+  $longitude = $_POST['longitude'];
+  $location_name = $_POST['location_name'];
 
   /* IMAGE */
   if (!empty($_FILES['image']['name'])) {
@@ -71,12 +72,15 @@ if (isset($_POST['update'])) {
           banner_image = ?,
           pdf_file = ?,
           is_popular = ?,
-          status = ?
+          status = ?,
+          latitude = ?,
+          longitude = ?,
+          location_name = ?
         WHERE id = ?
     ");
 
   $stmt->bind_param(
-    "sssddsssssssii",
+    "sssddsssssssiddsi",
     $title,
     $type,
     $duration,
@@ -90,6 +94,9 @@ if (isset($_POST['update'])) {
     $pdfName,
     $is_popular,
     $status,
+    $latitude,
+    $longitude,
+    $location_name,
     $id
   );
 
@@ -249,6 +256,21 @@ include 'includes/sidebar.php';
     <div class="file_input">
       <label>Replace PDF (optional)</label>
       <input type="file" name="pdf" accept="application/pdf">
+    </div>
+
+    <div class="form-group">
+      <input type="number" step="any" name="latitude" id="latitude" placeholder="Latitude (e.g. 12.3456)" data-validate="latitude" value="<?= $data['latitude'] ?>">
+      <small class="error"></small>
+    </div>
+
+    <div class="form-group">
+      <input type="number" step="any" name="longitude" id="longitude" placeholder="Longitude (e.g. 78.9012)" data-validate="longitude" value="<?= $data['longitude'] ?>">
+      <small class="error"></small>
+    </div>
+
+    <div class="form-group">
+      <input type="text" name="location_name" id="location_name" placeholder="Location Name" data-validate="name" value="<?= $data['location_name'] ?>">
+      <small class="error"></small>
     </div>
 
     <label>Is Popular?</label>

@@ -1,6 +1,6 @@
 <?php
 
-function getRecommendations($conn, $current_tour_id, $limit = 6)
+function getRecommendations($conn, $current_tour_id, $limit = 5)
 {
 
     $user_id = $_SESSION['user_id'] ?? null;

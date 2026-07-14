@@ -59,6 +59,15 @@
         </ul>
       </li>
 
+      <li class="has-submenu">
+        <a href="">Blogs ▾</a>
+        <ul class="submenu">
+          <li><a href="manage-blogs">Manage Blogs</a></li>
+          <li><a href="manage-blog-categories">Manage Categories</a></li>
+          <li><a href="manage-blog-comments">Manage Comments</a></li>
+        </ul>
+      </li>
+
 
       <li class="has-submenu">
         <a href="">Testimonials ▾</a>
@@ -88,9 +97,11 @@
         <a href="reviews">Reviews</a>
       </li>
 
-      <li>
+
+
+      <!-- <li>
         <a href="logout">Logout</a>
-      </li>
+      </li> -->
     </ul>
   <?php } else { ?>
     <!-- <ul class="sidebar-menu">

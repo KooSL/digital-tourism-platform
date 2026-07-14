@@ -63,6 +63,9 @@ include 'includes/sidebar.php';
         <th>Excludes</th>
         <th>Image</th>
         <th>PDF</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Location Name</th>
         <th>Popular</th>
         <th>Status</th>
         <th>Action</th>
@@ -143,6 +146,9 @@ include 'includes/sidebar.php';
             </div>
 
           </td>
+          <td><?= $row['latitude'] ?></td>
+          <td><?= $row['longitude'] ?></td>
+          <td><?= $row['location_name'] ?></td>
 
           <td>
             <?= $row['is_popular'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?>

@@ -20,7 +20,7 @@ include 'includes/header.php'; ?>
 
 <section class="page-banner">
   <div class="overlay">
-    <h1>About Us</h1>
+    <h1>About Us </h1>
     <p>Your trusted travel partner in Nepal & beyond</p>
   </div>
 </section>

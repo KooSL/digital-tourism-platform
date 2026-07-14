@@ -27,6 +27,9 @@ if (isset($_POST['submit'])) {
     $excludes   = $_POST['excludes'];
     $status     = $_POST['status'];
     $is_popular = $_POST['is_popular'];
+    $latitude = $_POST['latitude'];
+    $longitude = $_POST['longitude'];
+    $location_name = $_POST['location_name'];
 
     /* IMAGE UPLOAD */
     $banner = time() . '_' . $_FILES['banner']['name'];
@@ -48,12 +51,12 @@ if (isset($_POST['submit'])) {
     /* INSERT TOUR */
     $stmt = $conn->prepare("
         INSERT INTO tours
-        (title, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status, latitude, longitude, location_name)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        "sssdddssssssii",
+        "sssdddssssssiidds",
         $title,
         $type,
         $duration,
@@ -67,7 +70,10 @@ if (isset($_POST['submit'])) {
         $banner,
         $pdf,
         $is_popular,
-        $status
+        $status,
+        $latitude,
+        $longitude,
+        $location_name
     );
 
     if ($stmt->execute()) {
@@ -213,6 +219,21 @@ include 'includes/sidebar.php';
         <div class="file_input">
             <label>Trip PDF</label>
             <input type="file" name="pdf" accept="application/pdf">
+        </div>
+
+        <div class="form-group">
+            <input type="number" step="any" name="latitude" id="latitude" placeholder="Latitude (e.g. 12.3456)" data-validate="latitude">
+            <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+            <input type="number" step="any" name="longitude" id="longitude" placeholder="Longitude (e.g. 78.9012)" data-validate="longitude">
+            <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="location_name" id="location_name" placeholder="Location Name" data-validate="name">
+            <small class="error"></small>
         </div>
 
         <label>Is Popular?</label>

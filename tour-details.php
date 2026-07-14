@@ -391,7 +391,7 @@ if (!$tour) {
         </div>
 
         <div class="form-group">
-          <input type="email" name="email" id="email" placeholder="Email (Optional)">
+          <input type="email" name="email" id="email" placeholder="Email">
           <small class="error"></small>
         </div>
 
