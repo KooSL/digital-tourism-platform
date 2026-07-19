@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Tour Details";
 include 'includes/header.php'; ?>
 
@@ -13,7 +13,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 require_once __DIR__ . '/config/db.php';
 include 'includes/mailer.php';
-include 'api/recommendation.php';
+include 'api/recommendation.php'; // now also exposes bayesianRating(), getGlobalRatingStats()
 
 
 // Fetch tour details using prepared statement
@@ -23,6 +23,23 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
+
+// Sanitize and validate tour ID / existence EARLY (before using $tour below)
+if ($id <= 0) {
+  include 'includes/topbar.php';
+  include 'includes/navbar.php';
+  echo "<p class='pageError invalidId'>Invalid tour ID!</p>";
+  include 'includes/footer.php';
+  exit;
+}
+
+if (!$tour) {
+  include 'includes/topbar.php';
+  include 'includes/navbar.php';
+  echo "<p class='pageError tournotfound'>Tour not found!</p>";
+  include 'includes/footer.php';
+  exit;
+}
 
 $current_tour_id = $tour['id'];
 $latitude = $tour['latitude'];
@@ -40,12 +57,12 @@ if (isset($_POST['send_inquiry'])) {
     die("CSRF validation failed.");
   }
 
-  $trip_id = mysqli_real_escape_string($conn, $_POST['trip_id']);
-  $tour_name = mysqli_real_escape_string($conn, $_POST['tour_name']);
-  $name      = mysqli_real_escape_string($conn, $_POST['name']);
-  $email     = mysqli_real_escape_string($conn, $_POST['email']);
-  $phone     = mysqli_real_escape_string($conn, $_POST['phone']);
-  $message   = mysqli_real_escape_string($conn, $_POST['message']);
+  $trip_id   = (int)$_POST['trip_id'];
+  $tour_name = $_POST['tour_name'] ?? '';
+  $name      = trim($_POST['name'] ?? '');
+  $email     = trim($_POST['email'] ?? '');
+  $phone     = trim($_POST['phone'] ?? '');
+  $message   = trim($_POST['message'] ?? '');
 
   // Insert inquiry using prepared statement
   $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (trip_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
@@ -63,14 +80,14 @@ if (isset($_POST['send_inquiry'])) {
       '/admin/inquiries.php'
     );
 
-    $subject = "New Inquiry from $name for $tour_name";
+    $subject = "New Inquiry from " . $name . " for " . $tour_name;
     $body = "
         <h3>New Inquiry Received</h3>
-        <p><strong>Tour:</strong> $tour_name</p>
-        <p><strong>Name:</strong> $name</p>
-        <p><strong>Email:</strong> $email</p>
-        <p><strong>Phone:</strong> $phone</p>
-        <p><strong>Message:</strong> $message</p>
+        <p><strong>Tour:</strong> " . htmlspecialchars($tour_name) . "</p>
+        <p><strong>Name:</strong> " . htmlspecialchars($name) . "</p>
+        <p><strong>Email:</strong> " . htmlspecialchars($email) . "</p>
+        <p><strong>Phone:</strong> " . htmlspecialchars($phone) . "</p>
+        <p><strong>Message:</strong> " . nl2br(htmlspecialchars($message)) . "</p>
     ";
     sendAdminMail($subject, $body);
 
@@ -91,34 +108,51 @@ if (isset($_POST['submit_review'])) {
     die("CSRF validation failed.");
   }
 
-  $trip_id = (int)$_POST['trip_id'];
-  $name = mysqli_real_escape_string($conn, $_POST['name']);
-  $rating = (int)$_POST['rating'];
-  $review = mysqli_real_escape_string($conn, $_POST['review']);
+  if (!isset($_SESSION['user_id'])) {
+    header("Location: signin?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+    exit;
+  }
 
-  mysqli_query(
+  $trip_id  = (int)$_POST['trip_id'];
+  $name     = trim($_POST['name'] ?? '');
+  $rating   = max(1, min(5, (int)($_POST['rating'] ?? 0)));
+  $review   = trim($_POST['review'] ?? '');
+  $user_id  = $_SESSION['user_id'];
+
+  $stmt = mysqli_prepare(
     $conn,
-    "INSERT INTO trip_reviews
-        (trip_id, name, rating, review)
-        VALUES
-        ($trip_id, '$name', $rating, '$review')"
+    "INSERT INTO trip_reviews (trip_id, user_id, name, rating, review) VALUES (?, ?, ?, ?, ?)"
   );
+  mysqli_stmt_bind_param($stmt, "iisis", $trip_id, $user_id, $name, $rating, $review);
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_close($stmt);
 
   header("Location: tour-details?id=$trip_id&success=review_sent");
   exit;
 }
 
-$avg = mysqli_query(
-  $conn,
-  "SELECT
-        ROUND(AVG(rating),1) AS avg_rating,
-        COUNT(*) AS total_reviews
-     FROM trip_reviews
-     WHERE trip_id = $id
-     AND status = 1"
-);
+// ---------------------------------------------------------------------------
+// Bayesian rating for the hero "rating summary" badge instead of a raw AVG,
+// so a tour with 1 five-star review doesn't outrank a tour with 40 solid
+// 4.5-star reviews. Uses the same helper as the recommendation engine.
+// ---------------------------------------------------------------------------
+$stmt = mysqli_prepare($conn, "
+    SELECT AVG(rating) AS avg_rating, COUNT(*) AS total_reviews
+    FROM trip_reviews
+    WHERE trip_id = ? AND status = 1
+");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$ratingData = mysqli_stmt_get_result($stmt)->fetch_assoc();
+mysqli_stmt_close($stmt);
 
-$ratingData = mysqli_fetch_assoc($avg);
+$globalStats = getGlobalRatingStats($conn);
+$bayesianDisplayRating = bayesianRating(
+  (float)($ratingData['avg_rating'] ?? 0),
+  (int)($ratingData['total_reviews'] ?? 0),
+  BAYESIAN_MIN_VOTES,
+  $globalStats['global_avg']
+);
 
 // Define helper function for rendering lists
 function renderList($text)
@@ -133,30 +167,32 @@ function renderList($text)
   echo "</ul>";
 }
 
-// if (isset($_SESSION['user_id'])) {
-//   $uid = $_SESSION['user_id'];
+// Track a page view for logged-in users so the recommendation engine has
+// real signal to work with (previously commented out).
+if (isset($_SESSION['user_id'])) {
+  $uid = $_SESSION['user_id'];
 
-//   $stmt = $conn->prepare("
-//     INSERT INTO user_activity (user_id, package_id, action, time_spent)
-//     VALUES (?, ?, 'view', 0)
-//     ON DUPLICATE KEY UPDATE action = 'view'
-//   ");
-//   $stmt->bind_param("ii", $uid, $id);
-//   $stmt->execute();
-// }
+  $stmt = $conn->prepare("
+    INSERT INTO user_activity (user_id, package_id, action, view_count, last_viewed_at)
+    VALUES (?, ?, 'view', 1, NOW())
+    ON DUPLICATE KEY UPDATE view_count = view_count + 1, last_viewed_at = NOW()
+  ");
+  $stmt->bind_param("ii", $uid, $id);
+  $stmt->execute();
+}
 
 if (isset($_GET['rec']) && isset($_SESSION['user_id'])) {
 
   $uid = $_SESSION['user_id'];
   $pid = $tour['id'];
 
-  mysqli_query($conn, "
-        INSERT INTO recmnd_clicks
-        (user_id, package_id, total_clicks)
-        VALUES
-        ($uid,$pid, 1)
-        ON DUPLICATE KEY UPDATE total_clicks = total_clicks + 1;
+  $stmt = $conn->prepare("
+        INSERT INTO recmnd_clicks (user_id, package_id, total_clicks)
+        VALUES (?, ?, 1)
+        ON DUPLICATE KEY UPDATE total_clicks = total_clicks + 1
     ");
+  $stmt->bind_param("ii", $uid, $pid);
+  $stmt->execute();
 }
 
 $recommended = getRecommendations($conn, $tour['id']);
@@ -168,22 +204,9 @@ $recommended = getRecommendations($conn, $tour['id']);
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<?php
-// Sanitize and validate tour ID
-if ($id <= 0) {
-  echo "<p class='pageError invalidId'>Invalid tour ID!</p>";
-  exit;
-}
-
-if (!$tour) {
-  echo "<p class='pageError tournotfound'>Tour not found!</p>";
-  exit;
-}
-?>
-
 <!-- BANNER -->
 <section class="tour-banner"
-  style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
+  style="background-image: url('admin/uploads/images/tours/<?= htmlspecialchars($tour['banner_image']) ?>');">
 
   <div class="overlay">
     <div class="container">
@@ -192,10 +215,13 @@ if (!$tour) {
         <div class="success-box" id="successBox">
           <strong>Success!</strong>
           <?php
-          if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
-          if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
-          if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
-          if ($_GET['success'] === 'review_sent') echo "Thank you for your review. Your review has been sent successfully.";
+          $successMsgs = [
+            'sent'         => "Your inquiry has been sent successfully. We'll contact you soon.",
+            'booked'       => "Your package has been booked successfully. We'll contact you soon.",
+            'signin'       => "Sign in successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
+            'review_sent'  => "Thank you for your review. Your review has been sent successfully.",
+          ];
+          echo $successMsgs[$_GET['success']] ?? '';
           ?>
         </div>
       <?php endif; ?>
@@ -204,14 +230,14 @@ if (!$tour) {
         <div class="error-box package" id="errorBox">
           <strong>Error!</strong>
           <?php
-          if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
-          if ($_GET['error'] === 'booking_failed') echo "Booking failed. Please try again.";
+          $errorMsgs = [
+            'failed'         => "Inquiry failed to send. Please try again.",
+            'booking_failed' => "Booking failed. Please try again.",
+          ];
+          echo $errorMsgs[$_GET['error']] ?? '';
           ?>
         </div>
       <?php endif; ?>
-
-      <!-- <h1><?= $tour['title'] ?></h1>
-      <p><?= $tour['duration'] ?></p> -->
 
       <div class="banner-bottom-info">
 
@@ -225,9 +251,9 @@ if (!$tour) {
           <?php endif; ?>
         </div>
 
-        <div class="rating-summary">
-          <a href="#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-            (<?= $ratingData['total_reviews'] ?> reviews)</a>
+        <div class="rating-summary" title="Bayesian-weighted rating - balances average score with number of reviews">
+          <a href="#reviews"><i class="fa-solid fa-star"></i> <?= number_format($bayesianDisplayRating, 1) ?>
+            (<?= (int)($ratingData['total_reviews'] ?? 0) ?> reviews)</a>
         </div>
 
       </div>
@@ -237,12 +263,10 @@ if (!$tour) {
 </section>
 
 <section class="container title-content">
-
   <div class="title-content-box">
-    <h1><?= $tour['title'] ?></h1>
-    <p><?= $tour['duration'] ?></p>
+    <h1><?= htmlspecialchars($tour['title']) ?></h1>
+    <p><?= htmlspecialchars($tour['duration']) ?></p>
   </div>
-
 </section>
 
 <!-- MAIN CONTENT -->
@@ -251,9 +275,7 @@ if (!$tour) {
   <div class="tour-content">
 
     <h2 class="trip-overview">Trip Overview</h2>
-    <p>
-      <?= $tour['overview'] ?>
-    </p>
+    <p><?= nl2br(htmlspecialchars($tour['overview'])) ?></p>
 
     <h2>Trip Highlights</h2>
     <ul class="tour-highlights">
@@ -264,17 +286,15 @@ if (!$tour) {
 
     <div class="itinerary-list">
       <?php
-      $itinerary = mysqli_query(
-        $conn,
-        "SELECT * FROM tour_itineraries
-      WHERE tour_id = $id
-      ORDER BY day_number ASC"
-      );
+      $stmt = $conn->prepare("SELECT * FROM tour_itineraries WHERE tour_id = ? ORDER BY day_number ASC");
+      $stmt->bind_param("i", $id);
+      $stmt->execute();
+      $itinerary = $stmt->get_result();
 
-      while ($day = mysqli_fetch_assoc($itinerary)) {
+      while ($day = $itinerary->fetch_assoc()) {
       ?>
         <div class="itinerary-day">
-          <h3>Day <?= $day['day_number']; ?>: <?= htmlspecialchars($day['title']); ?></h3>
+          <h3>Day <?= (int)$day['day_number']; ?>: <?= htmlspecialchars($day['title']); ?></h3>
           <p><?= nl2br(htmlspecialchars($day['description'])); ?></p>
         </div>
       <?php } ?>
@@ -302,31 +322,24 @@ if (!$tour) {
       <a href="download-pdf?file=<?= urlencode($tour['pdf_file']); ?>" class="download-btn">
         <i class="fas fa-file-pdf"></i> Download PDF
       </a>
-
     </div>
 
     <div class="price-box sidebar-price">
 
       <h3>Trip Cost</h3>
 
-      <!-- ORIGINAL PRICE (optional for discount) -->
       <?php if (!empty($tour['old_price'])): ?>
-        <p class="old-price">NPR <?= $tour['old_price'] ?></p>
+        <p class="old-price">NPR <?= htmlspecialchars($tour['old_price']) ?></p>
       <?php endif; ?>
 
-      <!-- CURRENT PRICE -->
       <p class="current-price">
-        NPR <?= $tour['price'] ?>
-        <span>| USD $<?= $tour['price_usd'] ?> PP</span>
+        NPR <?= htmlspecialchars($tour['price']) ?>
+        <span>| USD $<?= htmlspecialchars($tour['price_usd']) ?> PP</span>
       </p>
 
-      <!-- DISCOUNT BADGE -->
-      <?php if (!empty($tour['old_price'])):
-        $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
-      ?>
-        <span class="discount-badge">
-          <?= $discount ?>% OFF
-        </span>
+      <?php if (!empty($tour['old_price']) && (float)$tour['old_price'] > 0): ?>
+        <?php $discount = round((((float)$tour['old_price'] - (float)$tour['price']) / (float)$tour['old_price']) * 100); ?>
+        <span class="discount-badge"><?= $discount ?>% OFF</span>
       <?php endif; ?>
 
       <div class="group-discount">
@@ -337,53 +350,29 @@ if (!$tour) {
         </ul>
       </div>
 
-      <!-- EXTRA INFO -->
       <ul class="price-features">
         <li><i class="fa fa-check"></i> Best price guarantee</li>
         <li><i class="fa fa-check"></i> No hidden charges</li>
         <li><i class="fa fa-check"></i> Instant confirmation</li>
       </ul>
 
-      <!-- NOTE -->
-      <p class="note">
-        * Final price may vary based on taxes and travelers.
-      </p>
+      <p class="note">* Final price may vary based on taxes and travelers.</p>
 
-      <a href="booking?id=<?= $tour['id'] ?>" class="download-btn booking">
-        Book Now
-      </a>
-
+      <a href="booking?id=<?= (int)$tour['id'] ?>" class="download-btn booking">Book Now</a>
     </div>
-
 
     <div class="map-box sidebar-map">
       <h3>Trip Location</h3>
-
       <div id="map" style="height:300px;"></div>
     </div>
-
-
-    <!-- <div class="download-box sidebar-download">
-      <h3>Book Package</h3>
-      <p>Secure your spot on this amazing trip!</p>
-
-      <a href="booking?id=<?= $tour['id'] ?>" class="download-btn">
-        Book Now
-      </a>
-      <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
-        Book Now
-      </a>
-    </div> -->
 
     <div class="inquiry-box sidebar-inquiry">
       <h3>Trip Inquiry</h3>
 
       <form method="POST" id="userForm" novalidate>
-
-        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-
-        <input type="hidden" name="tour_name" value="<?= $tour['title']; ?>">
-        <input type="hidden" name="trip_id" value="<?= $tour['id']; ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+        <input type="hidden" name="tour_name" value="<?= htmlspecialchars($tour['title']); ?>">
+        <input type="hidden" name="trip_id" value="<?= (int)$tour['id']; ?>">
 
         <div class="form-group">
           <input type="text" name="name" id="name" placeholder="Full Name">
@@ -407,7 +396,6 @@ if (!$tour) {
 
         <button type="submit" name="send_inquiry">Send Inquiry</button>
       </form>
-
     </div>
 
   </div>
@@ -421,22 +409,16 @@ if (!$tour) {
       </div>
 
       <form method="POST" class="review-form" id="reviewForm" novalidate>
-
-        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-        <input type="hidden" name="trip_id" value="<?= $tour['id'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+        <input type="hidden" name="trip_id" value="<?= (int)$tour['id'] ?>">
 
         <div class="form-group">
-          <input
-            type="text"
-            name="name"
-            placeholder="Full name"
-            id="reviewName">
+          <input type="text" name="name" placeholder="Full name" id="reviewName"
+            value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>">
           <small class="error"></small>
         </div>
 
         <div class="form-group">
-          <!-- <label>Your Rating</label> -->
-
           <div class="star-rating">
             <input type="radio" id="star5" name="rating" value="5">
             <label for="star5"><i class="fa-solid fa-star"></i></label>
@@ -453,65 +435,47 @@ if (!$tour) {
             <input type="radio" id="star1" name="rating" value="1">
             <label for="star1"><i class="fa-solid fa-star"></i></label>
           </div>
-
           <small class="error"></small>
         </div>
 
         <div class="form-group">
-          <textarea
-            id="review"
-            name="review"
-            rows="5"
-            placeholder="Tell us about your experience..."></textarea>
+          <textarea id="review" name="review" rows="5" placeholder="Tell us about your experience..."></textarea>
           <small class="error"></small>
         </div>
 
         <?php if (isset($_SESSION['user_id'])) { ?>
-          <button type="submit" name="submit_review">
-            Submit Review
-          </button>
+          <button type="submit" name="submit_review">Submit Review</button>
         <?php } else { ?>
-          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">
-            Submit Review
-          </a>
+          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">Submit Review</a>
         <?php } ?>
-
       </form>
 
       <?php
+      $stmt = $conn->prepare("
+        SELECT * FROM trip_reviews
+        WHERE trip_id = ? AND status = 1
+        ORDER BY created_at DESC
+      ");
+      $stmt->bind_param("i", $id);
+      $stmt->execute();
+      $reviews = $stmt->get_result();
 
-      $reviews = mysqli_query(
-        $conn,
-        "SELECT *
-     FROM trip_reviews
-     WHERE trip_id = $id
-     AND status = 1
-     ORDER BY created_at DESC"
-      );
-
-      while ($review = mysqli_fetch_assoc($reviews)):
+      while ($review = $reviews->fetch_assoc()):
       ?>
-
         <div class="review-card">
-
           <h4><?= htmlspecialchars($review['name']) ?></h4>
-          <small><?= $review['created_at'] ?></small>
-
+          <small><?= htmlspecialchars($review['created_at']) ?></small>
 
           <div class="stars">
-            <?= str_repeat('<i class="fa-solid fa-star"></i>', $review['rating']) ?>
+            <?= str_repeat('<i class="fa-solid fa-star"></i>', (int)$review['rating']) ?>
           </div>
 
           <p><?= nl2br(htmlspecialchars($review['review'])) ?></p>
-
         </div>
-
       <?php endwhile; ?>
 
     </div>
   </section>
-
-
 
 </section>
 
@@ -519,27 +483,31 @@ if (!$tour) {
 <section class="container recommend-section">
 
   <h3>Recommended for You</h3>
+  <!-- <p class="recommend-subtitle">Powered by our hybrid recommendation engine - blending your browsing habits, similar travelers' bookings, and Bayesian-weighted ratings.</p> -->
 
   <div class="recommend-grid">
 
     <?php while ($row = $recommended->fetch_assoc()): ?>
 
       <div class="recommend-card">
-        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
+        <img src="admin/uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
 
-        <h4><?= $row['title'] ?></h4>
+        <h4><?= htmlspecialchars($row['title']) ?></h4>
 
         <div class="recommend-info">
-          <p><i class="fa-solid fa-clock"></i> <?= $row['duration'] ?></p>
+          <p><i class="fa-solid fa-clock"></i> <?= htmlspecialchars($row['duration']) ?></p>
+          <p class="recommend-rating">
+            <i class="fa-solid fa-star"></i> <?= number_format($row['bayesian_rating'], 1) ?>
+            <span>(<?= (int)$row['review_count'] ?>)</span>
+          </p>
         </div>
 
         <p class="current-price recommend-price">
-          NPR <?= $row['price'] ?>
-          <span>| USD $<?= $row['price_usd'] ?> PP</span>
+          NPR <?= htmlspecialchars($row['price']) ?>
+          <span>| USD $<?= htmlspecialchars($row['price_usd']) ?> PP</span>
         </p>
 
-        <!-- <a href="tour-details?id=<?= $row['id'] ?>">View</a> -->
-        <a href="tour-details?id=<?= $row['id'] ?>&rec=1">View</a>
+        <a href="tour-details?id=<?= (int)$row['id'] ?>&rec=1">View</a>
       </div>
 
     <?php endwhile; ?>
@@ -554,10 +522,10 @@ if (!$tour) {
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-  const currentTripId = <?= $current_tour_id ?>;
-  const latitude = <?= $latitude ?>;
-  const longitude = <?= $longitude ?>;
-  const locationName = "<?= addslashes($location_name) ?>";
+  const currentTripId = <?= (int)$current_tour_id ?>;
+  const latitude = <?= json_encode((float)$latitude) ?>;
+  const longitude = <?= json_encode((float)$longitude) ?>;
+  const locationName = <?= json_encode($location_name) ?>;
 </script>
 
 <script src="api/tripMap.js"></script>
