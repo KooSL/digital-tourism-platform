@@ -88,8 +88,15 @@
   padding: 20px;
 } */
 
-.recommend-section h3 {
+.recommend-section h3, .nearby-section h3 {
   text-align: center;
+  color: var(--blue);
+}
+
+.recommend-subtitle{
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
 }
 
 .recommend-grid {

@@ -223,7 +223,7 @@ $result = $stmt->get_result();
               <span>| USD $<?= $row['price_usd'] ?> PP</span>
             </p>
 
-            <a href="tour-details?id=<?= $row['id'] ?>" class="btn">
+            <a href="tour-details?slug=<?= $row['slug'] ?>&id=<?= $row['id'] ?>" class="btn">
               View Details
             </a>
           </div>

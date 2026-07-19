@@ -14,9 +14,9 @@
   margin-bottom: 10px;
 }
 
-.review-header h2 {
+.review-header h3 {
   /* font-size: 32px; */
-  color: #1f2937;
+  color: var(--blue);
   /* margin-bottom: 10px; */
 }
 

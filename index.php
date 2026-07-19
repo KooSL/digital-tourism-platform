@@ -16,8 +16,9 @@ if (isset($_GET['i'])) {
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<?php include 'config/db.php';
-include 'api/recommendation.php';
+<?php
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/api/recommendation.php';
 ?>
 
 <!-- HERO SECTION -->
@@ -29,9 +30,12 @@ include 'api/recommendation.php';
         <div class="success-box" id="successBox">
           <strong>Success!</strong>
           <?php
-          if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
-          if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
-          if ($_GET['success'] === 'signout') echo "You have been signed out successfully.";
+          $homeSuccessMsgs = [
+            'signin'  => "Sign in successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
+            'signup'  => "Sign Up successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
+            'signout' => "You have been signed out successfully.",
+          ];
+          echo $homeSuccessMsgs[$_GET['success']] ?? '';
           ?>
         </div>
       <?php endif; ?>
@@ -39,13 +43,9 @@ include 'api/recommendation.php';
       <?php if (isset($_GET['error'])): ?>
         <div class="error-box" id="errorBox">
           <strong>Error!</strong>
-          <?php
-          if ($_GET['error'] === 'error') echo "Something went wrong!";
-          ?>
+          <?php if ($_GET['error'] === 'error') echo "Something went wrong!"; ?>
         </div>
       <?php endif; ?>
-
-      <!-- <img src="assets/images/logo/airplane-icon_white.png" class="airplane-icon" alt="Airplane"> -->
 
       <div class="hero-search">
         <form class="search-bar">
@@ -57,219 +57,39 @@ include 'api/recommendation.php';
         <div id="searchResults" class="search-results"></div>
       </div>
 
-      <!-- <p class="hero-lgt">Jane Vaye Jaam Maya, <br>Ghumera Aam Maya</p> -->
-
-      <!-- <div class="view-btn">
-        <a href="tours.php" class="btn-primary-vtp">View Tour Packages</a>
-      </div> -->
-
     </div>
   </div>
 </section>
 
 <?php
-
-$recommendedTours = [];
-
-
-/*
- Logged in user:
- use recommendation engine
-*/
-if (isset($_SESSION['user_id'])) {
-
-
-  $user_id = $_SESSION['user_id'];
-
-
-  $sql = "
-    SELECT t.*,
-
-    (
-        -- POPULAR
-        (CASE 
-            WHEN t.is_popular = 1 
-            THEN 15 
-            ELSE 0 
-        END)
-
-
-        +
-
-        -- RECENT
-        (CASE
-            WHEN t.created_at >= NOW() - INTERVAL 7 DAY
-            THEN 10
-            ELSE 0
-        END)
-
-
-        +
-
-        -- BOOKING POPULARITY
-        (COUNT(pb.id) * 2)
-
-
-        +
-
-        -- RATINGS
-        (
-            SELECT IFNULL(AVG(tr.rating),0) * 5
-            FROM trip_reviews tr
-            WHERE tr.trip_id=t.id
-            AND tr.status=1
-        )
-
-
-        +
-
-        -- REVIEW COUNT
-        (
-            SELECT LEAST(COUNT(tr.id),20)
-            FROM trip_reviews tr
-            WHERE tr.trip_id=t.id
-            AND tr.status=1
-        )
-
-
-        +
-
-        -- USER HISTORY
-        (CASE
-            WHEN t.id IN
-            (
-                SELECT package_id
-                FROM user_activity
-                WHERE user_id=$user_id
-            )
-            THEN 20
-            ELSE 0
-        END)
-
-
-    ) AS score
-
-
-    FROM tours t
-
-
-    LEFT JOIN package_bookings pb
-    ON t.id = pb.package_id
-
-
-    WHERE t.status=1
-
-
-    GROUP BY t.id
-
-
-    ORDER BY score DESC
-
-
-    LIMIT 6
-    ";
-} else {
-
-
-  /*
-    Guest user
-    */
-
-  $sql = "
-
-    SELECT t.*,
-
-    (
-
-        (CASE
-            WHEN t.is_popular=1
-            THEN 20
-            ELSE 0
-        END)
-
-
-        +
-
-
-        (CASE
-            WHEN t.created_at >= NOW() - INTERVAL 7 DAY
-            THEN 15
-            ELSE 0
-        END)
-
-
-        +
-
-
-        (
-            SELECT IFNULL(AVG(tr.rating),0)*5
-            FROM trip_reviews tr
-            WHERE tr.trip_id=t.id
-            AND tr.status=1
-        )
-
-
-        +
-
-
-        (
-            SELECT LEAST(COUNT(tr.id),20)
-            FROM trip_reviews tr
-            WHERE tr.trip_id=t.id
-            AND tr.status=1
-        )
-
-
-        +
-
-        (COUNT(pb.id)*2)
-
-
-    ) AS score
-
-
-    FROM tours t
-
-
-    LEFT JOIN package_bookings pb
-    ON t.id=pb.package_id
-
-
-    WHERE t.status=1
-
-
-    GROUP BY t.id
-
-
-    ORDER BY score DESC
-
-
-    LIMIT 5
-
-    ";
-}
-
-
-
-$recommendedTours = mysqli_query($conn, $sql);
-
+// ---------------------------------------------------------------------------
+// Homepage "Explore Our Latest and Popular Packages" now uses the SAME
+// hybrid recommendation engine as the tour-details page (api/recommendation.php)
+// instead of two separate hand-written SQL scoring blocks (one for logged-in
+// users, one for guests). See getHomepageRecommendations() for how logged-in
+// personalization vs. guest fallback is handled internally.
+//
+// Bonus: this also fixes the old N+1 query problem where every single tour
+// card ran its own extra "SELECT AVG(rating)..." query in the loop below -
+// the engine now returns bayesian_rating + review_count already attached
+// to each row from ONE aggregated query.
+// ---------------------------------------------------------------------------
+$homepageLimit = isset($_SESSION['user_id']) ? 6 : 5;
+$recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
 ?>
 
 <section class="home-tours recommendation-section">
 
   <div class="container">
 
-
     <h2 class="section-title">
       Explore Our Latest and Popular Packages
     </h2>
-
 
     <p class="section-subtitle-explore">
       Digital Tourism Platform offers carefully designed packages focusing on comfort,
       safety, and unforgettable travel experiences.
     </p>
-
 
     <div class="tour-slider-wrapper">
 
@@ -277,112 +97,69 @@ $recommendedTours = mysqli_query($conn, $sql);
         <i class="fas fa-chevron-left"></i>
       </button>
 
-
       <div class="tour-slider-viewport">
 
         <div class="tour-slider-track">
 
-
-          <?php while ($tour = mysqli_fetch_assoc($recommendedTours)): ?>
-
+          <?php while ($tour = $recommendedTours->fetch_assoc()): ?>
 
             <div class="tour-card">
 
-
               <div class="tour-card-img">
 
-
                 <?php if ($tour['is_popular'] == 1): ?>
-
                   <span class="popular-badge-home">
                     <i class="fa-solid fa-fire"></i> Popular
                   </span>
-
                 <?php endif; ?>
 
-
                 <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
-
                   <span class="latest-badge-home">
                     <i class="fa-solid fa-star"></i> Latest
                   </span>
-
                 <?php endif; ?>
 
-                <?php
-                $tripId = $tour['id'];
-                $avg = mysqli_query(
-                  $conn,
-                  "SELECT
-                  ROUND(AVG(rating),1) AS avg_rating,
-                  COUNT(*) AS total_reviews
-                    FROM trip_reviews
-                    WHERE trip_id = $tripId
-                    AND status = 1"
-                );
-                $ratingData = mysqli_fetch_assoc($avg); ?>
-
                 <div class="trip-card-banner-img">
-                  <img src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>">
+                  <img src="admin/uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
+                    alt="<?= htmlspecialchars($tour['title']); ?>">
                   <div class="image-bottom-fade"></div>
                 </div>
 
-                <?php if (!empty($tour['old_price'])):
-                  $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
+                <?php if (!empty($tour['old_price']) && (float)$tour['old_price'] > 0):
+                  $discount = round((((float)$tour['old_price'] - (float)$tour['price']) / (float)$tour['old_price']) * 100);
                 ?>
                   <span class="discount-badge home">
                     <?= $discount ?>% OFF
                   </span>
                 <?php endif; ?>
 
-
-                <div class="rating-summary home">
-                  <a href="tour-details?id=<?= $tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-                    (<?= $ratingData['total_reviews'] ?> reviews)</a>
+                <div class="rating-summary home" title="Bayesian-weighted rating">
+                  <a href="tour-details?id=<?= (int)$tour['id'] ?>#reviews">
+                    <i class="fa-solid fa-star"></i> <?= number_format($tour['bayesian_rating'], 1) ?>
+                    (<?= (int)$tour['review_count'] ?> reviews)
+                  </a>
                 </div>
 
               </div>
 
-
               <div class="tour-info">
-
-
-                <h3>
-                  <?= htmlspecialchars($tour['title']) ?>
-                </h3>
-
-
+                <h3><?= htmlspecialchars($tour['title']) ?></h3>
 
                 <p class="current-price price home">
-
-                  NPR <?= $tour['price'] ?>
-
-                  <span>
-                    | USD $<?= $tour['price_usd'] ?> PP
-                  </span>
-
+                  NPR <?= htmlspecialchars($tour['price']) ?>
+                  <span>| USD $<?= htmlspecialchars($tour['price_usd']) ?> PP</span>
                 </p>
-
-
-
               </div>
-
-
 
               <div class="tour-card-btn">
-
-                <a href="tour-details?id=<?= $tour['id'] ?>">
+                <a href="tour-details?slug=<?= htmlspecialchars($tour['slug']) ?>&id=<?= (int)$tour['id'] ?>">
                   View Details
                 </a>
-
               </div>
-
 
             </div>
 
-
           <?php endwhile; ?>
-
 
         </div>
 
@@ -401,177 +178,6 @@ $recommendedTours = mysqli_query($conn, $sql);
   </div>
 
 </section>
-
-<!-- POPULAR TOURS -->
-<!-- <section class="home-tours">
-  <div class="container">
-
-    <h2 class="section-title">Explore Our Latest and Popular Packages</h2>
-    <p class="section-subtitle-explore">
-      Digital Tourism Platform offers carefully designed packages focusing on comfort,
-      safety, and unforgettable travel experiences.
-    </p>
-
-    <h2 class="section-title type">Our Domestic Packages</h2>
-
-    <div class="tour-slider-wrapper">
-
-      <button class="slider-btn prev domestic-prev">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-
-      <div class="tour-slider-viewport">
-        <div class="tour-slider-track domestic-track">
-
-          <?php
-          $domestic = mysqli_query(
-            $conn,
-            "SELECT * FROM tours 
-             WHERE status = 1 AND type = 'domestic' 
-             ORDER BY is_popular DESC, created_at DESC"
-          );
-
-          while ($tour = mysqli_fetch_assoc($domestic)) {
-
-            $tripId = $tour['id'];
-            $avg = mysqli_query(
-              $conn,
-              "SELECT
-                  ROUND(AVG(rating),1) AS avg_rating,
-                  COUNT(*) AS total_reviews
-              FROM trip_reviews
-              WHERE trip_id = $tripId
-              AND status = 1"
-            );
-            $ratingData = mysqli_fetch_assoc($avg);
-
-          ?>
-            <div class="tour-card">
-              <div class="tour-card-img">
-                <?php if ($tour['is_popular'] == 1): ?>
-                  <span class="popular-badge-home">
-                    <i class="fa-solid fa-fire"></i> Popular
-                  </span>
-                <?php endif; ?>
-
-                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
-                  <span class="latest-badge-home">
-                    <i class="fa-solid fa-star"></i> Latest
-                  </span>
-                <?php endif; ?>
-
-                <?php if (!empty($tour['old_price'])):
-                  $discount = round((($tour['old_price'] - $tour['price']) / $tour['old_price']) * 100);
-                ?>
-                  <span class="discount-badge home">
-                    <?= $discount ?>% OFF
-                  </span>
-                <?php endif; ?>
-
-                <div class="rating-summary home">
-                  <i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-                  (<?= $ratingData['total_reviews'] ?> reviews)
-                </div>
-
-                <img
-                  src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>"
-                  alt="<?= htmlspecialchars($tour['title']); ?>">
-              </div>
-
-              <div class="tour-info">
-                <h3><?= htmlspecialchars($tour['title']); ?></h3>
-
-                <p class="current-price price">
-                  NPR <?= htmlspecialchars($tour['price']); ?>
-                  <span>| USD $<?= htmlspecialchars($tour['price_usd']); ?> PP</span>
-                </p>
-
-
-              </div>
-
-              <div class="tour-card-btn">
-                <a href="tour-details?id=<?= $tour['id']; ?>">View Details</a>
-              </div>
-            </div>
-          <?php } ?>
-
-        </div>
-      </div>
-
-      <button class="slider-btn next domestic-next">
-        <i class="fas fa-chevron-right"></i>
-      </button>
-
-    </div>
-
-
-    <h2 class="section-title type">Our International Packages</h2>
-
-    <div class="tour-slider-wrapper">
-
-      <button class="slider-btn prev international-prev">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-
-      <div class="tour-slider-viewport">
-        <div class="tour-slider-track international-track">
-
-          <?php
-          $international = mysqli_query(
-            $conn,
-            "SELECT * FROM tours 
-             WHERE status = 1 AND type = 'international' 
-             ORDER BY is_popular DESC, created_at DESC"
-          );
-
-          while ($tour = mysqli_fetch_assoc($international)) {
-          ?>
-            <div class="tour-card">
-              <div class="tour-card-img">
-                <?php if ($tour['is_popular'] == 1): ?>
-                  <span class="popular-badge-home">
-                    <i class="fa-solid fa-fire"></i> Popular
-                  </span>
-                <?php endif; ?>
-
-                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
-                  <span class="latest-badge-home">
-                    <i class="fa-solid fa-star"></i> Latest
-                  </span>
-                <?php endif; ?>
-
-                <img
-                  src="admin/uploads/images/tours/<?= $tour['banner_image']; ?>"
-                  alt="<?= htmlspecialchars($tour['title']); ?>">
-              </div>
-
-              <div class="tour-info">
-                <h3><?= htmlspecialchars($tour['title']); ?></h3>
-                <p>NPR <?= htmlspecialchars($tour['price']); ?> | USD $<?= htmlspecialchars($tour['price_usd']); ?></p>
-              </div>
-
-              <div class="tour-card-btn">
-                <a href="tour-details?id=<?= $tour['id']; ?>">View Details</a>
-              </div>
-            </div>
-          <?php } ?>
-
-        </div>
-      </div>
-
-      <button class="slider-btn next international-next">
-        <i class="fas fa-chevron-right"></i>
-      </button>
-
-    </div>
-
-    <div class="center-btn">
-      <a href="tours" class="btn-primary-em">Explore More</a>
-    </div>
-
-  </div>
-</section> -->
-
 
 <!-- INTERNATIONAL FLIGHTS -->
 <section class="home-flights">
@@ -581,16 +187,12 @@ $recommendedTours = mysqli_query($conn, $sql);
       Best airfare deals with professional ticketing assistance
     </p>
 
-
-
     <div class="flight-slider-wrapper">
 
-      <!-- PREV BUTTON -->
       <button class="slider-btn prev" id="flightPrevBtn">
         <i class="fas fa-chevron-left"></i>
       </button>
 
-      <!-- VIEWPORT -->
       <div class="flight-slider-viewport">
         <div class="flight-slider-track" id="flightTrack">
 
@@ -611,8 +213,8 @@ $recommendedTours = mysqli_query($conn, $sql);
                   </span>
                 <?php endif; ?>
 
-                <img src="admin/uploads/images/flights/<?= $flight['image']; ?>"
-                  alt="<?= $flight['from_city'] . ' to ' . $flight['to_city']; ?>">
+                <img src="admin/uploads/images/flights/<?= htmlspecialchars($flight['image']); ?>"
+                  alt="<?= htmlspecialchars($flight['from_city'] . ' to ' . $flight['to_city']); ?>">
 
               </div>
 
@@ -622,17 +224,7 @@ $recommendedTours = mysqli_query($conn, $sql);
                   <?= htmlspecialchars($flight['to_city']); ?>
                 </h3>
 
-                <!-- Optional Description -->
-                <!-- <p><?= htmlspecialchars($flight['description']); ?></p> -->
-
-                <!-- Price -->
-                <!-- <?php if ($flight['price']) { ?>
-              <p><strong>From:</strong> <?= $flight['price']; ?></p>
-            <?php } ?> -->
-
-                <!-- Details Page -->
-                <a href="flight-details?id=<?= $flight['id']; ?>"
-                  class="btn-primary">
+                <a href="flight-details?id=<?= (int)$flight['id']; ?>" class="btn-primary">
                   View Details
                 </a>
               </div>
@@ -642,7 +234,6 @@ $recommendedTours = mysqli_query($conn, $sql);
         </div>
       </div>
 
-      <!-- NEXT BUTTON -->
       <button class="slider-btn next" id="flightNextBtn">
         <i class="fas fa-chevron-right"></i>
       </button>
@@ -663,8 +254,6 @@ $recommendedTours = mysqli_query($conn, $sql);
     <p class="section-subtitle">Complete travel services under one roof</p>
 
     <div class="services-grid">
-
-
 
       <div class="service-card">
         <span><i class="fa-solid fa-plane-departure" style="color: var(--blue);"></i></span>
@@ -713,7 +302,6 @@ $recommendedTours = mysqli_query($conn, $sql);
         <h3>Wildlife Activities</h3>
         <p>Jungle safari, wildlife tours & nature experiences.</p>
       </div>
-
 
     </div>
   </div>
@@ -764,32 +352,29 @@ $recommendedTours = mysqli_query($conn, $sql);
 
   <div class="marquee">
     <div class="marquee-track">
-      <!-- Repeat logos twice for seamless loop -->
-      <img src="assets/images/airlines/qatar.png" alt="">
-      <img src="assets/images/airlines/emirates.png" alt="">
-      <img src="assets/images/airlines/nepalairlines.png" alt="">
-      <img src="assets/images/airlines/flydubai.png" alt="">
-      <img src="assets/images/airlines/airindia.png" alt="">
-      <img src="assets/images/airlines/turkish.png" alt="">
-      <img src="assets/images/airlines/airasia.png" alt="">
-      <img src="assets/images/airlines/indigo.png" alt="">
-      <img src="assets/images/airlines/thaiairways.png" alt="">
+      <img src="assets/images/airlines/qatar.png" alt="Qatar Airways">
+      <img src="assets/images/airlines/emirates.png" alt="Emirates">
+      <img src="assets/images/airlines/nepalairlines.png" alt="Nepal Airlines">
+      <img src="assets/images/airlines/flydubai.png" alt="Fly Dubai">
+      <img src="assets/images/airlines/airindia.png" alt="Air India">
+      <img src="assets/images/airlines/turkish.png" alt="Turkish Airlines">
+      <img src="assets/images/airlines/airasia.png" alt="AirAsia">
+      <img src="assets/images/airlines/indigo.png" alt="IndiGo">
+      <img src="assets/images/airlines/thaiairways.png" alt="Thai Airways">
 
-
-      <!-- duplicate -->
-      <img src="assets/images/airlines/qatar.png" alt="">
-      <img src="assets/images/airlines/emirates.png" alt="">
-      <img src="assets/images/airlines/nepalairlines.png" alt="">
-      <img src="assets/images/airlines/flydubai.png" alt="">
-      <img src="assets/images/airlines/airindia.png" alt="">
-      <img src="assets/images/airlines/turkish.png" alt="">
-      <img src="assets/images/airlines/airasia.png" alt="">
-      <img src="assets/images/airlines/indigo.png" alt="">
-      <img src="assets/images/airlines/thaiairways.png" alt="">
+      <!-- duplicate for seamless loop -->
+      <img src="assets/images/airlines/qatar.png" alt="Qatar Airways">
+      <img src="assets/images/airlines/emirates.png" alt="Emirates">
+      <img src="assets/images/airlines/nepalairlines.png" alt="Nepal Airlines">
+      <img src="assets/images/airlines/flydubai.png" alt="Fly Dubai">
+      <img src="assets/images/airlines/airindia.png" alt="Air India">
+      <img src="assets/images/airlines/turkish.png" alt="Turkish Airlines">
+      <img src="assets/images/airlines/airasia.png" alt="AirAsia">
+      <img src="assets/images/airlines/indigo.png" alt="IndiGo">
+      <img src="assets/images/airlines/thaiairways.png" alt="Thai Airways">
     </div>
   </div>
 </section>
-
 
 <!-- TESTIMONIALS -->
 <section class="testimonials">
@@ -819,7 +404,7 @@ $recommendedTours = mysqli_query($conn, $sql);
 
             <div class="testimonial-card">
               <div class="stars">
-                <?= str_repeat('★', $t['rating']); ?>
+                <?= str_repeat('★', (int)$t['rating']); ?>
               </div>
 
               <p class="review">
@@ -892,7 +477,6 @@ $faqs = mysqli_query(
   });
 </script>
 
-
 <!-- WHY CHOOSE US -->
 <section class="why-us">
   <div class="container">
@@ -929,28 +513,16 @@ $faqs = mysqli_query(
   </div>
 </section>
 
-<!-- DESTINATIONS -->
-<!-- <section class="destinations">
-  <div class="container">
-
-    <h2 class="section-title">Top Destinations</h2>
-
-    <div class="destination-grid">
-      <div class="destination-card">Nepal</div>
-      <div class="destination-card">India</div>
-      <div class="destination-card">Dubai</div>
-      <div class="destination-card">Thailand</div>
-    </div>
-
-  </div>
-</section> -->
-
 <!-- HAPPY CLIENTS -->
 <?php
 $clients = mysqli_query(
   $conn,
   "SELECT * FROM clients WHERE status = 1 ORDER BY id DESC"
 );
+$clientRows = [];
+while ($c = mysqli_fetch_assoc($clients)) {
+  $clientRows[] = $c;
+}
 ?>
 
 <section class="happy-clients">
@@ -960,26 +532,20 @@ $clients = mysqli_query(
   <div class="client-marquee">
     <div class="client-marquee-track">
 
-      <?php while ($client = mysqli_fetch_assoc($clients)): ?>
-        <img
-          src="admin/uploads/images/clients/<?= $client['logo'] ?>"
+      <?php foreach ($clientRows as $client): ?>
+        <img src="admin/uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
           alt="<?= htmlspecialchars($client['name']) ?>">
-      <?php endwhile; ?>
+      <?php endforeach; ?>
 
       <!-- duplicate for smooth loop -->
-      <?php
-      mysqli_data_seek($clients, 0);
-      while ($client = mysqli_fetch_assoc($clients)):
-      ?>
-        <img
-          src="admin/uploads/images/clients/<?= $client['logo'] ?>"
+      <?php foreach ($clientRows as $client): ?>
+        <img src="admin/uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
           alt="<?= htmlspecialchars($client['name']) ?>">
-      <?php endwhile; ?>
+      <?php endforeach; ?>
 
     </div>
   </div>
 </section>
-
 
 <!-- CTA -->
 <section class="home-cta">
@@ -999,9 +565,6 @@ $clients = mysqli_query(
 <script src="assets/js/statistics.js"></script>
 <script src="assets/js/airlines-slider.js"></script>
 <script src="assets/js/testimonial-slider.js"></script>
-<!-- <script src="assets/js/testimonial-btns.js"></script> -->
 <script src="assets/js/clients-slider.js"></script>
-
-
 
 <?php include 'includes/footer.php'; ?>

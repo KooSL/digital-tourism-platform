@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ============================================================================
  *  SMART HYBRID RECOMMENDATION ENGINE  (v2)
@@ -46,8 +47,9 @@ const REC_WEIGHTS = [
 const BAYESIAN_MIN_VOTES = 5;
 
 /**
- * Public entry point - kept the same name/signature so tour-details.php
- * does not need to change how it calls this file.
+ * Public entry point for the TOUR-DETAILS PAGE - "Recommended for You"
+ * relative to the tour currently being viewed. Kept the same name/signature
+ * so tour-details.php does not need to change how it calls this file.
  *
  * @return mysqli_result-like array-based result via a tiny wrapper so the
  *         calling code's `while ($row = $recommended->fetch_assoc())`
@@ -69,7 +71,40 @@ function getRecommendations($conn, $current_tour_id, $limit = 5)
 
     $scored = [];
     foreach ($candidates as $tour) {
-        $scored[] = scoreTour($tour, $tasteProfile, $coBooked, $globalStats, $currentTour);
+        $scored[] = scoreTour($tour, $tasteProfile, $coBooked, $globalStats);
+    }
+
+    usort($scored, fn($a, $b) => $b['_score'] <=> $a['_score']);
+
+    return new ArrayResult(array_slice($scored, 0, $limit));
+}
+
+/**
+ * Public entry point for the HOMEPAGE - "Explore Our Latest and Popular
+ * Packages". Same 5-signal hybrid model as getRecommendations(), but there
+ * is no single "tour being viewed" to anchor content-based similarity on,
+ * so instead:
+ *   - Logged-in users: taste profile is built purely from their OWN history
+ *     (views/time-spent/bookings/reviews) - no seed tour.
+ *   - Guests: no personalization is possible, so the content & collaborative
+ *     signals drop out and ranking falls back to popularity + Bayesian
+ *     rating + freshness (still far better than the old raw-AVG scoring).
+ *
+ * Replaces the two hand-written SQL scoring blocks that used to live
+ * directly in index.php.
+ */
+function getHomepageRecommendations($conn, $limit = 6)
+{
+    $user_id = $_SESSION['user_id'] ?? null;
+
+    $tasteProfile = $user_id ? buildUserTasteProfile($conn, $user_id, null) : null;
+    $coBooked     = $user_id ? getCollaborativeCandidates($conn, $user_id) : [];
+    $globalStats  = getGlobalRatingStats($conn);
+    $candidates   = fetchCandidateTours($conn, 0);
+
+    $scored = [];
+    foreach ($candidates as $tour) {
+        $scored[] = scoreTour($tour, $tasteProfile, $coBooked, $globalStats);
     }
 
     usort($scored, fn($a, $b) => $b['_score'] <=> $a['_score']);
@@ -95,21 +130,28 @@ function fetchCurrentTour($conn, $id)
  |     how strong that signal is (view count, time spent, bookings, ratings).
  |     This is far more representative of what the user actually likes.
  |-------------------------------------------------------------------------*/
-function buildUserTasteProfile($conn, $user_id, $currentTour)
+function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
 {
-    // Always seed the profile with the tour being viewed right now,
-    // so logged-out users / users with no history still get relevant results.
-    $profile = [
+    // If we have a tour the user is currently looking at (tour-details page),
+    // seed the profile with it so logged-out users / users with no history
+    // still get relevant results anchored to what they're viewing right now.
+    // On the homepage there is no such tour, so we start from an empty
+    // profile and rely entirely on the user's own history below.
+    $profile = $currentTour ? [
         'price'      => (float)$currentTour['price'],
         'durations'  => [$currentTour['duration'] => 1.0],
         'types'      => [$currentTour['type'] => 1.0],
+    ] : [
+        'price'      => 0.0,
+        'durations'  => [],
+        'types'      => [],
     ];
 
     if (!$user_id) {
         return $profile;
     }
 
-    $weightedPrices = [(float)$currentTour['price'] => 1.0];
+    $weightedPrices = $currentTour ? [(float)$currentTour['price'] => 1.0] : [];
 
     // --- Views (weighted by view_count) & Time spent (weighted by seconds)
     $stmt = $conn->prepare("
@@ -178,9 +220,29 @@ function buildUserTasteProfile($conn, $user_id, $currentTour)
     foreach ($weightedPrices as $price => $w) {
         $sumWP += $price * $w;
     }
-    $profile['price'] = $sumW > 0 ? $sumWP / $sumW : (float)$currentTour['price'];
+    if ($sumW > 0) {
+        $profile['price'] = $sumWP / $sumW;
+    } elseif ($currentTour) {
+        $profile['price'] = (float)$currentTour['price'];
+    } else {
+        $profile['price'] = getAveragePriceAcrossTours($conn);
+    }
 
     return $profile;
+}
+
+/**
+ * Fallback target price when a homepage taste profile has zero signal
+ * (e.g. a logged-in user who hasn't viewed/booked/reviewed anything yet).
+ * Using the platform-wide average price is a reasonable neutral default -
+ * better than 0, which would make exp(-diff/6000) collapse to ~0 for
+ * every real tour and make the content signal meaningless.
+ */
+function getAveragePriceAcrossTours($conn)
+{
+    $res = mysqli_query($conn, "SELECT AVG(CAST(price AS DECIMAL(10,2))) AS avg_price FROM tours WHERE status = 1");
+    $row = mysqli_fetch_assoc($res);
+    return $row && $row['avg_price'] !== null ? (float)$row['avg_price'] : 0.0;
 }
 
 /* ---------------------------------------------------------------------------
@@ -275,10 +337,13 @@ function fetchCandidateTours($conn, $exclude_id)
             WHERE status = 1
             GROUP BY trip_id
         ) r ON r.trip_id = t.id
-        WHERE t.id != ? AND t.status = 1
-    ";
+        WHERE t.status = 1
+    " . ($exclude_id > 0 ? " AND t.id != ? " : "");
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $exclude_id);
+    if ($exclude_id > 0) {
+        $stmt->bind_param("i", $exclude_id);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -292,31 +357,56 @@ function fetchCandidateTours($conn, $exclude_id)
 /* ---------------------------------------------------------------------------
  |  6. SCORING
  |-------------------------------------------------------------------------*/
-function scoreTour($tour, $tasteProfile, $coBooked, $globalStats, $currentTour)
+function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalStats)
 {
     $price = (float)$tour['price'];
+    $hasProfile = $tasteProfile !== null;
 
     /* ---- Content-based similarity (0..1) ---------------------------- */
     // Smooth exponential decay instead of a hard ±5000 cutoff, so a tour
     // that's 5001 away isn't treated as "completely irrelevant".
-    $priceDiff  = abs($price - $tasteProfile['price']);
-    $priceScore = exp(-$priceDiff / 6000); // ~0.37 similarity at 6000 diff, ~0.03 at 20000
+    // No profile at all (guest on the homepage) -> no content signal.
+    if ($hasProfile) {
+        $priceDiff  = abs($price - $tasteProfile['price']);
+        $priceScore = exp(-$priceDiff / 6000); // ~0.37 similarity at 6000 diff, ~0.03 at 20000
 
-    $durationWeights = $tasteProfile['durations'];
-    $durationTotal    = array_sum($durationWeights) ?: 1;
-    $durationScore    = ($durationWeights[$tour['duration']] ?? 0) / $durationTotal;
+        $durationWeights = $tasteProfile['durations'];
+        $durationTotal    = array_sum($durationWeights) ?: 1;
+        $durationScore    = ($durationWeights[$tour['duration']] ?? 0) / $durationTotal;
 
-    $typeWeights = $tasteProfile['types'];
-    $typeTotal    = array_sum($typeWeights) ?: 1;
-    $typeScore    = ($typeWeights[$tour['type']] ?? 0) / $typeTotal;
+        $typeWeights = $tasteProfile['types'];
+        $typeTotal    = array_sum($typeWeights) ?: 1;
+        $typeScore    = ($typeWeights[$tour['type']] ?? 0) / $typeTotal;
 
-    $contentScore = (0.5 * $priceScore) + (0.3 * $durationScore) + (0.2 * $typeScore);
+        $contentScore = (0.5 * $priceScore) + (0.3 * $durationScore) + (0.2 * $typeScore);
+    } else {
+        $contentScore = 0;
+    }
 
     /* ---- Collaborative filtering (0..1) ------------------------------ */
     $maxCoBooked = $coBooked ? max($coBooked) : 0;
     $collabScore = $maxCoBooked > 0
         ? ($coBooked[(int)$tour['id']] ?? 0) / $maxCoBooked
         : 0;
+
+    // Weight redistribution: if there's no taste profile at all (guest,
+    // no session), the content+collaborative weight (0.30 + 0.20 = 0.50 by
+    // default) would otherwise just be thrown away, quietly making every
+    // guest's score out of only 0.50. Instead we spread it proportionally
+    // across the remaining signals so guest scores stay on the same 0..1
+    // scale and rank purely on popularity/rating/freshness.
+    $weights = REC_WEIGHTS;
+    if (!$hasProfile) {
+        $droppedWeight = $weights['content'] + $weights['collaborative'];
+        $remaining = $weights['popularity'] + $weights['rating'] + $weights['freshness'];
+        $weights['content'] = 0;
+        $weights['collaborative'] = 0;
+        if ($remaining > 0) {
+            $weights['popularity'] += $droppedWeight * ($weights['popularity'] / $remaining);
+            $weights['rating']     += $droppedWeight * ($weights['rating'] / $remaining);
+            $weights['freshness']  += $droppedWeight * ($weights['freshness'] / $remaining);
+        }
+    }
 
     /* ---- Popularity (0..1, log-dampened) ------------------------------ */
     $popularityRaw   = log(1 + (int)$tour['booking_count'] * 3 + (int)$tour['click_count']);
@@ -339,11 +429,11 @@ function scoreTour($tour, $tasteProfile, $coBooked, $globalStats, $currentTour)
     $manualBoost = ((int)$tour['is_popular'] === 1) ? 0.05 : 0;
 
     $finalScore =
-        (REC_WEIGHTS['content']       * $contentScore) +
-        (REC_WEIGHTS['collaborative'] * $collabScore) +
-        (REC_WEIGHTS['popularity']    * $popularityScore) +
-        (REC_WEIGHTS['rating']        * $ratingScore) +
-        (REC_WEIGHTS['freshness']     * $freshnessScore) +
+        ($weights['content']       * $contentScore) +
+        ($weights['collaborative'] * $collabScore) +
+        ($weights['popularity']    * $popularityScore) +
+        ($weights['rating']        * $ratingScore) +
+        ($weights['freshness']     * $freshnessScore) +
         $manualBoost;
 
     $tour['_score']            = $finalScore;
