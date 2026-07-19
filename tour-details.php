@@ -6,6 +6,7 @@ include 'includes/header.php'; ?>
 
 // Get tour ID from URL
 $id = intval($_GET['id'] ?? 0);
+$slug = $_GET['slug'] ?? '';
 
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -14,11 +15,12 @@ if (empty($_SESSION['csrf_token'])) {
 require_once __DIR__ . '/config/db.php';
 include 'includes/mailer.php';
 include 'api/recommendation.php'; // now also exposes bayesianRating(), getGlobalRatingStats()
+include 'api/nearby.php';         // Haversine-distance nearby packages (separate from recommendations)
 
 
 // Fetch tour details using prepared statement
-$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE id=? AND status=1");
-mysqli_stmt_bind_param($stmt, "i", $id);
+$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE id=? OR slug=? AND status=1");
+mysqli_stmt_bind_param($stmt, "is", $id, $slug);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
@@ -196,6 +198,7 @@ if (isset($_GET['rec']) && isset($_SESSION['user_id'])) {
 }
 
 $recommended = getRecommendations($conn, $tour['id']);
+$nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
 
 ?>
 
@@ -516,6 +519,55 @@ $recommended = getRecommendations($conn, $tour['id']);
 
 </section>
 
+<!-- ============================================================= -->
+<!--  NEARBY PACKAGES - server-rendered, based on THIS tour's own  -->
+<!--  destination coordinates (Haversine, no JS/location required) -->
+<!-- ============================================================= -->
+<?php if ($nearbyByDestination->count() > 0): ?>
+  <section class="container nearby-section">
+
+    <h3>Nearby <?= htmlspecialchars($tour['location_name'] ?: 'This Destination') ?></h3>
+    <p class="recommend-subtitle">Other packages close to <?= htmlspecialchars($tour['location_name'] ?: 'this destination') ?></p>
+
+    <div class="recommend-grid">
+      <?php while ($row = $nearbyByDestination->fetch_assoc()): ?>
+        <div class="recommend-card">
+          <img src="admin/uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
+
+          <h4><?= htmlspecialchars($row['title']) ?></h4>
+
+          <div class="recommend-info">
+            <p><i class="fa-solid fa-clock"></i> <?= htmlspecialchars($row['duration']) ?></p>
+            <p class="recommend-distance"><i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($row['distance_km']) ?> km away</p>
+          </div>
+
+          <p class="current-price recommend-price">
+            NPR <?= htmlspecialchars($row['price']) ?>
+            <span>| USD $<?= htmlspecialchars($row['price_usd']) ?> PP</span>
+          </p>
+
+          <a href="tour-details?id=<?= (int)$row['id'] ?>">View</a>
+        </div>
+      <?php endwhile; ?>
+    </div>
+
+  </section>
+<?php endif; ?>
+
+<!-- ============================================================= -->
+<!--  NEARBY PACKAGES - based on the VISITOR's own live location   -->
+<!--  (browser geolocation -> api/nearby-user.php -> Haversine)    -->
+<!-- ============================================================= -->
+<section class="container nearby-section">
+
+  <h3>Packages Near You</h3>
+  <p class="recommend-subtitle">Based on your current location.</p>
+
+  <p id="nearbyStatus" class="nearby-status">Detecting your location...</p>
+  <div id="nearbyGrid" class="recommend-grid" data-exclude-id="<?= (int)$tour['id'] ?>"></div>
+
+</section>
+
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/review-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
@@ -531,5 +583,6 @@ $recommended = getRecommendations($conn, $tour['id']);
 <script src="api/tripMap.js"></script>
 <script src="api/weather.js"></script>
 <script src="assets/js/track-time.js"></script>
+<script src="assets/js/nearby-packages.js"></script>
 
 <?php include 'includes/footer.php'; ?>
