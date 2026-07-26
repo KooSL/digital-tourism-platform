@@ -4,144 +4,167 @@ include 'auth.php';
 include '../includes/blog-functions.php';
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 /* DELETE */
 if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $img = mysqli_fetch_assoc(mysqli_query($conn, "SELECT cover_image FROM blogs WHERE id=$id"));
-    if ($img && $img['cover_image']) {
-        @unlink("uploads/images/blogs/" . $img['cover_image']);
-    }
-    if (mysqli_query($conn, "DELETE FROM blogs WHERE id=$id")) {
-        $_SESSION['success'] = "Blog post deleted successfully.";
-    } else {
-        $_SESSION['error'] = "Failed to delete blog post.";
-    }
-    header("Location: manage-blogs" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
-    exit;
+  $id = (int)$_GET['delete'];
+  $img = mysqli_fetch_assoc(mysqli_query($conn, "SELECT cover_image FROM blogs WHERE id=$id"));
+  if ($img && $img['cover_image']) {
+    @unlink("../uploads/images/blogs/" . $img['cover_image']);
+  }
+  if (mysqli_query($conn, "DELETE FROM blogs WHERE id=$id")) {
+    $_SESSION['success'] = "Blog post deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete blog post.";
+  }
+  header("Location: manage-blogs" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
+  exit;
 }
 
 /* ADD */
 if (isset($_POST['submit'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
-    }
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
 
-    $title            = trim($_POST['title']);
-    $category_id      = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-    $author           = trim($_POST['author']) ?: 'DTP Team';
-    $excerpt          = trim($_POST['excerpt']);
-    $content          = $_POST['content'];
-    $tags             = trim($_POST['tags']);
-    $meta_title       = trim($_POST['meta_title']);
-    $meta_description = trim($_POST['meta_description']);
-    $meta_keywords    = trim($_POST['meta_keywords']);
-    $is_featured      = (int)$_POST['is_featured'];
-    $status           = (int)$_POST['status'];
+  $title            = trim($_POST['title']);
+  $category_id      = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
+  $author           = trim($_POST['author']) ?: 'DTP Team';
+  $excerpt          = trim($_POST['excerpt']);
+  $content          = $_POST['content'];
+  $tags             = trim($_POST['tags']);
+  $meta_title       = trim($_POST['meta_title']);
+  $meta_description = trim($_POST['meta_description']);
+  $meta_keywords    = trim($_POST['meta_keywords']);
+  $is_featured      = (int)$_POST['is_featured'];
+  $status           = (int)$_POST['status'];
 
-    if ($title === '' || $content === '' || empty($_FILES['cover_image']['name'])) {
-        $_SESSION['error'] = "Title, content and cover image are required.";
-        $_SESSION['reopen_modal'] = 'addModal';
-    } else {
-        $slug = generateSlug($title, $conn);
-        if ($excerpt === '') $excerpt = autoExcerpt($content, 160);
+  if ($title === '' || $content === '' || empty($_FILES['cover_image']['name'])) {
+    $_SESSION['error'] = "Title, content and cover image are required.";
+    $_SESSION['reopen_modal'] = 'addModal';
+  } else {
+    $slug = generateSlug($title, $conn);
+    if ($excerpt === '') $excerpt = autoExcerpt($content, 160);
 
-        $cover = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['cover_image']['name']);
-        move_uploaded_file($_FILES['cover_image']['tmp_name'], "uploads/images/blogs/" . $cover);
+    $cover = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['cover_image']['name']);
+    move_uploaded_file($_FILES['cover_image']['tmp_name'], "../uploads/images/blogs/" . $cover);
 
-        $stmt = $conn->prepare("
+    $stmt = $conn->prepare("
             INSERT INTO blogs
             (title, slug, category_id, author, cover_image, excerpt, content, tags, meta_title, meta_description, meta_keywords, is_featured, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param(
-            "ssissssssssii",
-            $title, $slug, $category_id, $author, $cover, $excerpt, $content, $tags,
-            $meta_title, $meta_description, $meta_keywords, $is_featured, $status
-        );
+    $stmt->bind_param(
+      "ssissssssssii",
+      $title,
+      $slug,
+      $category_id,
+      $author,
+      $cover,
+      $excerpt,
+      $content,
+      $tags,
+      $meta_title,
+      $meta_description,
+      $meta_keywords,
+      $is_featured,
+      $status
+    );
 
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Blog post added successfully.";
-        } else {
-            $_SESSION['error'] = "Error adding blog post.";
-        }
-        $stmt->close();
+    if ($stmt->execute()) {
+      $_SESSION['success'] = "Blog post added successfully.";
+    } else {
+      $_SESSION['error'] = "Error adding blog post.";
     }
+    $stmt->close();
+  }
 
-    header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* UPDATE */
 if (isset($_POST['update'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
+
+  $id = (int)$_POST['id'];
+  $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM blogs WHERE id=$id"));
+
+  if ($id <= 0 || !$data) {
+    $_SESSION['error'] = "Invalid blog post.";
+    $_SESSION['reopen_modal'] = 'editModal';
+    header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+    exit();
+  }
+
+  $title            = trim($_POST['title']);
+  $category_id      = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
+  $author           = trim($_POST['author']) ?: 'DTP Team';
+  $excerpt          = trim($_POST['excerpt']);
+  $content          = $_POST['content'];
+  $tags             = trim($_POST['tags']);
+  $meta_title       = trim($_POST['meta_title']);
+  $meta_description = trim($_POST['meta_description']);
+  $meta_keywords    = trim($_POST['meta_keywords']);
+  $is_featured      = (int)$_POST['is_featured'];
+  $status           = (int)$_POST['status'];
+
+  if ($title === '' || $content === '') {
+    $_SESSION['error'] = "Title and content are required.";
+    $_SESSION['reopen_modal'] = 'editModal';
+  } else {
+    $slug = $data['slug'];
+    if (strcasecmp($title, $data['title']) !== 0) {
+      $slug = generateSlug($title, $conn, $id);
+    }
+    if ($excerpt === '') $excerpt = autoExcerpt($content, 160);
+
+    $cover = $data['cover_image'];
+    if (!empty($_FILES['cover_image']['name'])) {
+      $cover = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['cover_image']['name']);
+      move_uploaded_file($_FILES['cover_image']['tmp_name'], "../uploads/images/blogs/" . $cover);
+      if ($data['cover_image']) @unlink("../uploads/images/blogs/" . $data['cover_image']);
     }
 
-    $id = (int)$_POST['id'];
-    $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM blogs WHERE id=$id"));
-
-    if ($id <= 0 || !$data) {
-        $_SESSION['error'] = "Invalid blog post.";
-        $_SESSION['reopen_modal'] = 'editModal';
-        header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-        exit();
-    }
-
-    $title            = trim($_POST['title']);
-    $category_id      = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-    $author           = trim($_POST['author']) ?: 'DTP Team';
-    $excerpt          = trim($_POST['excerpt']);
-    $content          = $_POST['content'];
-    $tags             = trim($_POST['tags']);
-    $meta_title       = trim($_POST['meta_title']);
-    $meta_description = trim($_POST['meta_description']);
-    $meta_keywords    = trim($_POST['meta_keywords']);
-    $is_featured      = (int)$_POST['is_featured'];
-    $status           = (int)$_POST['status'];
-
-    if ($title === '' || $content === '') {
-        $_SESSION['error'] = "Title and content are required.";
-        $_SESSION['reopen_modal'] = 'editModal';
-    } else {
-        $slug = $data['slug'];
-        if (strcasecmp($title, $data['title']) !== 0) {
-            $slug = generateSlug($title, $conn, $id);
-        }
-        if ($excerpt === '') $excerpt = autoExcerpt($content, 160);
-
-        $cover = $data['cover_image'];
-        if (!empty($_FILES['cover_image']['name'])) {
-            $cover = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['cover_image']['name']);
-            move_uploaded_file($_FILES['cover_image']['tmp_name'], "uploads/images/blogs/" . $cover);
-            if ($data['cover_image']) @unlink("uploads/images/blogs/" . $data['cover_image']);
-        }
-
-        $stmt = $conn->prepare("
+    $stmt = $conn->prepare("
             UPDATE blogs SET
             title=?, slug=?, category_id=?, author=?, cover_image=?,
             excerpt=?, content=?, tags=?, meta_title=?, meta_description=?,
             meta_keywords=?, is_featured=?, status=?
             WHERE id=?
         ");
-        $stmt->bind_param(
-            "ssissssssssiii",
-            $title, $slug, $category_id, $author, $cover, $excerpt, $content, $tags,
-            $meta_title, $meta_description, $meta_keywords, $is_featured, $status, $id
-        );
+    $stmt->bind_param(
+      "ssissssssssiii",
+      $title,
+      $slug,
+      $category_id,
+      $author,
+      $cover,
+      $excerpt,
+      $content,
+      $tags,
+      $meta_title,
+      $meta_description,
+      $meta_keywords,
+      $is_featured,
+      $status,
+      $id
+    );
 
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Blog post updated successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to update blog post.";
-        }
-        $stmt->close();
+    if ($stmt->execute()) {
+      $_SESSION['success'] = "Blog post updated successfully.";
+    } else {
+      $_SESSION['error'] = "Failed to update blog post.";
     }
+    $stmt->close();
+  }
 
-    header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-blogs" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* SEARCH + FILTER + PAGINATION */
@@ -155,25 +178,27 @@ $types = '';
 $params = [];
 
 if ($search !== '') {
-    $where[] = "(b.title LIKE ? OR b.author LIKE ? OR b.tags LIKE ?)";
-    $like = "%$search%";
-    $types .= 'sss';
-    $params[] = $like; $params[] = $like; $params[] = $like;
+  $where[] = "(b.title LIKE ? OR b.author LIKE ? OR b.tags LIKE ?)";
+  $like = "%$search%";
+  $types .= 'sss';
+  $params[] = $like;
+  $params[] = $like;
+  $params[] = $like;
 }
 if ($status !== null) {
-    $where[] = "b.status = ?";
-    $types .= 'i';
-    $params[] = $status;
+  $where[] = "b.status = ?";
+  $types .= 'i';
+  $params[] = $status;
 }
 if ($catId !== null) {
-    $where[] = "b.category_id = ?";
-    $types .= 'i';
-    $params[] = $catId;
+  $where[] = "b.category_id = ?";
+  $types .= 'i';
+  $params[] = $catId;
 }
 if ($featured !== null) {
-    $where[] = "b.is_featured = ?";
-    $types .= 'i';
-    $params[] = $featured;
+  $where[] = "b.is_featured = ?";
+  $types .= 'i';
+  $params[] = $featured;
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
@@ -207,10 +232,10 @@ $categoriesForAdd = mysqli_query($conn, "SELECT * FROM blog_categories ORDER BY 
 $categoriesForEdit = mysqli_query($conn, "SELECT * FROM blog_categories ORDER BY name ASC");
 
 $qsArray = array_filter([
-    'search' => $search,
-    'status' => $status !== null ? $status : '',
-    'category' => $catId !== null ? $catId : '',
-    'featured' => $featured !== null ? $featured : '',
+  'search' => $search,
+  'status' => $status !== null ? $status : '',
+  'category' => $catId !== null ? $catId : '',
+  'featured' => $featured !== null ? $featured : '',
 ], fn($v) => $v !== '');
 $qs = http_build_query($qsArray);
 
@@ -263,73 +288,77 @@ unset($_SESSION['reopen_modal']);
 
   <p class="result-count"><?= $totalRows ?> post<?= $totalRows == 1 ? '' : 's' ?> found</p>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Date</th>
-        <th>Cover</th>
-        <th>Title</th>
-        <th>Category</th>
-        <th>Author</th>
-        <th>Views</th>
-        <th>Featured</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php $i = $offset + 1; ?>
-      <?php if ($totalRows == 0): ?>
-        <tr><td colspan="10" class="no-results">No blog posts match your search/filter.</td></tr>
-      <?php endif; ?>
-      <?php while ($row = $result->fetch_assoc()): ?>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['created_at']) ?></td>
-          <td><img src="uploads/images/blogs/<?= htmlspecialchars($row['cover_image']) ?>" height="50"></td>
-          <td><?= htmlspecialchars($row['title']) ?></td>
-          <td><?= htmlspecialchars($row['category_name'] ?? '-') ?></td>
-          <td><?= htmlspecialchars($row['author']) ?></td>
-          <td><?= (int)$row['views'] ?></td>
-          <td><?= $row['is_featured'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?></td>
-          <td class="status-col">
-            <a href="javascript:void(0)"
-              onclick="showConfirm('toggle-blog?id=<?= $row['id'] ?>','<?= $row['status'] == 1 ? 'Unpublish' : 'Publish' ?> this post?')"
-              class="pill <?= $row['status'] == 1 ? 'published' : 'draft' ?>">
-              <?= $row['status'] == 1 ? 'Published' : 'Draft' ?>
-            </a>
-          </td>
-          <td class="action-col">
-            <a href="../blog-details?slug=<?= urlencode($row['slug']) ?>" target="_blank" class="btn-view">View</a>
-            <button type="button" class="btn-edit"
-              onclick="openEditModal(this)"
-              data-id="<?= $row['id'] ?>"
-              data-title="<?= htmlspecialchars($row['title']) ?>"
-              data-category_id="<?= (int)$row['category_id'] ?>"
-              data-author="<?= htmlspecialchars($row['author']) ?>"
-              data-excerpt="<?= htmlspecialchars($row['excerpt']) ?>"
-              data-content="<?= htmlspecialchars($row['content']) ?>"
-              data-tags="<?= htmlspecialchars($row['tags']) ?>"
-              data-meta_title="<?= htmlspecialchars($row['meta_title']) ?>"
-              data-meta_description="<?= htmlspecialchars($row['meta_description']) ?>"
-              data-meta_keywords="<?= htmlspecialchars($row['meta_keywords']) ?>"
-              data-is_featured="<?= $row['is_featured'] ?>"
-              data-status="<?= $row['status'] ?>"
-              data-image="<?= htmlspecialchars($row['cover_image']) ?>"
-              data-image-path="uploads/images/blogs/<?= htmlspecialchars($row['cover_image']) ?>">
-              Edit
-            </button>
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this blog post?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
+          <th>S.N.</th>
+          <th>Date</th>
+          <th>Cover</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Author</th>
+          <th>Views</th>
+          <th>Featured</th>
+          <th>Status</th>
+          <th>Action</th>
         </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table></div>
+      </thead>
+      <tbody>
+        <?php $i = $offset + 1; ?>
+        <?php if ($totalRows == 0): ?>
+          <tr>
+            <td colspan="10" class="no-results">No blog posts match your search/filter.</td>
+          </tr>
+        <?php endif; ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><img src="../uploads/images/blogs/<?= htmlspecialchars($row['cover_image']) ?>" height="50"></td>
+            <td><?= htmlspecialchars($row['title']) ?></td>
+            <td><?= htmlspecialchars($row['category_name'] ?? '-') ?></td>
+            <td><?= htmlspecialchars($row['author']) ?></td>
+            <td><?= (int)$row['views'] ?></td>
+            <td><?= $row['is_featured'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?></td>
+            <td class="status-col">
+              <a href="javascript:void(0)"
+                onclick="showConfirm('toggle-blog?id=<?= $row['id'] ?>','<?= $row['status'] == 1 ? 'Unpublish' : 'Publish' ?> this post?')"
+                class="pill <?= $row['status'] == 1 ? 'published' : 'draft' ?>">
+                <?= $row['status'] == 1 ? 'Published' : 'Draft' ?>
+              </a>
+            </td>
+            <td class="action-col">
+              <a href="../blog-details?slug=<?= urlencode($row['slug']) ?>" target="_blank" class="btn-view">View</a>
+              <button type="button" class="btn-edit"
+                onclick="openEditModal(this)"
+                data-id="<?= $row['id'] ?>"
+                data-title="<?= htmlspecialchars($row['title']) ?>"
+                data-category_id="<?= (int)$row['category_id'] ?>"
+                data-author="<?= htmlspecialchars($row['author']) ?>"
+                data-excerpt="<?= htmlspecialchars($row['excerpt']) ?>"
+                data-content="<?= htmlspecialchars($row['content']) ?>"
+                data-tags="<?= htmlspecialchars($row['tags']) ?>"
+                data-meta_title="<?= htmlspecialchars($row['meta_title']) ?>"
+                data-meta_description="<?= htmlspecialchars($row['meta_description']) ?>"
+                data-meta_keywords="<?= htmlspecialchars($row['meta_keywords']) ?>"
+                data-is_featured="<?= $row['is_featured'] ?>"
+                data-status="<?= $row['status'] ?>"
+                data-image="<?= htmlspecialchars($row['cover_image']) ?>"
+                data-image-path="../uploads/images/blogs/<?= htmlspecialchars($row['cover_image']) ?>">
+                Edit
+              </button>
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this blog post?')"
+                class="btn-delete">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php if ($totalPages > 1): ?>
     <div class="pagination">

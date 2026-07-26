@@ -3,115 +3,116 @@ include '../config/db.php';
 include 'auth.php';
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-function slugify($title) {
-    return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
+function slugify($title)
+{
+  return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
 }
 
 /* DELETE */
 if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    if (mysqli_query($conn, "DELETE FROM gallery_albums WHERE id=$id")) {
-        $_SESSION['success'] = "Album deleted successfully.";
-    } else {
-        $_SESSION['error'] = "Failed to delete album.";
-    }
-    header("Location: manage-albums" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
-    exit();
+  $id = (int)$_GET['delete'];
+  if (mysqli_query($conn, "DELETE FROM gallery_albums WHERE id=$id")) {
+    $_SESSION['success'] = "Album deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete album.";
+  }
+  header("Location: manage-albums" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
+  exit();
 }
 
 /* ADD */
 if (isset($_POST['create_album'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
-    }
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
 
-    $title = trim($_POST['title']);
-    $slug = slugify($title);
+  $title = trim($_POST['title']);
+  $slug = slugify($title);
 
-    if ($title === '' || empty($_FILES['cover']['name'])) {
-        $_SESSION['error'] = "Title and cover image are required.";
-        $_SESSION['reopen_modal'] = 'addModal';
+  if ($title === '' || empty($_FILES['cover']['name'])) {
+    $_SESSION['error'] = "Title and cover image are required.";
+    $_SESSION['reopen_modal'] = 'addModal';
+  } else {
+    $folder = "../uploads/gallery/$slug";
+    if (!is_dir($folder)) mkdir($folder, 0777, true);
+
+    $cover = uniqid() . '_' . basename($_FILES['cover']['name']);
+    move_uploaded_file($_FILES['cover']['tmp_name'], "$folder/$cover");
+
+    $stmt = $conn->prepare("INSERT INTO gallery_albums (title, slug, cover_image, status) VALUES (?, ?, ?, 1)");
+    $stmt->bind_param("sss", $title, $slug, $cover);
+    if ($stmt->execute()) {
+      $_SESSION['success'] = "Album created successfully.";
     } else {
-        $folder = "uploads/gallery/$slug";
-        if (!is_dir($folder)) mkdir($folder, 0777, true);
-
-        $cover = uniqid() . '_' . basename($_FILES['cover']['name']);
-        move_uploaded_file($_FILES['cover']['tmp_name'], "$folder/$cover");
-
-        $stmt = $conn->prepare("INSERT INTO gallery_albums (title, slug, cover_image, status) VALUES (?, ?, ?, 1)");
-        $stmt->bind_param("sss", $title, $slug, $cover);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Album created successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to create album.";
-        }
-        $stmt->close();
+      $_SESSION['error'] = "Failed to create album.";
     }
+    $stmt->close();
+  }
 
-    header("Location: manage-albums" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-albums" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* UPDATE */
 if (isset($_POST['update'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
-    }
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
 
-    $id = (int)$_POST['id'];
-    $existing = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM gallery_albums WHERE id=$id"));
+  $id = (int)$_POST['id'];
+  $existing = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM gallery_albums WHERE id=$id"));
 
-    if ($id <= 0 || !$existing) {
-        $_SESSION['error'] = "Invalid album.";
-        $_SESSION['reopen_modal'] = 'editModal';
-        header("Location: manage-albums" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-        exit();
-    }
-
-    $title = trim($_POST['title']);
-    $status = (int)$_POST['status'];
-
-    if ($title === '') {
-        $_SESSION['error'] = "Title is required.";
-        $_SESSION['reopen_modal'] = 'editModal';
-    } else {
-        $oldSlug = $existing['slug'];
-        $newSlug = slugify($title);
-        $cover = $existing['cover_image'];
-
-        if ($oldSlug !== $newSlug) {
-            $oldPath = "uploads/gallery/" . $oldSlug;
-            $newPath = "uploads/gallery/" . $newSlug;
-            if (is_dir($oldPath) && !is_dir($newPath)) {
-                rename($oldPath, $newPath);
-            }
-        }
-
-        if (!empty($_FILES['cover']['name'])) {
-            $newCover = uniqid() . '_' . basename($_FILES['cover']['name']);
-            $folder = "uploads/gallery/$newSlug";
-            if (!is_dir($folder)) mkdir($folder, 0777, true);
-            if (move_uploaded_file($_FILES['cover']['tmp_name'], "$folder/$newCover")) {
-                @unlink("$folder/$cover");
-                $cover = $newCover;
-            }
-        }
-
-        $stmt = $conn->prepare("UPDATE gallery_albums SET title=?, slug=?, cover_image=?, status=? WHERE id=?");
-        $stmt->bind_param("sssii", $title, $newSlug, $cover, $status, $id);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Album updated successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to update album.";
-        }
-        $stmt->close();
-    }
-
+  if ($id <= 0 || !$existing) {
+    $_SESSION['error'] = "Invalid album.";
+    $_SESSION['reopen_modal'] = 'editModal';
     header("Location: manage-albums" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
     exit();
+  }
+
+  $title = trim($_POST['title']);
+  $status = (int)$_POST['status'];
+
+  if ($title === '') {
+    $_SESSION['error'] = "Title is required.";
+    $_SESSION['reopen_modal'] = 'editModal';
+  } else {
+    $oldSlug = $existing['slug'];
+    $newSlug = slugify($title);
+    $cover = $existing['cover_image'];
+
+    if ($oldSlug !== $newSlug) {
+      $oldPath = "../uploads/gallery/" . $oldSlug;
+      $newPath = "../uploads/gallery/" . $newSlug;
+      if (is_dir($oldPath) && !is_dir($newPath)) {
+        rename($oldPath, $newPath);
+      }
+    }
+
+    if (!empty($_FILES['cover']['name'])) {
+      $newCover = uniqid() . '_' . basename($_FILES['cover']['name']);
+      $folder = "../uploads/gallery/$newSlug";
+      if (!is_dir($folder)) mkdir($folder, 0777, true);
+      if (move_uploaded_file($_FILES['cover']['tmp_name'], "$folder/$newCover")) {
+        @unlink("$folder/$cover");
+        $cover = $newCover;
+      }
+    }
+
+    $stmt = $conn->prepare("UPDATE gallery_albums SET title=?, slug=?, cover_image=?, status=? WHERE id=?");
+    $stmt->bind_param("sssii", $title, $newSlug, $cover, $status, $id);
+    if ($stmt->execute()) {
+      $_SESSION['success'] = "Album updated successfully.";
+    } else {
+      $_SESSION['error'] = "Failed to update album.";
+    }
+    $stmt->close();
+  }
+
+  header("Location: manage-albums" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* SEARCH + PAGINATION */
@@ -122,10 +123,11 @@ $types = '';
 $params = [];
 
 if ($search !== '') {
-    $where[] = "(title LIKE ? OR slug LIKE ?)";
-    $like = "%$search%";
-    $types .= 'ss';
-    $params[] = $like; $params[] = $like;
+  $where[] = "(title LIKE ? OR slug LIKE ?)";
+  $like = "%$search%";
+  $types .= 'ss';
+  $params[] = $like;
+  $params[] = $like;
 }
 
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
@@ -180,58 +182,62 @@ unset($_SESSION['reopen_modal']);
 
   <p class="result-count"><?= $totalRows ?> album<?= $totalRows == 1 ? '' : 's' ?> found</p>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Created Date</th>
-        <th>Title</th>
-        <th>Slug</th>
-        <th>Cover Image</th>
-        <th>Status</th>
-        <th>Photos</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php $i = $offset + 1; ?>
-      <?php if ($totalRows == 0): ?>
-        <tr><td colspan="8" class="no-results">No albums match your search.</td></tr>
-      <?php endif; ?>
-      <?php while ($row = $result->fetch_assoc()):
-        $photoCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM gallery_photos WHERE album_id = {$row['id']}"))['total'];
-      ?>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['created_at']) ?></td>
-          <td><?= htmlspecialchars($row['title']) ?></td>
-          <td><?= htmlspecialchars($row['slug']) ?></td>
-          <td><img src="uploads/gallery/<?= htmlspecialchars($row['slug']) ?>/<?= htmlspecialchars($row['cover_image']) ?>" height="50"></td>
-          <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
-          <td class="action-col-flight">
-            <p><?= $photoCount ?> Photos</p>
-            <a href="manage-photos?id=<?= $row['id'] ?>&slug=<?= urlencode($row['slug']) ?>" class="btn-view">View / Add Photos</a>
-          </td>
-          <td class="action-col-flight">
-            <button type="button" class="btn-edit"
-              onclick="openEditModal(this)"
-              data-id="<?= $row['id'] ?>"
-              data-title="<?= htmlspecialchars($row['title']) ?>"
-              data-status="<?= $row['status'] ?>"
-              data-image="<?= htmlspecialchars($row['cover_image']) ?>"
-              data-image-path="uploads/gallery/<?= htmlspecialchars($row['slug']) ?>/<?= htmlspecialchars($row['cover_image']) ?>">
-              Edit
-            </button>
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this album and all its photos?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
+          <th>S.N.</th>
+          <th>Created Date</th>
+          <th>Title</th>
+          <th>Slug</th>
+          <th>Cover Image</th>
+          <th>Status</th>
+          <th>Photos</th>
+          <th>Action</th>
         </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table></div>
+      </thead>
+      <tbody>
+        <?php $i = $offset + 1; ?>
+        <?php if ($totalRows == 0): ?>
+          <tr>
+            <td colspan="8" class="no-results">No albums match your search.</td>
+          </tr>
+        <?php endif; ?>
+        <?php while ($row = $result->fetch_assoc()):
+          $photoCount = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM gallery_photos WHERE album_id = {$row['id']}"))['total'];
+        ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><?= htmlspecialchars($row['title']) ?></td>
+            <td><?= htmlspecialchars($row['slug']) ?></td>
+            <td><img src="../uploads/gallery/<?= htmlspecialchars($row['slug']) ?>/<?= htmlspecialchars($row['cover_image']) ?>" height="50"></td>
+            <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
+            <td class="action-col-flight">
+              <p><?= $photoCount ?> Photos</p>
+              <a href="manage-photos?id=<?= $row['id'] ?>&slug=<?= urlencode($row['slug']) ?>" class="btn-view">View / Add Photos</a>
+            </td>
+            <td class="action-col-flight">
+              <button type="button" class="btn-edit"
+                onclick="openEditModal(this)"
+                data-id="<?= $row['id'] ?>"
+                data-title="<?= htmlspecialchars($row['title']) ?>"
+                data-status="<?= $row['status'] ?>"
+                data-image="<?= htmlspecialchars($row['cover_image']) ?>"
+                data-image-path="../uploads/gallery/<?= htmlspecialchars($row['slug']) ?>/<?= htmlspecialchars($row['cover_image']) ?>">
+                Edit
+              </button>
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this album and all its photos?')"
+                class="btn-delete">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php if ($totalPages > 1): ?>
     <div class="pagination">

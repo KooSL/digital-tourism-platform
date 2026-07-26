@@ -127,7 +127,7 @@ if (!$bus) {
 
         <!-- LEFT IMAGE -->
         <div class="bus-image">
-            <img src="admin/uploads/images/buses/<?php echo htmlspecialchars($bus['banner_image']); ?>" alt="">
+            <img src="uploads/images/buses/<?php echo htmlspecialchars($bus['banner_image']); ?>" alt="">
         </div>
 
         <!-- RIGHT CONTENT -->

@@ -176,7 +176,7 @@ include 'includes/header.php'; ?>
                 </span>
               <?php endif; ?> -->
 
-                            <img src="admin/uploads/images/buses/<?= $bus['banner_image']; ?>" alt="<?= htmlspecialchars($bus['from_location'] . ' to ' . $bus['to_location']); ?>">
+                            <img src="uploads/images/buses/<?= $bus['banner_image']; ?>" alt="<?= htmlspecialchars($bus['from_location'] . ' to ' . $bus['to_location']); ?>">
 
                         </div>
 

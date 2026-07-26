@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Tours";
 include 'includes/header.php'; ?>
 
@@ -161,7 +161,7 @@ $result = $stmt->get_result();
           <div class="tour-img">
 
 
-            <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>"
+            <img src="uploads/images/tours/<?= $row['banner_image'] ?>"
               alt="<?= $row['title'] ?>">
           </div>
 

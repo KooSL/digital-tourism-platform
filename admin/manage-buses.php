@@ -41,7 +41,7 @@ if (isset($_POST['submit'])) {
         $_SESSION['reopen_modal'] = 'addModal';
     } else {
         $imageName = time() . '_' . basename($_FILES['image']['name']);
-        move_uploaded_file($_FILES['image']['tmp_name'], "uploads/images/buses/" . $imageName);
+        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/images/buses/" . $imageName);
 
         $stmt = $conn->prepare(
             "INSERT INTO buses
@@ -112,8 +112,8 @@ if (isset($_POST['update'])) {
             $upload_error = "Invalid image file.";
         } else {
             $newImage = bin2hex(random_bytes(8)) . "_" . time() . "." . $ext;
-            if (move_uploaded_file($tmp, "uploads/images/buses/" . $newImage)) {
-                $old = "uploads/images/buses/" . $image;
+            if (move_uploaded_file($tmp, "../uploads/images/buses/" . $newImage)) {
+                $old = "../uploads/images/buses/" . $image;
                 if (!empty($image) && file_exists($old)) unlink($old);
                 $image = $newImage;
             } else {
@@ -285,7 +285,7 @@ unset($_SESSION['reopen_modal']);
           <td><?= htmlspecialchars($row['price']) ?></td>
           <td><?= htmlspecialchars($row['total_seats']) ?></td>
           <td><?= implode(' ', array_slice(explode(' ', $row['description']), 0, 5)) ?>...</td>
-          <td><img src="uploads/images/buses/<?= htmlspecialchars($row['banner_image']) ?>" height="50"></td>
+          <td><img src="../uploads/images/buses/<?= htmlspecialchars($row['banner_image']) ?>" height="50"></td>
           <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
           <td class="action-col">
             <button type="button" class="btn-edit"
@@ -303,7 +303,7 @@ unset($_SESSION['reopen_modal']);
               data-description="<?= htmlspecialchars($row['description']) ?>"
               data-status="<?= $row['status'] ?>"
               data-image="<?= htmlspecialchars($row['banner_image']) ?>"
-              data-image-path="uploads/images/buses/<?= htmlspecialchars($row['banner_image']) ?>">
+              data-image-path="../uploads/images/buses/<?= htmlspecialchars($row['banner_image']) ?>">
               Edit
             </button>
             <a href="javascript:void(0)"

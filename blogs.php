@@ -96,7 +96,7 @@ include 'includes/header.php';
             <article class="blog-card <?= $row['is_featured'] ? 'featured' : '' ?>">
               <a href="blog-details?slug=<?= urlencode($row['slug']) ?>" class="blog-img">
                 <img
-                  src="admin/uploads/images/blogs/<?= htmlspecialchars($row['cover_image'] ?: 'default-blog.jpg') ?>"
+                  src="uploads/images/blogs/<?= htmlspecialchars($row['cover_image'] ?: 'default-blog.jpg') ?>"
                   alt="<?= htmlspecialchars($row['title']) ?>"
                   loading="lazy">
                 <?php if ($row['is_featured']): ?>

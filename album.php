@@ -26,7 +26,7 @@ $photos = mysqli_query($conn, "SELECT * FROM gallery_photos WHERE album_id='{$al
   <?php include 'includes/navbar.php'; ?>
 </div>
 
-<section class="page-hero" style="background-image: url('admin/uploads/gallery/<?php echo $slug; ?>/<?php echo $albumData['cover_image'] ?>');">
+<section class="page-hero" style="background-image: url('uploads/gallery/<?php echo $slug; ?>/<?php echo $albumData['cover_image'] ?>');">
   <div class="overlay">
     <div class="container">
       <h1><?php echo $albumData['title']; ?></h1>
@@ -42,7 +42,7 @@ $photos = mysqli_query($conn, "SELECT * FROM gallery_photos WHERE album_id='{$al
       <?php while ($photo = mysqli_fetch_assoc($photos)) { ?>
         <div class="photo-card">
           <img
-            src="admin/uploads/gallery/<?php echo $slug; ?>/<?php echo $photo['image']; ?>"
+            src="uploads/gallery/<?php echo $slug; ?>/<?php echo $photo['image']; ?>"
             alt=""
             class="gallery-img">
 

@@ -4,7 +4,7 @@ if (!isset($_GET['file'])) {
 }
 
 $file = basename($_GET['file']);
-$path = "admin/uploads/pdf/" . $file;
+$path = "../uploads/pdf/" . $file;
 
 if (!file_exists($path)) {
     exit('File does not exist');

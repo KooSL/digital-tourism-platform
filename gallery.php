@@ -27,7 +27,7 @@ include 'config/db.php';
       ?>
         <div class="album-card">
           <a href="album?album=<?php echo $album['slug']; ?>">
-            <img src="admin/uploads/gallery/<?php echo $album['slug']; ?>/<?php echo $album['cover_image']; ?>" alt="<?php echo $album['title']; ?>">
+            <img src="uploads/gallery/<?php echo $album['slug']; ?>/<?php echo $album['cover_image']; ?>" alt="<?php echo $album['title']; ?>">
             <div class="album-overlay">
               <h3><?php echo $album['title']; ?></h3>
             </div>

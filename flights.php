@@ -176,7 +176,7 @@ include 'includes/header.php'; ?>
                 </span>
               <?php endif; ?>
 
-              <img src="admin/uploads/images/flights/<?= $flight['image']; ?>" alt="<?= htmlspecialchars($flight['from_city'] . ' to ' . $flight['to_city']); ?>">
+              <img src="uploads/images/flights/<?= $flight['image']; ?>" alt="<?= htmlspecialchars($flight['from_city'] . ' to ' . $flight['to_city']); ?>">
 
             </div>
 

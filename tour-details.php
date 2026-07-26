@@ -209,7 +209,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
 
 <!-- BANNER -->
 <section class="tour-banner"
-  style="background-image: url('admin/uploads/images/tours/<?= htmlspecialchars($tour['banner_image']) ?>');">
+  style="background-image: url('uploads/images/tours/<?= htmlspecialchars($tour['banner_image']) ?>');">
 
   <div class="overlay">
     <div class="container">
@@ -322,7 +322,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
       <h3>Trip Brochure</h3>
       <p>Download the full itinerary and trip details.</p>
 
-      <a href="download-pdf?file=<?= urlencode($tour['pdf_file']); ?>" class="download-btn">
+      <a href="api/download-pdf?file=<?= urlencode($tour['pdf_file']); ?>" class="download-btn">
         <i class="fas fa-file-pdf"></i> Download PDF
       </a>
     </div>
@@ -493,7 +493,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
     <?php while ($row = $recommended->fetch_assoc()): ?>
 
       <div class="recommend-card">
-        <img src="admin/uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
+        <img src="uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
 
         <h4><?= htmlspecialchars($row['title']) ?></h4>
 
@@ -532,7 +532,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
     <div class="recommend-grid">
       <?php while ($row = $nearbyByDestination->fetch_assoc()): ?>
         <div class="recommend-card">
-          <img src="admin/uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
+          <img src="uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
 
           <h4><?= htmlspecialchars($row['title']) ?></h4>
 

@@ -155,7 +155,7 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
 
     <article class="blog-main blog-single">
       <img
-        src="admin/uploads/images/blogs/<?= htmlspecialchars($blog['cover_image'] ?: 'default-blog.jpg') ?>"
+        src="uploads/images/blogs/<?= htmlspecialchars($blog['cover_image'] ?: 'default-blog.jpg') ?>"
         alt="<?= htmlspecialchars($blog['title']) ?>"
         class="cover-img"
         loading="eager">

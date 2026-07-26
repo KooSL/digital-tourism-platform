@@ -31,7 +31,7 @@
       .map(function (t) {
         return `
         <div class="recommend-card">
-          <img src="admin/uploads/images/tours/${t.banner_image}" alt="${t.title}">
+          <img src="uploads/images/tours/${t.banner_image}" alt="${t.title}">
           <h4>${t.title}</h4>
           <div class="recommend-info">
             <p><i class="fa-solid fa-clock"></i> ${t.duration}</p>

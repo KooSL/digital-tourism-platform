@@ -3,160 +3,177 @@ include '../config/db.php';
 include 'auth.php';
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 /* DELETE */
 if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    if (mysqli_query($conn, "DELETE FROM tours WHERE id=$id")) {
-        $_SESSION['success'] = "Tour deleted successfully.";
-    } else {
-        $_SESSION['error'] = "Failed to delete tour.";
-    }
-    header("Location: manage-tours" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
-    exit;
+  $id = (int)$_GET['delete'];
+  if (mysqli_query($conn, "DELETE FROM tours WHERE id=$id")) {
+    $_SESSION['success'] = "Tour deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete tour.";
+  }
+  header("Location: manage-tours" . (isset($_GET['qs']) ? '?' . $_GET['qs'] : ''));
+  exit;
 }
 
-function slugifyTour($text) {
-    $text = strtolower(trim($text));
-    $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
-    $text = preg_replace('/[\s-]+/', '-', $text);
-    return trim($text, '-');
+function slugifyTour($text)
+{
+  $text = strtolower(trim($text));
+  $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
+  $text = preg_replace('/[\s-]+/', '-', $text);
+  return trim($text, '-');
 }
 
-function saveItineraries($conn, $tourId) {
-    $conn->query("DELETE FROM tour_itineraries WHERE tour_id = $tourId");
+function saveItineraries($conn, $tourId)
+{
+  $conn->query("DELETE FROM tour_itineraries WHERE tour_id = $tourId");
 
-    if (empty($_POST['day_no'])) return;
+  if (empty($_POST['day_no'])) return;
 
-    $days = $_POST['day_no'];
-    $titles = $_POST['itinerary_title'];
-    $descs = $_POST['itinerary_desc'];
+  $days = $_POST['day_no'];
+  $titles = $_POST['itinerary_title'];
+  $descs = $_POST['itinerary_desc'];
 
-    $itStmt = $conn->prepare("INSERT INTO tour_itineraries (tour_id, day_number, title, description) VALUES (?, ?, ?, ?)");
-    for ($i = 0; $i < count($days); $i++) {
-        $day = (int)$days[$i];
-        $itTitle = trim($titles[$i] ?? '');
-        $itDesc = trim($descs[$i] ?? '');
-        if ($day && $itTitle && $itDesc) {
-            $itStmt->bind_param("iiss", $tourId, $day, $itTitle, $itDesc);
-            $itStmt->execute();
-        }
+  $itStmt = $conn->prepare("INSERT INTO tour_itineraries (tour_id, day_number, title, description) VALUES (?, ?, ?, ?)");
+  for ($i = 0; $i < count($days); $i++) {
+    $day = (int)$days[$i];
+    $itTitle = trim($titles[$i] ?? '');
+    $itDesc = trim($descs[$i] ?? '');
+    if ($day && $itTitle && $itDesc) {
+      $itStmt->bind_param("iiss", $tourId, $day, $itTitle, $itDesc);
+      $itStmt->execute();
     }
-    $itStmt->close();
+  }
+  $itStmt->close();
 }
 
 /* ADD */
 if (isset($_POST['submit'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
+
+  $title         = trim($_POST['title']);
+  $slug          = trim($_POST['slug']) ?: slugifyTour($title);
+  $type          = $_POST['type'];
+  $duration      = trim($_POST['duration']);
+  $price         = (float)$_POST['price'];
+  $price_usd     = (float)$_POST['price_usd'];
+  $old_price     = (float)($_POST['old_price'] ?? 0);
+  $overview      = trim($_POST['overview']);
+  $highlights    = trim($_POST['highlights']);
+  $includes      = trim($_POST['includes']);
+  $excludes      = trim($_POST['excludes']);
+  $status        = (int)$_POST['status'];
+  $is_popular    = (int)$_POST['is_popular'];
+  $latitude      = (float)($_POST['latitude'] ?? 0);
+  $longitude     = (float)($_POST['longitude'] ?? 0);
+  $location_name = trim($_POST['location_name']);
+
+  if ($title === '' || empty($_FILES['banner']['name'])) {
+    $_SESSION['error'] = "Title and banner image are required.";
+    $_SESSION['reopen_modal'] = 'addModal';
+  } else {
+    $banner = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['banner']['name']);
+    move_uploaded_file($_FILES['banner']['tmp_name'], "../uploads/images/tours/" . $banner);
+
+    $pdf = '';
+    if (!empty($_FILES['pdf']['name'])) {
+      $pdf = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['pdf']['name']);
+      move_uploaded_file($_FILES['pdf']['tmp_name'], "../uploads/pdf/" . $pdf);
     }
 
-    $title         = trim($_POST['title']);
-    $slug          = trim($_POST['slug']) ?: slugifyTour($title);
-    $type          = $_POST['type'];
-    $duration      = trim($_POST['duration']);
-    $price         = (float)$_POST['price'];
-    $price_usd     = (float)$_POST['price_usd'];
-    $old_price     = (float)($_POST['old_price'] ?? 0);
-    $overview      = trim($_POST['overview']);
-    $highlights    = trim($_POST['highlights']);
-    $includes      = trim($_POST['includes']);
-    $excludes      = trim($_POST['excludes']);
-    $status        = (int)$_POST['status'];
-    $is_popular    = (int)$_POST['is_popular'];
-    $latitude      = (float)($_POST['latitude'] ?? 0);
-    $longitude     = (float)($_POST['longitude'] ?? 0);
-    $location_name = trim($_POST['location_name']);
-
-    if ($title === '' || empty($_FILES['banner']['name'])) {
-        $_SESSION['error'] = "Title and banner image are required.";
-        $_SESSION['reopen_modal'] = 'addModal';
-    } else {
-        $banner = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['banner']['name']);
-        move_uploaded_file($_FILES['banner']['tmp_name'], "uploads/images/tours/" . $banner);
-
-        $pdf = '';
-        if (!empty($_FILES['pdf']['name'])) {
-            $pdf = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['pdf']['name']);
-            move_uploaded_file($_FILES['pdf']['tmp_name'], "uploads/pdf/" . $pdf);
-        }
-
-        $stmt = $conn->prepare("
+    $stmt = $conn->prepare("
             INSERT INTO tours
             (title, slug, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status, latitude, longitude, location_name)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param(
-            "ssssdddssssssiidds",
-            $title, $slug, $type, $duration, $price, $price_usd, $old_price,
-            $overview, $highlights, $includes, $excludes, $banner, $pdf,
-            $is_popular, $status, $latitude, $longitude, $location_name
-        );
+    $stmt->bind_param(
+      "ssssdddssssssiidds",
+      $title,
+      $slug,
+      $type,
+      $duration,
+      $price,
+      $price_usd,
+      $old_price,
+      $overview,
+      $highlights,
+      $includes,
+      $excludes,
+      $banner,
+      $pdf,
+      $is_popular,
+      $status,
+      $latitude,
+      $longitude,
+      $location_name
+    );
 
-        if ($stmt->execute()) {
-            saveItineraries($conn, $stmt->insert_id);
-            $_SESSION['success'] = "Tour added successfully.";
-        } else {
-            $_SESSION['error'] = "Error adding tour.";
-        }
-        $stmt->close();
+    if ($stmt->execute()) {
+      saveItineraries($conn, $stmt->insert_id);
+      $_SESSION['success'] = "Tour added successfully.";
+    } else {
+      $_SESSION['error'] = "Error adding tour.";
     }
+    $stmt->close();
+  }
 
-    header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* UPDATE */
 if (isset($_POST['update'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
-    }
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
 
-    $id = (int)$_POST['id'];
-    $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tours WHERE id=$id"));
+  $id = (int)$_POST['id'];
+  $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tours WHERE id=$id"));
 
-    if ($id <= 0 || !$data) {
-        $_SESSION['error'] = "Invalid tour.";
-        $_SESSION['reopen_modal'] = 'editModal';
-        header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-        exit();
-    }
+  if ($id <= 0 || !$data) {
+    $_SESSION['error'] = "Invalid tour.";
+    $_SESSION['reopen_modal'] = 'editModal';
+    header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+    exit();
+  }
 
-    $title         = trim($_POST['title']);
-    $type          = $_POST['type'];
-    $duration      = trim($_POST['duration']);
-    $price         = (float)$_POST['price'];
-    $price_usd     = (float)$_POST['price_usd'];
-    $overview      = trim($_POST['overview']);
-    $highlights    = trim($_POST['highlights']);
-    $includes      = trim($_POST['includes']);
-    $excludes      = trim($_POST['excludes']);
-    $status        = (int)$_POST['status'];
-    $is_popular    = (int)$_POST['is_popular'];
-    $latitude      = (float)($_POST['latitude'] ?? 0);
-    $longitude     = (float)($_POST['longitude'] ?? 0);
-    $location_name = trim($_POST['location_name']);
-    $image         = $data['banner_image'];
-    $pdfName       = $data['pdf_file'];
+  $title         = trim($_POST['title']);
+  $type          = $_POST['type'];
+  $duration      = trim($_POST['duration']);
+  $price         = (float)$_POST['price'];
+  $price_usd     = (float)$_POST['price_usd'];
+  $overview      = trim($_POST['overview']);
+  $highlights    = trim($_POST['highlights']);
+  $includes      = trim($_POST['includes']);
+  $excludes      = trim($_POST['excludes']);
+  $status        = (int)$_POST['status'];
+  $is_popular    = (int)$_POST['is_popular'];
+  $latitude      = (float)($_POST['latitude'] ?? 0);
+  $longitude     = (float)($_POST['longitude'] ?? 0);
+  $location_name = trim($_POST['location_name']);
+  $image         = $data['banner_image'];
+  $pdfName       = $data['pdf_file'];
 
-    if (!empty($_FILES['banner']['name'])) {
-        $image = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['banner']['name']);
-        move_uploaded_file($_FILES['banner']['tmp_name'], "uploads/images/tours/" . $image);
-        @unlink("uploads/images/tours/" . $data['banner_image']);
-    }
+  if (!empty($_FILES['banner']['name'])) {
+    $image = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['banner']['name']);
+    move_uploaded_file($_FILES['banner']['tmp_name'], "../uploads/images/tours/" . $image);
+    @unlink("../uploads/images/tours/" . $data['banner_image']);
+  }
 
-    if (!empty($_FILES['pdf']['name'])) {
-        $pdfName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['pdf']['name']);
-        move_uploaded_file($_FILES['pdf']['tmp_name'], "uploads/pdf/" . $pdfName);
-    }
+  if (!empty($_FILES['pdf']['name'])) {
+    $pdfName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $_FILES['pdf']['name']);
+    move_uploaded_file($_FILES['pdf']['tmp_name'], "../uploads/pdf/" . $pdfName);
+  }
 
-    if ($title === '') {
-        $_SESSION['error'] = "Title is required.";
-        $_SESSION['reopen_modal'] = 'editModal';
-    } else {
-        $stmt = $conn->prepare("
+  if ($title === '') {
+    $_SESSION['error'] = "Title is required.";
+    $_SESSION['reopen_modal'] = 'editModal';
+  } else {
+    $stmt = $conn->prepare("
             UPDATE tours SET
               title = ?, type = ?, duration = ?, price = ?, price_usd = ?,
               overview = ?, highlights = ?, includes = ?, excludes = ?,
@@ -164,24 +181,38 @@ if (isset($_POST['update'])) {
               latitude = ?, longitude = ?, location_name = ?
             WHERE id = ?
         ");
-        $stmt->bind_param(
-            "sssddsssssssiddsi",
-            $title, $type, $duration, $price, $price_usd, $overview, $highlights,
-            $includes, $excludes, $image, $pdfName, $is_popular, $status,
-            $latitude, $longitude, $location_name, $id
-        );
+    $stmt->bind_param(
+      "sssddsssssssiddsi",
+      $title,
+      $type,
+      $duration,
+      $price,
+      $price_usd,
+      $overview,
+      $highlights,
+      $includes,
+      $excludes,
+      $image,
+      $pdfName,
+      $is_popular,
+      $status,
+      $latitude,
+      $longitude,
+      $location_name,
+      $id
+    );
 
-        if ($stmt->execute()) {
-            saveItineraries($conn, $id);
-            $_SESSION['success'] = "Tour updated successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to update tour.";
-        }
-        $stmt->close();
+    if ($stmt->execute()) {
+      saveItineraries($conn, $id);
+      $_SESSION['success'] = "Tour updated successfully.";
+    } else {
+      $_SESSION['error'] = "Failed to update tour.";
     }
+    $stmt->close();
+  }
 
-    header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-tours" . (!empty($_POST['qs']) ? '?' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* SEARCH + FILTER + PAGINATION */
@@ -195,25 +226,26 @@ $types = '';
 $params = [];
 
 if ($search !== '') {
-    $where[] = "(title LIKE ? OR location_name LIKE ?)";
-    $like = "%$search%";
-    $types .= 'ss';
-    $params[] = $like; $params[] = $like;
+  $where[] = "(title LIKE ? OR location_name LIKE ?)";
+  $like = "%$search%";
+  $types .= 'ss';
+  $params[] = $like;
+  $params[] = $like;
 }
 if ($status !== null) {
-    $where[] = "status = ?";
-    $types .= 'i';
-    $params[] = $status;
+  $where[] = "status = ?";
+  $types .= 'i';
+  $params[] = $status;
 }
 if ($type !== '') {
-    $where[] = "type = ?";
-    $types .= 's';
-    $params[] = $type;
+  $where[] = "type = ?";
+  $types .= 's';
+  $params[] = $type;
 }
 if ($popular !== null) {
-    $where[] = "is_popular = ?";
-    $types .= 'i';
-    $params[] = $popular;
+  $where[] = "is_popular = ?";
+  $types .= 'i';
+  $params[] = $popular;
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
@@ -236,10 +268,10 @@ $dataStmt->execute();
 $result = $dataStmt->get_result();
 
 $qsArray = array_filter([
-    'search' => $search,
-    'status' => $status !== null ? $status : '',
-    'type' => $type,
-    'popular' => $popular !== null ? $popular : '',
+  'search' => $search,
+  'status' => $status !== null ? $status : '',
+  'type' => $type,
+  'popular' => $popular !== null ? $popular : '',
 ], fn($v) => $v !== '');
 $qs = http_build_query($qsArray);
 
@@ -291,95 +323,99 @@ unset($_SESSION['reopen_modal']);
 
   <p class="result-count"><?= $totalRows ?> tour<?= $totalRows == 1 ? '' : 's' ?> found</p>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Created Date</th>
-        <th>Title</th>
-        <th>Type</th>
-        <th>Duration</th>
-        <th>Price</th>
-        <th>Price USD</th>
-        <th>Overview</th>
-        <th>Itinerary</th>
-        <th>Image</th>
-        <th>PDF</th>
-        <th>Location</th>
-        <th>Popular</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php $i = $offset + 1; ?>
-      <?php if ($totalRows == 0): ?>
-        <tr><td colspan="15" class="no-results">No tours match your search/filter.</td></tr>
-      <?php endif; ?>
-      <?php while ($row = $result->fetch_assoc()):
-        $itRes = mysqli_query($conn, "SELECT day_number, title, description FROM tour_itineraries WHERE tour_id = {$row['id']} ORDER BY day_number ASC");
-        $itinerary = [];
-        while ($it = mysqli_fetch_assoc($itRes)) $itinerary[] = $it;
-      ?>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['created_at']) ?></td>
-          <td><?= htmlspecialchars($row['title']) ?></td>
-          <td><?= htmlspecialchars($row['type']) ?></td>
-          <td><?= htmlspecialchars($row['duration']) ?></td>
-          <td><?= htmlspecialchars($row['price']) ?></td>
-          <td><?= htmlspecialchars($row['price_usd']) ?></td>
-          <td><?= implode(' ', array_slice(explode(' ', $row['overview']), 0, 5)) ?>...</td>
-          <td>
-            <?php if ($itinerary): ?>
-              <ul style="padding-left:15px; margin:0;">
-                <?php foreach (array_slice($itinerary, 0, 2) as $it): ?>
-                  <li><strong>Day <?= $it['day_number'] ?>:</strong> <?= htmlspecialchars($it['title']) ?></li>
-                <?php endforeach; ?>
-              </ul>
-              <small style="color:#777;">+ more</small>
-            <?php else: ?>
-              <em>No itinerary</em>
-            <?php endif; ?>
-          </td>
-          <td><img src="uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" height="50"></td>
-          <td><?php if ($row['pdf_file']): ?><a href="uploads/pdf/<?= htmlspecialchars($row['pdf_file']) ?>" target="_blank" class="btn-view">View</a><?php endif; ?></td>
-          <td><?= htmlspecialchars($row['location_name']) ?></td>
-          <td><?= $row['is_popular'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?></td>
-          <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
-          <td class="action-col">
-            <button type="button" class="btn-edit"
-              onclick="openEditModal(this)"
-              data-id="<?= $row['id'] ?>"
-              data-title="<?= htmlspecialchars($row['title']) ?>"
-              data-type="<?= htmlspecialchars($row['type']) ?>"
-              data-duration="<?= htmlspecialchars($row['duration']) ?>"
-              data-price="<?= htmlspecialchars($row['price']) ?>"
-              data-price_usd="<?= htmlspecialchars($row['price_usd']) ?>"
-              data-overview="<?= htmlspecialchars($row['overview']) ?>"
-              data-highlights="<?= htmlspecialchars($row['highlights']) ?>"
-              data-includes="<?= htmlspecialchars($row['includes']) ?>"
-              data-excludes="<?= htmlspecialchars($row['excludes']) ?>"
-              data-latitude="<?= htmlspecialchars($row['latitude']) ?>"
-              data-longitude="<?= htmlspecialchars($row['longitude']) ?>"
-              data-location_name="<?= htmlspecialchars($row['location_name']) ?>"
-              data-is_popular="<?= $row['is_popular'] ?>"
-              data-status="<?= $row['status'] ?>"
-              data-image="<?= htmlspecialchars($row['banner_image']) ?>"
-              data-image-path="uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>"
-              data-itinerary='<?= htmlspecialchars(json_encode($itinerary), ENT_QUOTES) ?>'>
-              Edit
-            </button>
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this package?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
+          <th>S.N.</th>
+          <th>Created Date</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Duration</th>
+          <th>Price</th>
+          <th>Price USD</th>
+          <th>Overview</th>
+          <th>Itinerary</th>
+          <th>Image</th>
+          <th>PDF</th>
+          <th>Location</th>
+          <th>Popular</th>
+          <th>Status</th>
+          <th>Action</th>
         </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table></div>
+      </thead>
+      <tbody>
+        <?php $i = $offset + 1; ?>
+        <?php if ($totalRows == 0): ?>
+          <tr>
+            <td colspan="15" class="no-results">No tours match your search/filter.</td>
+          </tr>
+        <?php endif; ?>
+        <?php while ($row = $result->fetch_assoc()):
+          $itRes = mysqli_query($conn, "SELECT day_number, title, description FROM tour_itineraries WHERE tour_id = {$row['id']} ORDER BY day_number ASC");
+          $itinerary = [];
+          while ($it = mysqli_fetch_assoc($itRes)) $itinerary[] = $it;
+        ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><?= htmlspecialchars($row['title']) ?></td>
+            <td><?= htmlspecialchars($row['type']) ?></td>
+            <td><?= htmlspecialchars($row['duration']) ?></td>
+            <td><?= htmlspecialchars($row['price']) ?></td>
+            <td><?= htmlspecialchars($row['price_usd']) ?></td>
+            <td><?= implode(' ', array_slice(explode(' ', $row['overview']), 0, 5)) ?>...</td>
+            <td>
+              <?php if ($itinerary): ?>
+                <ul style="padding-left:15px; margin:0;">
+                  <?php foreach (array_slice($itinerary, 0, 2) as $it): ?>
+                    <li><strong>Day <?= $it['day_number'] ?>:</strong> <?= htmlspecialchars($it['title']) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+                <small style="color:#777;">+ more</small>
+              <?php else: ?>
+                <em>No itinerary</em>
+              <?php endif; ?>
+            </td>
+            <td><img src="../uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" height="50"></td>
+            <td><?php if ($row['pdf_file']): ?><a href="../uploads/pdf/<?= htmlspecialchars($row['pdf_file']) ?>" target="_blank" class="btn-view">View</a><?php endif; ?></td>
+            <td><?= htmlspecialchars($row['location_name']) ?></td>
+            <td><?= $row['is_popular'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?></td>
+            <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
+            <td class="action-col">
+              <button type="button" class="btn-edit"
+                onclick="openEditModal(this)"
+                data-id="<?= $row['id'] ?>"
+                data-title="<?= htmlspecialchars($row['title']) ?>"
+                data-type="<?= htmlspecialchars($row['type']) ?>"
+                data-duration="<?= htmlspecialchars($row['duration']) ?>"
+                data-price="<?= htmlspecialchars($row['price']) ?>"
+                data-price_usd="<?= htmlspecialchars($row['price_usd']) ?>"
+                data-overview="<?= htmlspecialchars($row['overview']) ?>"
+                data-highlights="<?= htmlspecialchars($row['highlights']) ?>"
+                data-includes="<?= htmlspecialchars($row['includes']) ?>"
+                data-excludes="<?= htmlspecialchars($row['excludes']) ?>"
+                data-latitude="<?= htmlspecialchars($row['latitude']) ?>"
+                data-longitude="<?= htmlspecialchars($row['longitude']) ?>"
+                data-location_name="<?= htmlspecialchars($row['location_name']) ?>"
+                data-is_popular="<?= $row['is_popular'] ?>"
+                data-status="<?= $row['status'] ?>"
+                data-image="<?= htmlspecialchars($row['banner_image']) ?>"
+                data-image-path="../uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>"
+                data-itinerary='<?= htmlspecialchars(json_encode($itinerary), ENT_QUOTES) ?>'>
+                Edit
+              </button>
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>&qs=<?= urlencode($qs) ?>','Delete this package?')"
+                class="btn-delete">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php if ($totalPages > 1): ?>
     <div class="pagination">
@@ -524,27 +560,27 @@ unset($_SESSION['reopen_modal']);
 <script src="assets/js/admin-crud.js"></script>
 
 <script>
-    const nameInput = document.getElementById('add-title');
-    const slugInput = document.getElementById('add-slug');
-    let slugEdited = false;
+  const nameInput = document.getElementById('add-title');
+  const slugInput = document.getElementById('add-slug');
+  let slugEdited = false;
 
-    function slugify(text) {
-        return text.toString().trim().toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-    }
+  function slugify(text) {
+    return text.toString().trim().toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
 
-    if (nameInput && slugInput) {
-        nameInput.addEventListener('input', () => {
-            if (!slugEdited) slugInput.value = slugify(nameInput.value);
-        });
-        slugInput.addEventListener('input', () => {
-            slugEdited = true;
-            slugInput.value = slugify(slugInput.value);
-        });
-    }
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', () => {
+      if (!slugEdited) slugInput.value = slugify(nameInput.value);
+    });
+    slugInput.addEventListener('input', () => {
+      slugEdited = true;
+      slugInput.value = slugify(slugInput.value);
+    });
+  }
 </script>
 
 <?php include 'includes/footer.php'; ?>

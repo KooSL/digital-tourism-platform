@@ -35,7 +35,7 @@ if (isset($_POST['submit'])) {
         $_SESSION['reopen_modal'] = 'addModal';
     } else {
         $imageName = time() . '_' . basename($_FILES['image']['name']);
-        move_uploaded_file($_FILES['image']['tmp_name'], "uploads/images/flights/" . $imageName);
+        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/images/flights/" . $imageName);
 
         $stmt = $conn->prepare("INSERT INTO flights (from_city, to_city, description, image, is_group_fare, status) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("ssssii", $from, $to, $desc, $imageName, $group_fare, $status);
@@ -77,8 +77,8 @@ if (isset($_POST['update'])) {
     if (!empty($_FILES['image']['name'])) {
         $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
         $newImage = time() . '_' . basename($_FILES['image']['name']);
-        if (move_uploaded_file($_FILES['image']['tmp_name'], "uploads/images/flights/" . $newImage)) {
-            $old = "uploads/images/flights/" . $image;
+        if (move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/images/flights/" . $newImage)) {
+            $old = "../uploads/images/flights/" . $image;
             if (!empty($image) && file_exists($old)) unlink($old);
             $image = $newImage;
         }
@@ -223,7 +223,7 @@ unset($_SESSION['reopen_modal']);
           <td><?= htmlspecialchars($row['from_city']) ?></td>
           <td><?= htmlspecialchars($row['to_city']) ?></td>
           <td><?= implode(' ', array_slice(explode(' ', $row['description']), 0, 5)) ?>...</td>
-          <td><img src="uploads/images/flights/<?= htmlspecialchars($row['image']) ?>" height="50"></td>
+          <td><img src="../uploads/images/flights/<?= htmlspecialchars($row['image']) ?>" height="50"></td>
           <td><?= $row['is_group_fare'] ? 'Yes' : 'No' ?></td>
           <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
           <td class="action-col-flight">
@@ -236,7 +236,7 @@ unset($_SESSION['reopen_modal']);
               data-group_fare="<?= $row['is_group_fare'] ?>"
               data-status="<?= $row['status'] ?>"
               data-image="<?= htmlspecialchars($row['image']) ?>"
-              data-image-path="uploads/images/flights/<?= htmlspecialchars($row['image']) ?>">
+              data-image-path="../uploads/images/flights/<?= htmlspecialchars($row['image']) ?>">
               Edit
             </button>
             <a href="javascript:void(0)"

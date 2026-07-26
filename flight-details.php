@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Flight Details";
 include 'includes/header.php'; ?>
 <div class="header-wrapper">
@@ -42,7 +42,7 @@ if (!$flight) {
 
 
 
-      <img src="admin/uploads/images/flights/<?php echo $flight['image']; ?>" alt="">
+      <img src="uploads/images/flights/<?php echo $flight['image']; ?>" alt="">
     </div>
 
     <!-- RIGHT CONTENT -->

@@ -3,59 +3,59 @@ include '../config/db.php';
 include 'auth.php';
 
 if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 $albumId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $album = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM gallery_albums WHERE id=$albumId"));
 
 if (!$album) {
-    header("Location: manage-albums");
-    exit();
+  header("Location: manage-albums");
+  exit();
 }
 $slug = $album['slug'];
 
 /* DELETE */
 if (isset($_GET['delete'])) {
-    $photoId = (int)$_GET['delete'];
-    if (mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$photoId")) {
-        $_SESSION['success'] = "Photo deleted successfully.";
-    } else {
-        $_SESSION['error'] = "Failed to delete photo.";
-    }
-    header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug) . (isset($_GET['qs']) ? '&' . $_GET['qs'] : ''));
-    exit();
+  $photoId = (int)$_GET['delete'];
+  if (mysqli_query($conn, "DELETE FROM gallery_photos WHERE id=$photoId")) {
+    $_SESSION['success'] = "Photo deleted successfully.";
+  } else {
+    $_SESSION['error'] = "Failed to delete photo.";
+  }
+  header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug) . (isset($_GET['qs']) ? '&' . $_GET['qs'] : ''));
+  exit();
 }
 
 /* UPLOAD (ADD) */
 if (isset($_POST['upload'])) {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        die("CSRF validation failed.");
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die("CSRF validation failed.");
+  }
+
+  $path = "../uploads/gallery/" . $slug . "/";
+  if (!is_dir($path)) mkdir($path, 0755, true);
+
+  if (empty($_FILES['images']['name'][0])) {
+    $_SESSION['error'] = "Please choose at least one photo.";
+    $_SESSION['reopen_modal'] = 'addModal';
+  } else {
+    $stmt = $conn->prepare("INSERT INTO gallery_photos (album_id, image) VALUES (?, ?)");
+    $uploaded = 0;
+    foreach ($_FILES['images']['name'] as $key => $img) {
+      $safe_name = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', basename($img));
+      if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $path . $safe_name)) {
+        $stmt->bind_param("is", $albumId, $safe_name);
+        $stmt->execute();
+        $uploaded++;
+      }
     }
+    $stmt->close();
+    $_SESSION['success'] = "$uploaded photo(s) uploaded successfully.";
+  }
 
-    $path = "uploads/gallery/" . $slug . "/";
-    if (!is_dir($path)) mkdir($path, 0755, true);
-
-    if (empty($_FILES['images']['name'][0])) {
-        $_SESSION['error'] = "Please choose at least one photo.";
-        $_SESSION['reopen_modal'] = 'addModal';
-    } else {
-        $stmt = $conn->prepare("INSERT INTO gallery_photos (album_id, image) VALUES (?, ?)");
-        $uploaded = 0;
-        foreach ($_FILES['images']['name'] as $key => $img) {
-            $safe_name = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', basename($img));
-            if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $path . $safe_name)) {
-                $stmt->bind_param("is", $albumId, $safe_name);
-                $stmt->execute();
-                $uploaded++;
-            }
-        }
-        $stmt->close();
-        $_SESSION['success'] = "$uploaded photo(s) uploaded successfully.";
-    }
-
-    header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug) . (!empty($_POST['qs']) ? '&' . $_POST['qs'] : ''));
-    exit();
+  header("Location: manage-photos?id=$albumId&slug=" . urlencode($slug) . (!empty($_POST['qs']) ? '&' . $_POST['qs'] : ''));
+  exit();
 }
 
 /* SEARCH + PAGINATION */
@@ -66,9 +66,9 @@ $types = 'i';
 $params = [$albumId];
 
 if ($search !== '') {
-    $where[] = "image LIKE ?";
-    $types .= 's';
-    $params[] = "%$search%";
+  $where[] = "image LIKE ?";
+  $types .= 's';
+  $params[] = "%$search%";
 }
 $whereSql = 'WHERE ' . implode(' AND ', $where);
 
@@ -124,36 +124,40 @@ unset($_SESSION['reopen_modal']);
 
   <p class="result-count"><?= $totalRows ?> photo<?= $totalRows == 1 ? '' : 's' ?> found</p>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Created Date</th>
-        <th>Image</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php $i = $offset + 1; ?>
-      <?php if ($totalRows == 0): ?>
-        <tr><td colspan="4" class="no-results">No photos in this album yet.</td></tr>
-      <?php endif; ?>
-      <?php while ($row = $result->fetch_assoc()): ?>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['created_at']) ?></td>
-          <td><img src="uploads/gallery/<?= htmlspecialchars($slug) ?>/<?= htmlspecialchars($row['image']) ?>" height="50"></td>
-          <td class="action-col-flight">
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>&qs=<?= urlencode($qs) ?>','Delete this photo?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
+          <th>S.N.</th>
+          <th>Created Date</th>
+          <th>Image</th>
+          <th>Action</th>
         </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table></div>
+      </thead>
+      <tbody>
+        <?php $i = $offset + 1; ?>
+        <?php if ($totalRows == 0): ?>
+          <tr>
+            <td colspan="4" class="no-results">No photos in this album yet.</td>
+          </tr>
+        <?php endif; ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><img src="../uploads/gallery/<?= htmlspecialchars($slug) ?>/<?= htmlspecialchars($row['image']) ?>" height="50"></td>
+            <td class="action-col-flight">
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>&id=<?= $albumId ?>&slug=<?= urlencode($slug) ?>&qs=<?= urlencode($qs) ?>','Delete this photo?')"
+                class="btn-delete">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php if ($totalPages > 1): ?>
     <div class="pagination">

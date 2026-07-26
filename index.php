@@ -120,7 +120,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
                 <?php endif; ?>
 
                 <div class="trip-card-banner-img">
-                  <img src="admin/uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
+                  <img src="uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
                     alt="<?= htmlspecialchars($tour['title']); ?>">
                   <div class="image-bottom-fade"></div>
                 </div>
@@ -213,7 +213,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
                   </span>
                 <?php endif; ?>
 
-                <img src="admin/uploads/images/flights/<?= htmlspecialchars($flight['image']); ?>"
+                <img src="uploads/images/flights/<?= htmlspecialchars($flight['image']); ?>"
                   alt="<?= htmlspecialchars($flight['from_city'] . ' to ' . $flight['to_city']); ?>">
 
               </div>
@@ -533,13 +533,13 @@ while ($c = mysqli_fetch_assoc($clients)) {
     <div class="client-marquee-track">
 
       <?php foreach ($clientRows as $client): ?>
-        <img src="admin/uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
+        <img src="uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
           alt="<?= htmlspecialchars($client['name']) ?>">
       <?php endforeach; ?>
 
       <!-- duplicate for smooth loop -->
       <?php foreach ($clientRows as $client): ?>
-        <img src="admin/uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
+        <img src="uploads/images/clients/<?= htmlspecialchars($client['logo']) ?>"
           alt="<?= htmlspecialchars($client['name']) ?>">
       <?php endforeach; ?>
 

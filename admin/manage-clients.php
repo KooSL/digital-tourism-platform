@@ -37,7 +37,7 @@ if (isset($_POST['submit'])) {
         $_SESSION['reopen_modal'] = 'addModal';
     } else {
         $logo = time() . '_' . basename($_FILES['logo']['name']);
-        move_uploaded_file($_FILES['logo']['tmp_name'], "uploads/images/clients/" . $logo);
+        move_uploaded_file($_FILES['logo']['tmp_name'], "../uploads/images/clients/" . $logo);
 
         $stmt = $conn->prepare("INSERT INTO clients (name, logo, status) VALUES (?, ?, ?)");
         $stmt->bind_param("ssi", $name, $logo, $status);
@@ -79,8 +79,8 @@ if (isset($_POST['update'])) {
             if (in_array($_FILES['logo']['type'], $allowedTypes)) {
                 $ext = pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
                 $newLogo = time() . '_client.' . $ext;
-                if (move_uploaded_file($_FILES['logo']['tmp_name'], "uploads/images/clients/" . $newLogo)) {
-                    @unlink("uploads/images/clients/" . $logo);
+                if (move_uploaded_file($_FILES['logo']['tmp_name'], "../uploads/images/clients/" . $newLogo)) {
+                    @unlink("../uploads/images/clients/" . $logo);
                     $logo = $newLogo;
                 }
             }
@@ -202,7 +202,7 @@ unset($_SESSION['reopen_modal']);
         <tr>
           <td><?= $i++ ?></td>
           <td><?= htmlspecialchars($row['name']) ?></td>
-          <td><img src="uploads/images/clients/<?= htmlspecialchars($row['logo']) ?>" height="50"></td>
+          <td><img src="../uploads/images/clients/<?= htmlspecialchars($row['logo']) ?>" height="50"></td>
           <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
           <td class="action-col">
             <button type="button" class="btn-edit"
@@ -211,7 +211,7 @@ unset($_SESSION['reopen_modal']);
               data-name="<?= htmlspecialchars($row['name']) ?>"
               data-status="<?= $row['status'] ?>"
               data-image="<?= htmlspecialchars($row['logo']) ?>"
-              data-image-path="uploads/images/clients/<?= htmlspecialchars($row['logo']) ?>">
+              data-image-path="../uploads/images/clients/<?= htmlspecialchars($row['logo']) ?>">
               Edit
             </button>
             <a href="javascript:void(0)"
