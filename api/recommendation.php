@@ -170,7 +170,7 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
         $w = ($viewWeight * 1.5) + ($timeWeight * 2.0);           // time spent counts more than raw views
         if ($w <= 0) continue;
 
-        $weightedPrices[(float)$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
+        $weightedPrices[$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
         $profile['durations'][$row['duration']] = ($profile['durations'][$row['duration']] ?? 0) + $w;
         $profile['types'][$row['type']] = ($profile['types'][$row['type']] ?? 0) + $w;
     }
@@ -189,7 +189,7 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
 
     while ($row = $bookings->fetch_assoc()) {
         $w = 4.0 * (int)$row['cnt']; // bookings weigh heavily
-        $weightedPrices[(float)$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
+        $weightedPrices[$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
         $profile['durations'][$row['duration']] = ($profile['durations'][$row['duration']] ?? 0) + $w;
         $profile['types'][$row['type']] = ($profile['types'][$row['type']] ?? 0) + $w;
     }
@@ -209,7 +209,7 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
     while ($row = $reviews->fetch_assoc()) {
         $w = max((int)$row['rating'] - 2, 0) * 1.5; // only 3*+ reviews signal positive taste
         if ($w <= 0) continue;
-        $weightedPrices[(float)$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
+        $weightedPrices[$row['price']] = ($weightedPrices[(float)$row['price']] ?? 0) + $w;
         $profile['durations'][$row['duration']] = ($profile['durations'][$row['duration']] ?? 0) + $w;
         $profile['types'][$row['type']] = ($profile['types'][$row['type']] ?? 0) + $w;
     }
