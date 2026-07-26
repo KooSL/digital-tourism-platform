@@ -106,7 +106,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
 
 <div class="admin-content">
 
-  <h1>Dashboard</h1>
+  <h3>Stats</h3>
 
   <!-- STATS -->
   <div class="dashboard-stats">
@@ -225,7 +225,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
 
   <!-- RECENT INQUIRIES -->
   <div class="recent-box">
-    <h2>Recent package Inquiries</h2>
+    <h3>Recent package Inquiries</h3>
 
     <table>
       <tr>

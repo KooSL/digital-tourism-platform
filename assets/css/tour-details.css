@@ -93,7 +93,7 @@
   color: var(--blue);
 }
 
-.recommend-subtitle{
+.recommend-subtitle, .nearby-status {
   text-align: center;
   color: #6b7280;
   font-size: 15px;

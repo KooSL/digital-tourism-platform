@@ -45,7 +45,7 @@
 
   <header class="admin-header">
     <div class="admin-header-inner">
-      <h2></h2>
+      <h2 id="pageTitle">Admin Panel</h2>
 
       <div class="admin-user">
         <!-- <span>Admin</span> -->

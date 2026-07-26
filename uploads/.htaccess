@@ -1,0 +1,15 @@
+php_flag engine off
+Options -ExecCGI
+AddType text/plain .php .phtml .php3 .php4 .php5 .php7
+
+<FilesMatch "\.(php|php\d?|phtml|pht|phar|cgi|pl|py|sh|asp|aspx)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes
+
+# Prevent access to .htaccess itself
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>

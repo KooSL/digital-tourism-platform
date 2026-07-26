@@ -343,10 +343,10 @@ unset($_SESSION['reopen_modal']);
             <?php endif; ?>
           </td>
           <td><img src="uploads/images/tours/<?= htmlspecialchars($row['banner_image']) ?>" height="50"></td>
-          <td><?php if ($row['pdf_file']): ?><a href="uploads/pdf/<?= htmlspecialchars($row['pdf_file']) ?>" target="_blank">View</a><?php endif; ?></td>
+          <td><?php if ($row['pdf_file']): ?><a href="uploads/pdf/<?= htmlspecialchars($row['pdf_file']) ?>" target="_blank" class="btn-view">View</a><?php endif; ?></td>
           <td><?= htmlspecialchars($row['location_name']) ?></td>
           <td><?= $row['is_popular'] ? '<span class="badge badge-popular">Yes</span>' : 'No'; ?></td>
-          <td class="status-col <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></td>
+          <td class="status-col"><span class="pill <?= $row['status'] ? 'published' : 'draft' ?>"><?= $row['status'] ? 'Active' : 'Inactive' ?></span></td>
           <td class="action-col">
             <button type="button" class="btn-edit"
               onclick="openEditModal(this)"
@@ -424,7 +424,7 @@ unset($_SESSION['reopen_modal']);
           <button type="button" class="remove-itinerary">Remove</button>
         </div>
       </div>
-      <button type="button" class="additinerarybtn" onclick="addItinerary()">+ Add Day</button>
+      <button type="button" class="additinerarybtn" onclick="addItinerary('itinerary-wrapper')">+ Add Day</button>
 
       <div class="form-group"><textarea name="includes" placeholder="Cost Includes"></textarea></div>
       <div class="form-group"><textarea name="excludes" placeholder="Cost Excludes"></textarea></div>
@@ -486,7 +486,7 @@ unset($_SESSION['reopen_modal']);
           <button type="button" class="remove-itinerary">Remove</button>
         </div>
       </div>
-      <button type="button" class="additinerarybtn" onclick="addItinerary()">+ Add Day</button>
+      <button type="button" class="additinerarybtn" onclick="addItinerary('edit-itinerary-wrapper')">+ Add Day</button>
 
       <div class="form-group"><textarea name="includes"></textarea></div>
       <div class="form-group"><textarea name="excludes"></textarea></div>

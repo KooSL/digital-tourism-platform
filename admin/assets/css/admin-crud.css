@@ -1,0 +1,247 @@
+/* ==========================================================
+   Shared CRUD toolbar + modal styles for single-page
+   view / add / update admin modules.
+   Uses the design tokens defined in admin.css.
+   ========================================================== */
+
+/* ---- Toolbar: search + filter + add button ---- */
+.crud-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0px 0 22px;
+}
+
+.crud-toolbar form.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1;
+}
+
+.crud-toolbar .search-input {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.crud-toolbar .search-input input[type="text"] {
+  width: 100%;
+  padding: 11px 14px 11px 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 12px center;
+  background-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.crud-toolbar .search-input input[type="text"]:focus {
+  outline: none;
+
+}
+
+.crud-toolbar select,
+.crud-toolbar input[type="text"] {
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--surface);
+  min-width: 150px;
+  color: var(--ink);
+}
+
+.crud-toolbar select:focus,
+.crud-toolbar input[type="text"]:focus {
+  outline: none;
+  /* border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-50); */
+}
+
+.crud-toolbar .btn-filter,
+.crud-toolbar .btn-reset {
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* transition: all 0.15s ease; */
+}
+
+.crud-toolbar .btn-filter {
+  background: var(--blue);
+  color: #fff;
+}
+
+.crud-toolbar .btn-filter:hover {
+  background: var(--orange);
+  box-shadow: var(--shadow-sm);
+}
+
+.crud-toolbar .btn-reset {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.crud-toolbar .btn-reset:hover {
+  border-color: var(--orange);
+  color: var(--ink);
+}
+
+.crud-toolbar .btn-add {
+  /* background: linear-gradient(135deg, var(--orange), var(--orange-600)); */
+  background: var(--blue);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* transition: all 0.15s ease; */
+  /* box-shadow: 0 4px 12px rgba(255, 166, 48, 0.28); */
+}
+
+.crud-toolbar .btn-add:hover {
+  filter: brightness(1.04);
+  /* transform: translateY(-1px); */
+  /* box-shadow: 0 6px 16px rgba(255, 166, 48, 0.35); */
+  background: var(--orange);
+}
+
+.result-count {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.no-results {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted-light);
+  font-size: 14px;
+}
+
+/* ---- Modal ---- */
+.crud-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 18, 40, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 1300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.crud-modal-overlay.active {
+  display: flex;
+}
+
+.crud-modal {
+  background: var(--surface);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  padding: 28px 30px 30px;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.18s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.crud-modal.large {
+  max-width: 820px;
+}
+
+.crud-modal h2 {
+  color: var(--blue-900);
+  margin-bottom: 20px;
+  font-size: 19px;
+  padding-right: 20px;
+}
+
+.crud-modal .modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  background: var(--bg);
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  /* transition: all 0.15s ease; */
+}
+
+.crud-modal .modal-close:hover {
+  background: var(--error-bg);
+  color: var(--error-red);
+}
+
+.crud-modal .admin-form {
+  display: block;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  max-width: none;
+}
+
+.crud-modal .current-image img {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin: 6px 0 12px;
+}
+
+/* ---- View button ---- */
+.btn-view {
+  background: var(--blue-50);
+  color: var(--blue);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-right: 4px;
+  display: inline-block;
+  /* transition: all 0.15s ease; */
+}
+
+.btn-view:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .crud-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .crud-toolbar form.toolbar-filters {
+    flex-direction: column;
+  }
+}

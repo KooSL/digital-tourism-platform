@@ -16,6 +16,7 @@ if (isset($_POST['submit'])) {
     }
 
     $title      = $_POST['title'];
+    $slug       = $_POST['slug'];
     $type = $_POST['type'];
     $duration   = $_POST['duration'];
     $price      = $_POST['price'];
@@ -51,13 +52,14 @@ if (isset($_POST['submit'])) {
     /* INSERT TOUR */
     $stmt = $conn->prepare("
         INSERT INTO tours
-        (title, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status, latitude, longitude, location_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, slug, type, duration, price, price_usd, old_price, overview, highlights, includes, excludes, banner_image, pdf_file, is_popular, status, latitude, longitude, location_name)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        "sssdddssssssiidds",
+        "ssssdddssssssiidds",
         $title,
+        $slug,
         $type,
         $duration,
         $price,
@@ -137,7 +139,12 @@ include 'includes/sidebar.php';
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <div class="form-group">
-            <input type="text" name="title" id="title" placeholder="Tour Title" data-validate="name">
+            <input type="text" name="title" id="title" placeholder="Tour Title" data-validate="text10">
+            <small class="error"></small>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="slug" id="slug" placeholder="Slug" data-validate="text10">
             <small class="error"></small>
         </div>
 
@@ -257,5 +264,43 @@ include 'includes/sidebar.php';
 <script src="assets/js/form-validator.js"></script>
 <script src="assets/js/itinerary-validation.js"></script>
 <script src="assets/js/admin-alert.js"></script>
+
+<script>
+    const nameInput = document.getElementById('title');
+    const slugInput = document.getElementById('slug');
+    let slugEdited = false; // tracks if user manually edited the slug
+
+    function slugify(text) {
+        return text
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // strip invalid chars
+            .replace(/\s+/g, '-') // spaces -> hyphens
+            .replace(/-+/g, '-') // collapse multiple hyphens
+            .replace(/^-|-$/g, ''); // trim leading/trailing hyphen
+    }
+
+    nameInput.addEventListener('input', () => {
+        if (!slugEdited) {
+            slugInput.value = slugify(nameInput.value);
+        }
+        validateSlug();
+    });
+
+    // If the user edits the slug field directly, stop auto-syncing
+    slugInput.addEventListener('input', () => {
+        slugEdited = true;
+        slugInput.value = slugify(slugInput.value);
+        validateSlug();
+    });
+
+    // function validateSlug() {
+    //     const isValid = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slugInput.value) && slugInput.value.length > 0;
+    //     slugInput.setCustomValidity(isValid ? '' : 'Slug must be lowercase letters, numbers, and hyphens only');
+    //     slugInput.classList.toggle('is-invalid', !isValid);
+    //     return isValid;
+    // }
+</script>
 
 <?php include 'includes/footer.php'; ?>

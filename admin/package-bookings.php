@@ -74,7 +74,7 @@ include 'includes/sidebar.php';
 
   <?php include 'includes/admin-alert.php'; ?>
 
-  <table class="admin-table">
+  <div class="table-scroll"><table class="admin-table">
     <thead>
       <tr>
         <th>S.N.</th>
@@ -168,7 +168,7 @@ include 'includes/sidebar.php';
         </tr>
       <?php } ?>
     </tbody>
-  </table>
+  </table></div>
 
   <?php include 'includes/admin-pagination.php'; ?>
 

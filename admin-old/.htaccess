@@ -1,0 +1,16 @@
+# Prevent access to .htaccess itself
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Prevent access to sensitive files
+<FilesMatch "(^\.|config\.php|db\.php|\.env|composer\.json|composer\.lock)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+
+# Disable directory browsing
+Options -Indexes
+
