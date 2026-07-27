@@ -69,3 +69,25 @@ hr {
   color: var(--orange);
   font-weight: 600;
 }
+
+.payment-partners {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.payment-partners p {
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 14px;
+}
+.payment-icons img{
+  width: 100px;
+  height: auto;
+}
+
+.esewa-redirect {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--blue);
+  text-align: center;
+}

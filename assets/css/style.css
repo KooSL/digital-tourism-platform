@@ -481,7 +481,7 @@ a {
 .nav-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end; /* only nav-menu + hamburger remain, so push both to the right */
   height: 100%;
 }
 
@@ -625,7 +625,7 @@ a {
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
+@media (max-width: 850px) {
   .nav-menu {
     display: none;
   }

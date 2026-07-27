@@ -1,0 +1,55 @@
+/* ============================================================================
+   ANTI-FLICKER / ANTI-LAYOUT-SHIFT
+   ----------------------------------------------------------------------------
+   Problem: tour-slider.js / flight-slider.js / testimonial-slider.js all run
+   AFTER the browser has already painted the default (un-positioned) layout.
+   They then instantly add/remove classes, hide buttons, and set transforms -
+   which is visible as a snap/jump on every page load, especially on a slow
+   connection or busy main thread (e.g. right after a refresh).
+
+   Fix: each slider track starts invisible. Its JS adds a "slider-ready"
+   class the moment it has finished measuring/positioning things, and THAT
+   is what fades it in. All the snapping happens while it's still invisible.
+   ============================================================================ */
+
+.tour-slider-track,
+.flight-slider-track,
+.testimonial-track {
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    transform 0.5s ease;
+}
+
+.tour-slider-track.slider-ready,
+.flight-slider-track.slider-ready,
+.testimonial-track.slider-ready {
+  opacity: 1;
+}
+
+/* Prev/next buttons: default to hidden-but-reserved-space rather than
+   "visible then yanked away" - avoids the visible flash entirely, whether
+   or not there end up being enough cards to need them. */
+.tour-slider-wrapper .slider-btn,
+.testimonial-slider-wrapper .slider-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tour-slider-wrapper .slider-btn.slider-ready,
+.testimonial-slider-wrapper .slider-btn.slider-ready {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Fallback: if JS fails to load/run for any reason, don't leave the
+   slider permanently invisible - reveal it after a short timeout via a
+   class the page can add, or just let it degrade to visible+unpositioned
+   rather than blank. Belt-and-suspenders only; the JS below normally
+   handles this within a few milliseconds of DOMContentLoaded. */
+.no-js .tour-slider-track,
+.no-js .flight-slider-track,
+.no-js .testimonial-track {
+  opacity: 1;
+}

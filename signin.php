@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Sign In";
 include 'includes/header.php'; ?>
 
@@ -22,6 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
+    // 8 attempts per 10 minutes per email - slows down credential-stuffing /
+    // brute-force scripts without locking a real user out for long.
+    if (!checkRateLimit('login_' . strtolower($email), 8, 600)) {
+        header("Location: signin?error=too_many_attempts");
+        exit;
+    }
+
     $stmt = $conn->prepare("SELECT id, name, password FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -33,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 
         if (password_verify($password, $user['password'])) {
 
+            resetRateLimit('login_' . strtolower($email));
+
             session_regenerate_id(true);
 
             $_SESSION['user_id'] = $user['id'];
@@ -42,23 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             $stmt->bind_param("i", $user['id']);
             $stmt->execute();
 
-            // header("Location: index?success=signin");
-            // exit;
-
-            // $redirect = $_GET['redirect'] ?? 'index?success=signin';
-
-            // header("Location: " . $redirect . (strpos($redirect, '?') === false ? '?' : '&') . "success=signin");
-            // exit;
-
-            $redirect = $_POST['redirect'] ?? 'index?success=signin';
-
-            if (
-                !str_starts_with($redirect, '/')
-                && !str_starts_with($redirect, 'tour-details')
-                && !str_starts_with($redirect, 'booking')
-            ) {
-                $redirect = 'index?success=signin';
-            }
+            $redirect = safeInternalRedirect($_POST['redirect'] ?? null);
 
             header("Location: " . $redirect . (strpos($redirect, '?') === false ? '?' : '&') . "success=signin");
             exit;
@@ -120,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             </div>
 
             <div class="form-group password-group">
-                <input type="password" name="password"  placeholder="Password">
+                <input type="password" name="password" placeholder="Password">
 
                 <button type="button" class="toggle-password">
                     <i class="fa-solid fa-eye"></i>

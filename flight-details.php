@@ -15,7 +15,10 @@ if (!isset($_GET['id'])) {
 }
 
 $id = intval($_GET['id']);
-$query = mysqli_query($conn, "SELECT * FROM flights WHERE id = $id");
+$stmt = mysqli_prepare($conn, "SELECT * FROM flights WHERE id = ?");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$query = mysqli_stmt_get_result($stmt);
 $flight = mysqli_fetch_assoc($query);
 
 if (!$flight) {

@@ -12,7 +12,12 @@ include 'config/db.php';
 include 'includes/mailer.php';
 include 'api/countries.php';
 
-$id = intval($_GET['id'] ?? 0);
+$id = intval($_GET['id']);
+
+if (!isset($_GET['id']) || $id <= 0) {
+    header("Location: tours?error=invalid");
+    exit;
+}
 
 $stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE id=? AND status=1");
 mysqli_stmt_bind_param($stmt, "i", $id);
@@ -104,19 +109,53 @@ if (isset($_SESSION['user_id'])) {
 
 if (isset($_POST['book'])) {
 
+    if (
+        !isset($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    ) {
+        die("CSRF validation failed.");
+    }
+
+    $package_id = intval($_POST['package_id']);
+    $persons = intval($_POST['persons']);
+
+    // Re-fetch the tour SERVER-SIDE to get its real price - never trust a
+    // price/amount coming from the client. The old code hardcoded
+    // 'amount' => 5 (leftover test value), which meant every booking,
+    // regardless of the actual tour or number of people, was charged the
+    // same fixed 5 (currency unit) amount. This also closes a price-
+    // tampering vector: an attacker can't submit their own 'amount' field
+    // because we never read one from $_POST at all.
+    $priceStmt = mysqli_prepare($conn, "SELECT price FROM tours WHERE id = ? AND status = 1");
+    mysqli_stmt_bind_param($priceStmt, "i", $package_id);
+    mysqli_stmt_execute($priceStmt);
+    $priceResult = mysqli_stmt_get_result($priceStmt);
+    $priceRow = mysqli_fetch_assoc($priceResult);
+    mysqli_stmt_close($priceStmt);
+
+    if (!$priceRow) {
+        header("Location: booking?id=$package_id&error=required");
+        exit;
+    }
+
+    if ($persons < 1 || $persons > 50) {
+        header("Location: booking?id=$package_id&error=required");
+        exit;
+    }
+
     $_SESSION['booking_data'] = [
-        'package_id' => intval($_POST['package_id']),
+        'package_id' => $package_id,
         'user_id' => $_SESSION['user_id'] ?? null,
-        'name' => $_POST['name'],
-        'email' => $_POST['email'],
-        'country' => $_POST['country'],
-        'phone' => $_POST['phone'],
-        'date' => $_POST['travel_date'],
-        'persons' => intval($_POST['persons']),
-        'amount' => 5
+        'name' => trim($_POST['name'] ?? ''),
+        'email' => trim($_POST['email'] ?? ''),
+        'country' => trim($_POST['country'] ?? ''),
+        'phone' => trim($_POST['phone'] ?? ''),
+        'date' => $_POST['travel_date'] ?? '',
+        'persons' => $persons,
+        'amount' => (float)$priceRow['price'], // per-person price, server-verified
     ];
 
-    header("Location: esewa-payment?package_id=" . $_POST['package_id']);
+    header("Location: esewa-payment?package_id=" . $package_id);
     exit;
 }
 
@@ -153,7 +192,7 @@ if (!$tour) {
 
 <!-- BANNER -->
 <section class="tour-banner"
-    style="background-image: url('admin/uploads/images/tours/<?= $tour['banner_image'] ?>');">
+    style="background-image: url('uploads/images/tours/<?= $tour['banner_image'] ?>');">
 
     <div class="overlay">
         <div class="container">
@@ -175,6 +214,7 @@ if (!$tour) {
                     <?php
                     if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
                     if ($_GET['error'] === 'booking_failed') echo "Booking failed. Please try again.";
+                    if ($_GET['error'] === 'required') echo "Please fill in all required fields.";
                     ?>
                 </div>
             <?php endif; ?>
@@ -225,7 +265,8 @@ if (!$tour) {
 
         <form method="POST" novalidate>
 
-            <input type="hidden" name="package_id" value="<?php echo $tour['id']; ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="package_id" value="<?php echo (int)$tour['id']; ?>">
 
             <div class="form-group">
                 <input type="date" name="travel_date" id="travel_date" min="<?= date('Y-m-d') ?>">
@@ -277,6 +318,13 @@ if (!$tour) {
                 <p class="discount-txt">Discount: <span id="discountText">0%</span></p>
                 <hr>
                 <p><strong>Total Payable: NPR <span id="totalAmount"><?php echo $tour['price']; ?></span></strong></p>
+            </div>
+
+            <div class="payment-partners">
+                <p>Pay With:</p>
+                <div class="payment-icons">
+                    <img src="assets/images/payments/esewa_2.png" alt="eSewa">
+                </div>
             </div>
 
             <button type="submit" class="booking-btn" name="book">Proceed to Payment</button>

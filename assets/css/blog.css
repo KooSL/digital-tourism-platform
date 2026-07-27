@@ -4,7 +4,8 @@
    (--blue, --orange, --white, --gray, --fade-blue, etc.)
    ========================================= */
 
-.blog-list-section, .blog-details-section {
+.blog-list-section,
+.blog-details-section {
   padding: 30px 0;
   background: #f9fbfd;
 }
@@ -116,12 +117,16 @@
 }
 
 .blog-meta {
-  /* display: flex;
-  flex-wrap: wrap; */
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   font-size: 13px;
   color: #777;
   margin-bottom: 14px;
+}
+
+.blog-meta.details-meta {
+  justify-content: center;
 }
 
 .blog-meta i {

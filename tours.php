@@ -67,6 +67,25 @@ $result = $stmt->get_result();
 ?>
 
 <section class="page-banner">
+
+  <?php if (isset($_GET['success'])): ?>
+    <div class="success-box-contact" id="successBox">
+      <strong>Success!</strong>
+      <?php
+      if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
+      ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if (isset($_GET['error'])): ?>
+    <div class="error-box-contact" id="errorBox">
+      <strong>Error!</strong>
+      <?php
+      if ($_GET['error'] === 'invalid') echo "Invalid request. Please try again.";
+      ?>
+    </div>
+  <?php endif; ?>
+
   <div class="overlay">
     <?php if ($type) : ?>
       <h1>Our <?php echo ucfirst($type); ?> Packages</h1>
@@ -252,5 +271,7 @@ $result = $stmt->get_result();
     }
   });
 </script>
+
+<script src="assets/js/success-errorBox.js"></script>
 
 <?php include 'includes/footer.php'; ?>

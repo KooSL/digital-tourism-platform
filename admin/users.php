@@ -41,52 +41,64 @@ include 'includes/sidebar.php';
 
   <?php include 'includes/admin-alert.php'; ?>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Created Date</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Password Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>S.N.</th>
+          <th>Created Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Country</th>
+          <th>Address</th>
+          <th>Password Status</th>
+          <th>Created At</th>
+          <th>Last Sign-in</th>
+          <th>Last Updated</th>
+          <th>Action</th>
+        </tr>
+      </thead>
 
-    <tbody>
-      <?php
-      $i = $offset + 1;
+      <tbody>
+        <?php
+        $i = $offset + 1;
 
-      $result = mysqli_query(
-        $conn,
-        "SELECT * FROM users
+        $result = mysqli_query(
+          $conn,
+          "SELECT * FROM users
      ORDER BY id DESC
      LIMIT $limit OFFSET $offset"
-      );
-      while ($row = mysqli_fetch_assoc($result)) {
-      ?>
-        <tr>
-          <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['created_at']) ?></td>
-          <td><?= htmlspecialchars($row['name']) ?></td>
-          <td><?= htmlspecialchars($row['email']) ?></td>
-          <td><?= htmlspecialchars($row['phone']) ?></td>
-          <td><span style="color:green;">Encrypted</span></td>
-          <td>
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this user?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
-        </tr>
-      <?php } ?>
-    </tbody>
-  </table></div>
+        );
+        while ($row = mysqli_fetch_assoc($result)) {
+        ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><?= htmlspecialchars($row['name']) ?></td>
+            <td><?= htmlspecialchars($row['email']) ?></td>
+            <td><?= htmlspecialchars($row['phone']) ?></td>
+            <td><?= htmlspecialchars($row['country']) ?></td>
+            <td><?= htmlspecialchars($row['address']) ?></td>
+            <td><span style="color:green;">Encrypted</span></td>
+            <td><?= htmlspecialchars($row['created_at']) ?></td>
+            <td><?= htmlspecialchars($row['last_signin']) ?></td>
+            <td><?= htmlspecialchars($row['last_update']) ?></td>
+            <td>
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this user?')"
+                class="btn-delete">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php include 'includes/admin-pagination.php'; ?>
-  
+
 </div>
 
 <script src="assets/js/admin-alert.js"></script>

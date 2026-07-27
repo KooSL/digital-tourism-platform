@@ -1,11 +1,6 @@
 <nav class="main-navbar">
   <div class="container nav-wrapper">
 
-    <!-- LOGO -->
-    <a href="/TakeYourSeat/index" class="logo">
-      <!-- <img src="/TakeYourSeat/assets/images/TakeyourSeat_Logo-Color.png"> -->
-    </a>
-
     <!-- MENU -->
     <ul class="nav-menu" id="navMenu">
       <li><a href="/Digital_Tourism_Platform">Home</a></li>

@@ -118,9 +118,9 @@ include 'includes/header.php';
                 </p>
 
                 <div class="blog-meta">
-                  <span><i class="fa-regular fa-user"></i> <?= htmlspecialchars($row['author']) ?></span>
-                  <span><i class="fa-regular fa-calendar"></i> <?= date('M d, Y', strtotime($row['created_at'])) ?></span>
-                  <span><i class="fa-regular fa-clock"></i> <?= readingTime($row['content']) ?></span>
+                  <span><i class="fa-regular fa-user"></i><?= htmlspecialchars($row['author']) ?></span>
+                  <span><i class="fa-regular fa-calendar"></i><?= date('M d, Y', strtotime($row['created_at'])) ?></span>
+                  <span><i class="fa-regular fa-clock"></i><?= readingTime($row['content']) ?></span>
                 </div>
 
                 <a href="blog-details?slug=<?= urlencode($row['slug']) ?>" class="btn">Read More</a>

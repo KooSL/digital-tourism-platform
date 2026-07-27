@@ -1,9 +1,8 @@
-document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
-
-  const track = wrapper.querySelector('.tour-slider-track');
-  const nextBtn = wrapper.querySelector('.next');
-  const prevBtn = wrapper.querySelector('.prev');
-  const cards = wrapper.querySelectorAll('.tour-card');
+document.querySelectorAll(".tour-slider-wrapper").forEach((wrapper) => {
+  const track = wrapper.querySelector(".tour-slider-track");
+  const nextBtn = wrapper.querySelector(".next");
+  const prevBtn = wrapper.querySelector(".prev");
+  const cards = wrapper.querySelectorAll(".tour-card");
 
   let index = 0;
   let startX = 0;
@@ -16,19 +15,19 @@ document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
   }
 
   if (cards.length <= getVisibleCards()) {
-    track.classList.add('center');
+    track.classList.add("center");
+  } else {
+    // Only REVEAL the buttons when they're actually needed, instead of the
+    // old approach of showing them by default then hiding a beat later
+    // (which is what caused the visible flash on load).
+    nextBtn.classList.add("slider-ready");
+    prevBtn.classList.add("slider-ready");
   }
 
   function getCardWidth() {
-    const card = wrapper.querySelector('.tour-card');
+    const card = wrapper.querySelector(".tour-card");
     const gap = 25;
     return card.offsetWidth + gap;
-  }
-
-  // Hide buttons if not enough cards
-  if (cards.length <= getVisibleCards()) {
-    nextBtn.style.display = "none";
-    prevBtn.style.display = "none";
   }
 
   function updateSlider() {
@@ -36,8 +35,14 @@ document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
     track.style.transform = `translateX(-${index * cardWidth}px)`;
   }
 
+  // Position is now correct (index 0 = translateX(0), same as the CSS
+  // default) - safe to fade the track in. anti-flicker.css keeps it at
+  // opacity:0 until this class is added, so all the class/display
+  // decisions above happened invisibly.
+  track.classList.add("slider-ready");
+
   // Button navigation
-  nextBtn.addEventListener('click', () => {
+  nextBtn.addEventListener("click", () => {
     const visibleCards = getVisibleCards();
     if (index < cards.length - visibleCards) {
       index++;
@@ -45,7 +50,7 @@ document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
     }
   });
 
-  prevBtn.addEventListener('click', () => {
+  prevBtn.addEventListener("click", () => {
     if (index > 0) {
       index--;
       updateSlider();
@@ -53,16 +58,16 @@ document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
   });
 
   // Touch swipe
-  track.addEventListener('touchstart', (e) => {
+  track.addEventListener("touchstart", (e) => {
     startX = e.touches[0].clientX;
     isDragging = true;
   });
 
-  track.addEventListener('touchmove', (e) => {
+  track.addEventListener("touchmove", (e) => {
     if (!isDragging) return;
   });
 
-  track.addEventListener('touchend', (e) => {
+  track.addEventListener("touchend", (e) => {
     if (!isDragging) return;
 
     let endX = e.changedTouches[0].clientX;
@@ -82,5 +87,4 @@ document.querySelectorAll('.tour-slider-wrapper').forEach(wrapper => {
 
     isDragging = false;
   });
-
 });

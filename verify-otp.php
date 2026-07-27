@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Verify OTP";
 include 'includes/header.php'; ?>
 
@@ -24,14 +24,26 @@ if (isset($_POST['verify'])) {
         die("CSRF validation failed.");
     }
 
-    $entered_otp = $_POST['otp'];
+    // Cap OTP guesses at 5 per 5-minute window (matches the OTP's own
+    // expiry) - without this, a 6-digit OTP can be brute-forced by simply
+    // POSTing every combination before it expires.
+    if (!checkRateLimit('otp_verify', 5, 300)) {
+        header("Location: signup?error=too_many_attempts");
+        exit;
+    }
+
+    $entered_otp = trim($_POST['otp'] ?? '');
 
     if (time() > $_SESSION['otp_expire']) {
         header("Location: signup?error=otp_expired");
         exit;
     }
 
-    if ($entered_otp == $_SESSION['otp']) {
+    // hash_equals gives a constant-time comparison, closing the (small but
+    // free-to-fix) timing side-channel that a plain == comparison has.
+    if (hash_equals((string)$_SESSION['otp'], (string)$entered_otp)) {
+
+        resetRateLimit('otp_verify');
 
         $data = $_SESSION['signup_data'];
 
@@ -60,11 +72,11 @@ if (isset($_POST['verify'])) {
 
             if (!empty($data['redirect'])) {
 
-                $redirect = $data['redirect'];
+                $redirect = safeInternalRedirect($data['redirect']);
 
                 unset($data['redirect']);
 
-                header("Location: " . $redirect . "?success=signup");
+                header("Location: " . $redirect . (strpos($redirect, '?') === false ? '?' : '&') . "success=signup");
             } else {
 
                 header("Location: index?success=signup");

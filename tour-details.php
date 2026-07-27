@@ -6,6 +6,11 @@ include 'includes/header.php'; ?>
 
 // Get tour ID from URL
 $id = intval($_GET['id'] ?? 0);
+if (!isset($_GET['id']) || $id <= 0) {
+  header("Location: tours?error=invalid");
+  exit;
+}
+
 $slug = $_GET['slug'] ?? '';
 
 if (empty($_SESSION['csrf_token'])) {
@@ -235,7 +240,8 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
           <?php
           $errorMsgs = [
             'failed'         => "Inquiry failed to send. Please try again.",
-            'booking_failed' => "Booking failed. Please try again.",
+            'booking_failed' => "Booking failed or cancelled. Please try again.",
+            'invalid'        => "Invalid request. Please try again.",
           ];
           echo $errorMsgs[$_GET['error']] ?? '';
           ?>

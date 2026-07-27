@@ -141,11 +141,11 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
       <span><?= htmlspecialchars($blog['title']) ?></span>
     </nav>
     <h1><?= htmlspecialchars($blog['title']) ?></h1>
-    <div class="blog-meta">
-      <span><i class="fa-regular fa-user"></i> <?= htmlspecialchars($blog['author']) ?></span>
-      <span><i class="fa-regular fa-calendar"></i> <?= date('M d, Y', strtotime($blog['created_at'])) ?></span>
-      <span><i class="fa-regular fa-clock"></i> <?= readingTime($blog['content']) ?></span>
-      <span><i class="fa-regular fa-eye"></i> <?= (int)$blog['views'] ?> views</span>
+    <div class="blog-meta details-meta">
+      <span><i class="fa-regular fa-user"></i><?= htmlspecialchars($blog['author']) ?></span>
+      <span><i class="fa-regular fa-calendar"></i><?= date('M d, Y', strtotime($blog['created_at'])) ?></span>
+      <span><i class="fa-regular fa-clock"></i><?= readingTime($blog['content']) ?></span>
+      <span><i class="fa-regular fa-eye"></i><?= (int)$blog['views'] ?> views</span>
     </div>
   </div>
 </section>

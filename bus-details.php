@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Buse Details";
 include 'includes/header.php'; ?>
 
@@ -75,7 +75,10 @@ if (!isset($_GET['id'])) {
 }
 
 
-$query = mysqli_query($conn, "SELECT * FROM buses WHERE id = $id LIMIT 1");
+$stmt = mysqli_prepare($conn, "SELECT * FROM buses WHERE id = ? LIMIT 1");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$query = mysqli_stmt_get_result($stmt);
 $bus = mysqli_fetch_assoc($query);
 
 if (!$bus) {

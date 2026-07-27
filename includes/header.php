@@ -1,51 +1,54 @@
 <?php
-session_start();
+require_once __DIR__ . '/security.php'; // hardened session_start() + security headers + rate limiter
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
+<script>
+      document.documentElement.classList.remove('no-js');
+</script>
 
 <head>
       <meta charset="UTF-8">
       <!-- <title>Digital Tourism Platform</title> -->
-       <title><?= isset($metaTitle) ? htmlspecialchars($metaTitle) : (isset($pageTitle) ? htmlspecialchars($pageTitle) . " | Digital Tourism Platform" : "Digital Tourism Platform") ?></title>
+      <title><?= isset($metaTitle) ? htmlspecialchars($metaTitle) : (isset($pageTitle) ? htmlspecialchars($pageTitle) . " | Digital Tourism Platform" : "Digital Tourism Platform") ?></title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
       <?php if (isset($metaDescription)): ?>
-      <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
+            <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
       <?php endif; ?>
 
       <?php if (isset($metaKeywords)): ?>
-      <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+            <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
       <?php endif; ?>
 
       <meta name="robots" content="<?= isset($metaRobots) ? htmlspecialchars($metaRobots) : 'index, follow' ?>">
 
       <?php if (isset($canonical)): ?>
-      <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
+            <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
       <?php endif; ?>
 
       <?php if (isset($metaTitle) || isset($metaDescription)): ?>
-      <meta property="og:type" content="<?= isset($ogType) ? htmlspecialchars($ogType) : 'website' ?>">
-      <meta property="og:title" content="<?= htmlspecialchars($metaTitle ?? $pageTitle ?? 'Digital Tourism Platform') ?>">
-      <?php if (isset($metaDescription)): ?>
-      <meta property="og:description" content="<?= htmlspecialchars($metaDescription) ?>">
-      <?php endif; ?>
-      <?php if (isset($canonical)): ?>
-      <meta property="og:url" content="<?= htmlspecialchars($canonical) ?>">
-      <?php endif; ?>
-      <?php if (isset($ogImage)): ?>
-      <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
-      <?php endif; ?>
-      <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="<?= htmlspecialchars($metaTitle ?? $pageTitle ?? 'Digital Tourism Platform') ?>">
-      <?php if (isset($metaDescription)): ?>
-      <meta name="twitter:description" content="<?= htmlspecialchars($metaDescription) ?>">
-      <?php endif; ?>
+            <meta property="og:type" content="<?= isset($ogType) ? htmlspecialchars($ogType) : 'website' ?>">
+            <meta property="og:title" content="<?= htmlspecialchars($metaTitle ?? $pageTitle ?? 'Digital Tourism Platform') ?>">
+            <?php if (isset($metaDescription)): ?>
+                  <meta property="og:description" content="<?= htmlspecialchars($metaDescription) ?>">
+            <?php endif; ?>
+            <?php if (isset($canonical)): ?>
+                  <meta property="og:url" content="<?= htmlspecialchars($canonical) ?>">
+            <?php endif; ?>
+            <?php if (isset($ogImage)): ?>
+                  <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
+            <?php endif; ?>
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="<?= htmlspecialchars($metaTitle ?? $pageTitle ?? 'Digital Tourism Platform') ?>">
+            <?php if (isset($metaDescription)): ?>
+                  <meta name="twitter:description" content="<?= htmlspecialchars($metaDescription) ?>">
+            <?php endif; ?>
       <?php endif; ?>
 
       <?php if (isset($jsonLd)): ?>
-      <?= $jsonLd ?>
+            <?= $jsonLd ?>
       <?php endif; ?>
 
       <link rel="stylesheet" href="assets/css/style.css">
@@ -61,6 +64,7 @@ session_start();
       <link rel="stylesheet" href="assets/css/confirmation-box.css">
       <link rel="stylesheet" href="assets/css/home.css">
       <link rel="stylesheet" href="assets/css/blog.css">
+      <link rel="stylesheet" href="assets/css/anti-flicker.css">
 
       <link rel="stylesheet"
             href="https://unpkg.com/leaflet/dist/leaflet.css">

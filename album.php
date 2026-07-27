@@ -8,9 +8,12 @@ if (!isset($_GET['album'])) {
   exit;
 }
 
-$slug = mysqli_real_escape_string($conn, $_GET['album']);
+$slug = $_GET['album'];
 
-$album = mysqli_query($conn, "SELECT * FROM gallery_albums WHERE slug='$slug'");
+$stmt = mysqli_prepare($conn, "SELECT * FROM gallery_albums WHERE slug = ?");
+mysqli_stmt_bind_param($stmt, "s", $slug);
+mysqli_stmt_execute($stmt);
+$album = mysqli_stmt_get_result($stmt);
 $albumData = mysqli_fetch_assoc($album);
 
 if (!$albumData) {
@@ -18,7 +21,10 @@ if (!$albumData) {
   exit;
 }
 
-$photos = mysqli_query($conn, "SELECT * FROM gallery_photos WHERE album_id='{$albumData['id']}'");
+$stmt = mysqli_prepare($conn, "SELECT * FROM gallery_photos WHERE album_id = ?");
+mysqli_stmt_bind_param($stmt, "i", $albumData['id']);
+mysqli_stmt_execute($stmt);
+$photos = mysqli_stmt_get_result($stmt);
 ?>
 
 <div class="header-wrapper">
