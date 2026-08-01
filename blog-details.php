@@ -1,6 +1,7 @@
 <?php
 include 'config/db.php';
 include 'includes/blog-functions.php';
+include 'includes/validation.php';
 include 'includes/header.php';
 
 $slug = $_GET['slug'] ?? '';
@@ -41,17 +42,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
     die("CSRF validation failed.");
   }
 
+  // 5 comments per 10 minutes per session - public, no-login comment forms
+  // are a very common spam target.
+  if (!checkRateLimit('blog_comment', 5, 600)) {
+    $_SESSION['comment_msg'] = "You're commenting too quickly. Please wait a few minutes and try again.";
+    header("Location: blog-details?slug=" . urlencode($slug) . "#comments");
+    exit();
+  }
+
   $cName    = trim($_POST['name'] ?? '');
   $cEmail   = trim($_POST['email'] ?? '');
   $cComment = trim($_POST['comment'] ?? '');
 
-  if ($cName !== '' && filter_var($cEmail, FILTER_VALIDATE_EMAIL) && $cComment !== '') {
+  $v = new Validator();
+  // Honeypot: hidden field real users never see/fill; bots often do.
+  $v->honeypotEmpty('website', $_POST['website'] ?? '');
+  $v->required('name', $cName, 'Please enter your name.')
+    ->maxLength('name', $cName, 100, 'Name is too long.');
+  $v->required('email', $cEmail, 'Please enter a valid email.')
+    ->email('email', $cEmail, 'Please enter a valid email.');
+  $v->required('comment', $cComment, 'Comment cannot be empty.')
+    ->minLength('comment', $cComment, 3, 'Comment is too short.')
+    ->maxLength('comment', $cComment, 1000, 'Comment is too long (max 1000 characters).');
+
+  if ($v->fails()) {
+    // This page shows one combined message box rather than a per-field
+    // list, so flatten the validator's errors into that existing pattern.
+    $_SESSION['comment_msg'] = implode(' ', $v->errors());
+    $_SESSION['form_old_input'] = ['comment_name' => $cName, 'comment_email' => $cEmail, 'comment_text' => $cComment];
+  } else {
     $cStmt = $conn->prepare("INSERT INTO blog_comments (blog_id, name, email, comment) VALUES (?, ?, ?, ?)");
     $cStmt->bind_param("isss", $blog['id'], $cName, $cEmail, $cComment);
     $cStmt->execute();
     $_SESSION['comment_msg'] = "Thanks! Your comment has been submitted and is awaiting approval.";
-  } else {
-    $_SESSION['comment_msg'] = "Please fill in a valid name, email and comment.";
   }
 
   header("Location: blog-details?slug=" . urlencode($slug) . "#comments");
@@ -66,7 +89,9 @@ $comments = $cStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $commentCount = count($comments);
 
 /* Track a simple view count (best-effort, non-blocking) */
-mysqli_query($conn, "UPDATE blogs SET views = views + 1 WHERE id = " . (int)$blog['id']);
+$viewStmt = $conn->prepare("UPDATE blogs SET views = views + 1 WHERE id = ?");
+$viewStmt->bind_param("i", $blog['id']);
+$viewStmt->execute();
 
 /* Related posts: same category, excluding current */
 $related = [];
@@ -210,29 +235,38 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
         <form method="POST" class="comment-form" action="blog-details?slug=<?= urlencode($slug) ?>#comments" id="userForm" novalidate>
           <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
+          <!-- Honeypot field: invisible to real users, often auto-filled by
+               simple spam bots. See .hp-field CSS below. -->
+          <div class="form-group hp-field" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
           <h4>Leave a Comment</h4>
 
           <div class="comment-form-row">
 
             <div class="form-group">
-              <input type="text" name="name" placeholder="Your Name" id="name">
+              <input type="text" name="name" placeholder="Your Name" id="name"
+                value="<?= htmlspecialchars($_SESSION['form_old_input']['comment_name'] ?? '') ?>">
               <small class="error"></small>
             </div>
 
             <div class="form-group">
-              <input type="email" name="email" placeholder="Your Email" id="email">
+              <input type="email" name="email" placeholder="Your Email" id="email"
+                value="<?= htmlspecialchars($_SESSION['form_old_input']['comment_email'] ?? '') ?>">
               <small class="error"></small>
             </div>
           </div>
 
           <div class="form-group">
-            <textarea name="comment" placeholder="Write your comment..." rows="4" id="message"></textarea>
+            <textarea name="comment" placeholder="Write your comment..." rows="4" id="message"><?= htmlspecialchars($_SESSION['form_old_input']['comment_text'] ?? '') ?></textarea>
             <small class="error"></small>
           </div>
 
           <button type="submit" name="submit_comment" class="btn">Post Comment</button>
           <small class="comment-note">Your comment will be visible after admin approval.</small>
         </form>
+        <?php unset($_SESSION['form_old_input']); ?>
       </div>
     </article>
 
@@ -262,6 +296,16 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
 
   </div>
 </section>
+
+<style>
+  .hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    height: 0;
+    overflow: hidden;
+  }
+</style>
 
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>

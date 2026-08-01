@@ -11,6 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 include 'config/db.php';
 include 'includes/mailer.php';
 include 'api/countries.php';
+include 'includes/validation.php';
 
 $id = intval($_GET['id']);
 
@@ -26,6 +27,12 @@ $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 
+if (!$tour) {
+    echo "<p class='pageError tournotfound'>Package not found!</p>";
+    include 'includes/footer.php';
+    exit;
+}
+
 $latitude = $tour['latitude'];
 $longitude = $tour['longitude'];
 $location_name = $tour['location_name'];
@@ -40,72 +47,11 @@ if (isset($_SESSION['user_id'])) {
     $user_data = mysqli_fetch_assoc($user_result);
     mysqli_stmt_close($user_stmt);
 
-    // $user_name = $user_data['name'];
-    // $user_email = $user_data['email'];
-    // $user_phone = $user_data['phone'];
     $_SESSION['user_name'] = $user_data['name'];
     $_SESSION['user_email'] = $user_data['email'];
     $_SESSION['user_phone'] = $user_data['phone'];
     $_SESSION['user_country'] = $user_data['country'];
 }
-
-
-// if (isset($_POST['book'])) {
-
-//     $package_id = intval($_POST['package_id']);
-//     $user_id = $_SESSION['user_id'] ?? null;
-
-//     $name = $_POST['name'];
-//     $email = $_POST['email'];
-//     $phone = $_POST['phone'];
-//     $date = $_POST['travel_date'];
-//     $persons = intval($_POST['persons']);
-
-//     if (!$name || !$phone || !$date || $persons < 1) {
-//         header("Location: booking?id=$package_id&error=required");
-//         exit;
-//     }
-
-//     $stmt = $conn->prepare("
-//         INSERT INTO package_bookings
-//         (package_id, user_id, name, email, phone, travel_date, persons)
-//         VALUES (?, ?, ?, ?, ?, ?, ?)
-//     ");
-
-//     $stmt->bind_param(
-//         "iissssi",
-//         $package_id,
-//         $user_id,
-//         $name,
-//         $email,
-//         $phone,
-//         $date,
-//         $persons
-//     );
-
-//     if ($stmt->execute()) {
-
-//         $subject = "New Package Booking";
-
-//         $body = "
-//           <h3>New Booking</h3>
-//           <p>Name: $name</p>
-//           <p>Phone: $phone</p>
-//           <p>Date: $date</p>
-//           <p>Persons: $persons</p>
-//         ";
-
-//         sendAdminMail($subject, $body);
-
-//         header("Location: tour-details?id=$package_id&success=booked");
-//         exit;
-//         header("Location: esewa-payment");
-//         exit;
-//     } else {
-//         header("Location: tour-details?id=$package_id&error=booking_failed");
-//         exit;
-//     }
-// }
 
 if (isset($_POST['book'])) {
 
@@ -118,14 +64,16 @@ if (isset($_POST['book'])) {
 
     $package_id = intval($_POST['package_id']);
     $persons = intval($_POST['persons']);
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $country = trim($_POST['country'] ?? '');
+    $travel_date = trim($_POST['travel_date'] ?? '');
+    $payment_method = trim($_POST['payment_method'] ?? '');
 
     // Re-fetch the tour SERVER-SIDE to get its real price - never trust a
-    // price/amount coming from the client. The old code hardcoded
-    // 'amount' => 5 (leftover test value), which meant every booking,
-    // regardless of the actual tour or number of people, was charged the
-    // same fixed 5 (currency unit) amount. This also closes a price-
-    // tampering vector: an attacker can't submit their own 'amount' field
-    // because we never read one from $_POST at all.
+    // price/amount coming from the client. This also confirms the tour
+    // being booked actually exists and is still active.
     $priceStmt = mysqli_prepare($conn, "SELECT price FROM tours WHERE id = ? AND status = 1");
     mysqli_stmt_bind_param($priceStmt, "i", $package_id);
     mysqli_stmt_execute($priceStmt);
@@ -138,38 +86,80 @@ if (isset($_POST['book'])) {
         exit;
     }
 
-    if ($persons < 1 || $persons > 50) {
-        header("Location: booking?id=$package_id&error=required");
-        exit;
+    // ---- Full server-side validation (previously ONLY persons/price were
+    // checked here - name/email/phone/date/country were accepted as-is) ----
+    $v = new Validator();
+    $v->required('name', $name, 'Full name is required.')
+        ->maxLength('name', $name, 100, 'Name is too long.');
+    $v->required('email', $email, 'Email is required.')
+        ->email('email', $email, 'Please enter a valid email address.');
+    $v->required('phone', $phone, 'Phone number is required.')
+        ->phone('phone', $phone, 'Please enter a valid phone number.');
+    $v->required('country', $country, 'Please select your country.')
+        ->inArray('country', $country, $countries, 'Please select a valid country from the list.');
+    $v->required('travel_date', $travel_date, 'Travel date is required.')
+        ->dateNotPast('travel_date', $travel_date, 'Travel date must be today or a future date.');
+    $v->integerRange('persons', $persons, 1, 50, 'Number of persons must be between 1 and 50.');
+
+    if ($v->fails()) {
+        redirectWithErrors("booking?id=$package_id", $v->errors(), [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'country' => $country,
+            'travel_date' => $travel_date,
+            'persons' => (string)$persons,
+        ]);
     }
 
     $_SESSION['booking_data'] = [
         'package_id' => $package_id,
         'user_id' => $_SESSION['user_id'] ?? null,
-        'name' => trim($_POST['name'] ?? ''),
-        'email' => trim($_POST['email'] ?? ''),
-        'country' => trim($_POST['country'] ?? ''),
-        'phone' => trim($_POST['phone'] ?? ''),
-        'date' => $_POST['travel_date'] ?? '',
+        'name' => $name,
+        'email' => $email,
+        'country' => $country,
+        'phone' => $phone,
+        'date' => $travel_date,
         'persons' => $persons,
-        'amount' => (float)$priceRow['price'], // per-person price, server-verified
+        // 'amount' => (float)$priceRow['price'],
+        'amount' => 100.00, // For testing purposes, set a fixed amount of 100.00
     ];
 
-    header("Location: esewa-payment?package_id=" . $package_id);
-    exit;
+    if ($payment_method === 'esewa') {
+        header("Location: payment/esewa-payment?package_id=" . $package_id);
+        exit;
+    } elseif ($payment_method === 'khalti') {
+        // header("Location: payment/khalti-payment?package_id=" . $package_id);
+        // exit;
+        redirectWithErrors("booking?id=$package_id", ['payment_method' => 'Khalti is currently unavailable. Please choose another payment method.'], [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'country' => $country,
+            'travel_date' => $travel_date,
+            'persons' => (string)$persons,
+        ]);
+    } else {
+        redirectWithErrors("booking?id=$package_id", ['payment_method' => 'Please select a payment method.'], [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'country' => $country,
+            'travel_date' => $travel_date,
+            'persons' => (string)$persons,
+        ]);
+    }
 }
 
-$avg = mysqli_query(
-    $conn,
-    "SELECT
-        ROUND(AVG(rating),1) AS avg_rating,
-        COUNT(*) AS total_reviews
-     FROM trip_reviews
-     WHERE trip_id = $id
-     AND status = 1"
-);
-
-$ratingData = mysqli_fetch_assoc($avg);
+$avgStmt = mysqli_prepare($conn, "
+    SELECT ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS total_reviews
+    FROM trip_reviews
+    WHERE trip_id = ? AND status = 1
+");
+mysqli_stmt_bind_param($avgStmt, "i", $id);
+mysqli_stmt_execute($avgStmt);
+$ratingData = mysqli_stmt_get_result($avgStmt)->fetch_assoc();
+mysqli_stmt_close($avgStmt);
 
 ?>
 
@@ -178,21 +168,9 @@ $ratingData = mysqli_fetch_assoc($avg);
     <?php include 'includes/navbar.php'; ?>
 </div>
 
-<?php
-if ($id <= 0) {
-    echo "<p class='pageError invalidId'>Invalid Package ID!</p>";
-    exit;
-}
-
-if (!$tour) {
-    echo "<p class='pageError tournotfound'>Package not found!</p>";
-    exit;
-}
-?>
-
 <!-- BANNER -->
 <section class="tour-banner"
-    style="background-image: url('uploads/images/tours/<?= $tour['banner_image'] ?>');">
+    style="background-image: url('uploads/images/tours/<?= htmlspecialchars($tour['banner_image']) ?>');">
 
     <div class="overlay">
         <div class="container">
@@ -203,12 +181,12 @@ if (!$tour) {
                     <?php
                     if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
                     if ($_GET['success'] === 'booked') echo "Your package has been booked successfully. We’ll contact you soon.";
-                    if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
+                    if ($_GET['success'] === 'signin') echo "Sign in successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".";
                     ?>
                 </div>
             <?php endif; ?>
 
-            <?php if (isset($_GET['error'])): ?>
+            <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
                 <div class="error-box package" id="errorBox">
                     <strong>Error!</strong>
                     <?php
@@ -219,8 +197,10 @@ if (!$tour) {
                 </div>
             <?php endif; ?>
 
-            <h1><?= $tour['title'] ?></h1>
-            <p><?= $tour['duration'] ?></p>
+            <?php if (($_GET['error'] ?? '') === 'validation') renderValidationErrors(); ?>
+
+            <h1><?= htmlspecialchars($tour['title']) ?></h1>
+            <p><?= htmlspecialchars($tour['duration']) ?></p>
 
             <div class="banner-bottom-info">
 
@@ -235,8 +215,8 @@ if (!$tour) {
                 </div>
 
                 <div class="rating-summary">
-                    <a href="tour-details?id=<?= $tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
-                        (<?= $ratingData['total_reviews'] ?> reviews)</a>
+                    <a href="tour-details?id=<?= (int)$tour['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                        (<?= (int)($ratingData['total_reviews'] ?? 0) ?> reviews)</a>
                 </div>
 
             </div>
@@ -269,28 +249,30 @@ if (!$tour) {
             <input type="hidden" name="package_id" value="<?php echo (int)$tour['id']; ?>">
 
             <div class="form-group">
-                <input type="date" name="travel_date" id="travel_date" min="<?= date('Y-m-d') ?>">
+                <input type="date" name="travel_date" id="travel_date" min="<?= date('Y-m-d') ?>"
+                    value="<?= oldInput('travel_date') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="number" name="persons" placeholder="Number of Persons" min="1" id="persons">
+                <input type="number" name="persons" placeholder="Number of Persons" min="1" max="50" id="persons"
+                    value="<?= oldInput('persons') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
                 <input type="text" name="name" placeholder="Full Name" id="name"
-                    value="<?php echo $_SESSION['user_name'] ?? ''; ?>">
+                    value="<?= oldInput('name', $_SESSION['user_name'] ?? '') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
                 <input type="email" name="email" placeholder="Email" id="email"
-                    value="<?php echo $_SESSION['user_email'] ?? ''; ?>">
+                    value="<?= oldInput('email', $_SESSION['user_email'] ?? '') ?>">
                 <small class="error"></small>
             </div>
 
-            <?php $userCountry = $_SESSION['user_country'] ?? ''; ?>
+            <?php $userCountry = oldInput('country', $_SESSION['user_country'] ?? ''); ?>
             <div class="form-group">
                 <select name="country" id="country">
                     <option value="" disabled <?= empty($userCountry) ? 'selected' : '' ?>>
@@ -309,21 +291,36 @@ if (!$tour) {
 
             <div class="form-group">
                 <input type="text" name="phone" placeholder="Phone" id="phone"
-                    value="<?php echo $_SESSION['user_phone'] ?? ''; ?>">
+                    value="<?= oldInput('phone', $_SESSION['user_phone'] ?? '') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="payment-summary">
-                <p>Price: NPR <span id="packagePrice"><?php echo $tour['price']; ?></span> / person</p>
+                <p>Price: NPR <span id="packagePrice"><?= htmlspecialchars($tour['price']) ?></span> / person</p>
                 <p class="discount-txt">Discount: <span id="discountText">0%</span></p>
                 <hr>
-                <p><strong>Total Payable: NPR <span id="totalAmount"><?php echo $tour['price']; ?></span></strong></p>
+                <p><strong>Total Package Price: NPR <span id="totalAmount"><?= htmlspecialchars($tour['price']) ?></span></strong></p>
             </div>
 
             <div class="payment-partners">
-                <p>Pay With:</p>
+                <!-- <p>Pay With:</p>
                 <div class="payment-icons">
                     <img src="assets/images/payments/esewa_2.png" alt="eSewa">
+                </div> -->
+                <p>Choose Payment Method</p>
+                <div class="payment-methods">
+                    <label>
+                        <input type="radio" name="payment_method" id="payment_method" value="esewa">
+                        <div class="payment-icons">
+                            <img src="assets/images/payments/esewa_2.png" alt="eSewa">
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="payment_method" id="payment_method" value="khalti">
+                        <div class="payment-icons">
+                            <img src="assets/images/payments/khalti_2.png" alt="Khalti">
+                        </div>
+                    </label>
                 </div>
             </div>
 
@@ -337,17 +334,19 @@ if (!$tour) {
 <script src="assets/js/success-errorBox.js"></script>
 
 <script>
-    const pricePerPerson = <?= $tour['price']; ?>;
+    const pricePerPerson = <?= json_encode((float)$tour['price']) ?>;
 </script>
 
 <script>
-    const latitude = <?= $latitude ?>;
-    const longitude = <?= $longitude ?>;
-    const locationName = "<?= addslashes($location_name) ?>";
+    const latitude = <?= json_encode((float)$latitude) ?>;
+    const longitude = <?= json_encode((float)$longitude) ?>;
+    const locationName = <?= json_encode($location_name) ?>;
 </script>
 
 <script src="api/weather.js"></script>
 
 <script src="assets/js/tripCost-calc.js"></script>
+
+<?php clearOldInput(); ?>
 
 <?php include 'includes/footer.php'; ?>

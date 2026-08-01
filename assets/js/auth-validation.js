@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
       regex: /^(?!Select Country$).+$/,
       message: "Please select a country",
     },
+
   };
 
   const activeFields = {};

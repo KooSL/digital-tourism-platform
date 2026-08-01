@@ -1,4 +1,4 @@
-<?php 
+<?php
 $pageTitle = "Sign Up";
 include 'includes/header.php'; ?>
 
@@ -11,6 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 require_once 'config/db.php';
 require_once 'includes/mailer.php';
 require_once 'api/countries.php';
+require_once 'includes/validation.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
@@ -21,41 +22,57 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         die("CSRF validation failed.");
     }
 
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $phone = trim($_POST['phone']);
-    $address = trim($_POST['address']);
-    $country = trim($_POST['country']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-    $redirect = $_POST['redirect'];
-
-    if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($country) || empty($password)) {
-        die("All fields are required");
+    // A few signups per session in a short window is plenty for a real
+    // person; stops a script from mass-creating accounts.
+    if (!checkRateLimit('signup_attempt', 5, 600)) {
+        header("Location: signup?error=too_many_attempts");
+        exit;
     }
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid email format");
-    }
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $country = trim($_POST['country'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    // Validated with safeInternalRedirect() before ever being used, so a
+    // crafted redirect param can't be used for post-signup phishing.
+    $redirect = safeInternalRedirect($_POST['redirect'] ?? null, '');
 
-    if (!preg_match('/^[0-9]{7,15}$/', $phone)) {
-        die("Invalid phone number");
-    }
-
-    if (strlen($address) < 5) {
-        die("Address must be at least 5 characters");
-    }
+    // ---- Server-side validation, replacing the old die()-on-first-error
+    // approach - that gave a blank page with no navbar/footer and threw
+    // away everything the user had typed. Now it redirects back to the
+    // form with a proper error list and refills every non-password field. ----
+    $v = new Validator();
+    $v->required('name', $name, 'Full name is required.')
+        ->maxLength('name', $name, 100, 'Name is too long.');
+    $v->required('email', $email, 'Email is required.')
+        ->email('email', $email, 'Please enter a valid email address.');
+    $v->required('phone', $phone, 'Phone number is required.')
+        ->phone('phone', $phone, 'Please enter a valid phone number.');
+    $v->required('address', $address, 'Address is required.')
+        ->minLength('address', $address, 5, 'Address must be at least 5 characters.')
+        ->maxLength('address', $address, 200, 'Address is too long.');
+    $v->required('country', $country, 'Please select your country.')
+        ->inArray('country', $country, $countries, 'Please select a valid country from the list.');
+    $v->required('password', $password, 'Password is required.')
+        ->minLength('password', $password, 8, 'Password must be at least 8 characters.');
 
     if ($password !== $confirm_password) {
-        die("Passwords do not match");
+        $v->required('confirm_password', '', 'Passwords do not match.');
     }
 
-    if (strlen($password) < 8) {
-        die("Password must be at least 8 characters");
-    }
-
-    if (!in_array($country, $countries)) {
-        die("Invalid country selected");
+    if ($v->fails()) {
+        redirectWithErrors('signup', $v->errors(), [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $address,
+            'country' => $country,
+            'redirect' => $redirect,
+            // never flash password fields back
+        ]);
     }
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -82,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         'address' => $address,
         'country' => $country,
         'password' => $hashedPassword,
-        'redirect' => $redirect
+        'redirect' => $redirect,
     ];
 
     sendOtpMail($email, $otp);
@@ -103,21 +120,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         <div class="success-box" id="successBox">
             <strong>Success!</strong>
             <?php
-            if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
+            if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".";
             ?>
         </div>
     <?php endif; ?>
 
-    <?php if (isset($_GET['error'])): ?>
+    <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
         <div class="error-box" id="errorBox">
             <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'email_exist') echo "Email already exists.";
             if ($_GET['error'] === 'invalid') echo "Registration failed! Please try again.";
             if ($_GET['error'] === 'otp_expired') echo "OTP has been expired! Please signup again.";
+            if ($_GET['error'] === 'too_many_attempts') echo "Too many signup attempts. Please try again in a few minutes.";
             ?>
         </div>
     <?php endif; ?>
+
+    <?php if (($_GET['error'] ?? '') === 'validation') renderValidationErrors(); ?>
 
     <div class="overlay">
         <h1>Sign Up</h1>
@@ -131,23 +151,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
         <form method="POST" id="registerForm" novalidate>
 
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-            <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect'] ?? '') ?>">
+            <input type="hidden" name="redirect" value="<?= oldInput('redirect', $_GET['redirect'] ?? '') ?>">
 
             <div class="form-group">
-                <input type="text" name="name" id="name" placeholder="Full Name">
+                <input type="text" name="name" id="name" placeholder="Full Name" value="<?= oldInput('name') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="email" name="email" id="email" placeholder="Email">
+                <input type="email" name="email" id="email" placeholder="Email" value="<?= oldInput('email') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
                 <select name="country" id="country">
-                    <option value="" disabled selected>Select Country</option>
+                    <?php $oldCountry = oldInput('country'); ?>
+                    <option value="" disabled <?= empty($oldCountry) ? 'selected' : '' ?>>Select Country</option>
                     <?php foreach ($countries as $country): ?>
-                        <option value="<?= htmlspecialchars($country) ?>">
+                        <option value="<?= htmlspecialchars($country) ?>" <?= $country === $oldCountry ? 'selected' : '' ?>>
                             <?= htmlspecialchars($country) ?>
                         </option>
                     <?php endforeach; ?>
@@ -156,12 +177,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
             </div>
 
             <div class="form-group">
-                <input type="text" name="address" id="address" placeholder="Address">
+                <input type="text" name="address" id="address" placeholder="Address" value="<?= oldInput('address') ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="text" name="phone" id="phone" placeholder="Phone Number">
+                <input type="text" name="phone" id="phone" placeholder="Phone Number" value="<?= oldInput('phone') ?>">
                 <small class="error"></small>
             </div>
 
@@ -198,5 +219,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 <script src="assets/js/auth-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
 <script src="assets/js/toggle-password.js"></script>
+
+<?php clearOldInput(); ?>
 
 <?php include 'includes/footer.php'; ?>

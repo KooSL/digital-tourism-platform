@@ -52,6 +52,7 @@
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
   font-family: "Segoe UI", sans-serif;
+  z-index: 9999; /* was missing - this is why slider buttons/badges (z-index up to ~1454) could render above the chat window on scroll */
 }
 
 /* Header */
@@ -106,6 +107,49 @@
   border-bottom-left-radius: 4px;
 }
 
+/* Typing Indicator - styled like a bot bubble, with 3 bouncing dots */
+.typing-indicator {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #eee;
+  border-bottom-left-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #999;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
 /* Input Area */
 #chatInputArea {
   display: flex;
@@ -153,7 +197,7 @@
   color: var(--orange);
 }
 
-.chatFooter p{
+.chatFooter p {
   font-size: 10px;
   color: #888;
   text-align: center;

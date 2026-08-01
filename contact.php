@@ -10,6 +10,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 require_once 'config/db.php';
 require_once 'includes/mailer.php';
+require_once 'includes/validation.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
@@ -20,12 +21,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
     die("CSRF validation failed.");
   }
 
+  // 5 messages per 10 minutes per session - a contact form with no login
+  // wall is a common spam/abuse target.
+  if (!checkRateLimit('contact_form', 5, 600)) {
+    header("Location: contact?error=too_many_attempts");
+    exit;
+  }
+
   // Trim inputs
   $name    = trim($_POST['name'] ?? '');
   $email   = trim($_POST['email'] ?? '');
   $phone   = trim($_POST['phone'] ?? '');
   $message = trim($_POST['message'] ?? '');
 
+  $v = new Validator();
+  $v->honeypotEmpty('website', $_POST['website'] ?? '');
+  $v->required('name', $name, 'Full name is required.')
+    ->maxLength('name', $name, 100, 'Name is too long.');
+  $v->email('email', $email, 'Please enter a valid email address.', false);
+  $v->required('phone', $phone, 'Phone number is required.')
+    ->phone('phone', $phone, 'Please enter a valid phone number.');
+  $v->required('message', $message, 'Message cannot be empty.')
+    ->minLength('message', $message, 10, 'Message is too short - please add a bit more detail.')
+    ->maxLength('message', $message, 2000, 'Message is too long (max 2000 characters).');
+
+  if ($v->fails()) {
+    redirectWithErrors('contact', $v->errors(), [
+      'name' => $name,
+      'email' => $email,
+      'phone' => $phone,
+      'message' => $message,
+    ]);
+  }
 
   $stmt = $conn->prepare("INSERT INTO inquiries (name, email, phone, message) VALUES (?, ?, ?, ?)");
 
@@ -33,14 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
     $stmt->bind_param("ssss", $name, $email, $phone, $message);
 
     if ($stmt->execute()) {
-
-      // FCM Notification
-      // require_once 'includes/fcm.php';
-      // sendFCMToAdmins(
-      //   $conn,
-      //   "New Contact Message",
-      //   "New message received from $name"
-      // );
 
       require_once __DIR__ . '/includes/send_fcm_notification.php';
       $customerName = $name;
@@ -84,15 +103,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 </div>
 
 
-<!-- <section class="contact-hero">
-  <div class="overlay">
-    <div class="container">
-      <h1>Contact Us</h1>
-      <p>We’re here to help you plan your perfect journey</p>
-    </div>
-  </div>
-</section> -->
-
 <section class="page-banner">
 
   <?php if (isset($_GET['success'])): ?>
@@ -104,14 +114,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
     </div>
   <?php endif; ?>
 
-  <?php if (isset($_GET['error'])): ?>
+  <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
     <div class="error-box-contact" id="errorBox">
       <strong>Error!</strong>
       <?php
       if ($_GET['error'] === 'failed') echo "Message failed to send. Please try again.";
+      if ($_GET['error'] === 'too_many_attempts') echo "Too many messages sent recently. Please try again in a few minutes.";
       ?>
     </div>
   <?php endif; ?>
+
+  <?php if (($_GET['error'] ?? '') === 'validation') renderValidationErrors(); ?>
 
   <div class="overlay">
     <h1>Contact Us</h1>
@@ -138,9 +151,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
           <li><strong><i class="fa-solid fa-clock"></i> Working Hours:</strong> Sun–Fri | 10:00 AM – 5:00 PM</li>
         </ul>
       </div>
-
-
-
 
       <h2 class="map-title">Find Us on Map</h2>
 
@@ -169,23 +179,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
           <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
+          <!-- Honeypot field: hidden from real users via CSS (see below),
+               left blank by humans, often auto-filled by simple spam bots. -->
+          <div class="form-group hp-field" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
           <div class="form-group">
-            <input type="text" name="name" id="name" placeholder="Full Name">
+            <input type="text" name="name" id="name" placeholder="Full Name" value="<?= oldInput('name') ?>">
             <small class="error"></small>
           </div>
 
           <div class="form-group">
-            <input type="email" name="email" id="email" placeholder="Email (Optional)">
+            <input type="email" name="email" id="email" placeholder="Email (Optional)" value="<?= oldInput('email') ?>">
             <small class="error"></small>
           </div>
 
           <div class="form-group">
-            <input type="text" name="phone" id="phone" placeholder="Phone">
+            <input type="text" name="phone" id="phone" placeholder="Phone" value="<?= oldInput('phone') ?>">
             <small class="error"></small>
           </div>
 
           <div class="form-group">
-            <textarea name="message" id="message" placeholder="Your Message"></textarea>
+            <textarea name="message" id="message" placeholder="Your Message"><?= oldInput('message') ?></textarea>
             <small class="error"></small>
           </div>
 
@@ -198,7 +214,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
   </div>
 </section>
 
+<style>
+  /* Honeypot field: exists in the DOM for bots to find, but invisible and
+     unreachable for real users (display:none is skipped by some scrapers
+     that check computed visibility, so this uses an off-screen position
+     approach instead). */
+  .hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    height: 0;
+    overflow: hidden;
+  }
+</style>
+
 <script src="assets/js/inq-cnt-validation.js"></script>
 <script src="assets/js/success-errorBox.js"></script>
+
+<?php clearOldInput(); ?>
 
 <?php include 'includes/footer.php'; ?>

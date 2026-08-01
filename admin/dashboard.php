@@ -116,6 +116,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
     $busCount = $conn->query("SELECT COUNT(*) AS total FROM buses")->fetch_assoc();
     $flightCount = $conn->query("SELECT COUNT(*) AS total FROM flights")->fetch_assoc();
     $inqCount  = $conn->query("SELECT COUNT(*) AS total FROM inquiries")->fetch_assoc();
+    $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc();
     $albumCount = $conn->query("SELECT COUNT(*) AS total FROM gallery_albums")->fetch_assoc();
     $testCount = $conn->query("SELECT COUNT(*) AS total FROM testimonials")->fetch_assoc();
     $cliCount = $conn->query("SELECT COUNT(*) AS total FROM clients")->fetch_assoc();
@@ -184,7 +185,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
 
     <div class="stat-box">
       <p class="stat-title">Total Users</p>
-      <h3><?php echo $albumCount['total']; ?></h3>
+      <h3><?php echo $userCount['total']; ?></h3>
     </div>
 
     <div class="stat-box">

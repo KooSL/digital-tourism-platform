@@ -22,6 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
+        header("Location: signin?error=invalid");
+        exit;
+    }
+
     // 8 attempts per 10 minutes per email - slows down credential-stuffing /
     // brute-force scripts without locking a real user out for long.
     if (!checkRateLimit('login_' . strtolower($email), 8, 600)) {
@@ -89,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             <?php
             if ($_GET['error'] === 'invalid') echo "Invalid email or password.";
             if ($_GET['error'] === 'not_found') echo "Account does not exist.";
+            if ($_GET['error'] === 'too_many_attempts') echo "Too many sign-in attempts. Please try again in a few minutes.";
             ?>
         </div>
     <?php endif; ?>

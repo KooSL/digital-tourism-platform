@@ -9,34 +9,32 @@
   --fade-blue: #bfdbfe;
   --success-green: #28a745;
   --error-red: #dc3545;
+
+  --font-family-heading: "Poppins", sans-serif;
+  --font-family-body: "Inter", sans-serif;
+  --font-family-nav: "Inter", "Segoe UI", sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* font-family: Arial, sans-serif; */
+  font-display: swap;
 }
 
 * {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family-nav);
 }
 
 h1,
 h2,
 h3,
 .headline {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-family-heading);
 }
 
-@font-face {
-  font-family: "ComicSansCustom";
-  src:
-    url("../fonts/ComicSansMS.woff") format("woff"),
-    url("../fonts/COMICBD.TTF") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+.nav-menu li a {
+  font-family: var(--font-family-nav);
 }
 
 body {
@@ -45,22 +43,14 @@ body {
   background-color: var(--white);
 }
 
-/* @media (max-width: 768px) {
-  body{
-    padding-top: 0px;
-  }
-} */
+.hero {
+  transition: none;
+}
 
 a {
   text-decoration: none;
   color: inherit;
 }
-
-/* @media (max-width: 768px) {
-  *{
-    font-size: 16px;
-  }
-} */
 
 .container {
   max-width: 1200px;
@@ -508,7 +498,7 @@ a {
 .nav-menu li a {
   color: var(--white);
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 600;
   padding: 8px 0;
   position: relative;
 }
@@ -518,7 +508,7 @@ a {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -4px;
+  bottom: 2px;
   width: 0;
   height: 2px;
   background: var(--orange);

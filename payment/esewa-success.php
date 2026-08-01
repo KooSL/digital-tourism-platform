@@ -1,7 +1,7 @@
 <?php
-include 'includes/header.php';
-require_once __DIR__ . '/config/db.php';
-require_once __DIR__ . '/includes/mailer.php';
+include '../includes/header.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 /**
  * ============================================================================
@@ -24,7 +24,7 @@ require_once __DIR__ . '/includes/mailer.php';
  */
 
 if (!isset($_SESSION['booking_data']) || !isset($_SESSION['esewa_expected'])) {
-    header("Location: tours?error=invalid");
+    header("Location: ../tours?error=invalid");
     exit;
 }
 
@@ -36,7 +36,7 @@ function esewaVerificationFailed($package_id)
 {
     error_log("eSewa payment verification FAILED for package_id=$package_id, session=" . session_id());
     unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
-    header("Location: esewa-fail?reason=verification_failed");
+    header("Location: esewa-fail?reason=verification_failed"); 
     exit;
 }
 
@@ -53,7 +53,7 @@ if (!$decoded || !isset($decoded['signature'], $decoded['signed_field_names'], $
     esewaVerificationFailed($package_id);
 }
 
-$env = parse_ini_file(__DIR__ . '/.env');
+$env = parse_ini_file(__DIR__ . '/../.env');
 $secret_key = $env['ESEWA_SECRET_KEY'];
 
 // Rebuild the exact payload string eSewa signed, using the field order
@@ -148,12 +148,12 @@ $stmt->bind_param(
 
 $stmt->execute();
 
-require_once __DIR__ . '/includes/send_fcm_notification.php';
+require_once __DIR__ . '/../includes/send_fcm_notification.php';
 $customerName = $data['name'];
 sendAdminNotification(
     '🧳 New Booking Received!',
     $customerName . ' booked a trip.',
-    '/admin/inquiries.php'
+    '../admin/inquiries.php'
 );
 
 $adminsubject = "New Booking for Package ID: " . $data['package_id'];
@@ -194,5 +194,5 @@ if (!empty($data['user_id'])) {
 
 unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
 
-header("Location: tour-details?id=" . $data['package_id'] . "&success=booked");
+header("Location: ../tour-details?id=" . $data['package_id'] . "&success=booked");
 exit;

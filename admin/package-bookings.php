@@ -74,101 +74,103 @@ include 'includes/sidebar.php';
 
   <?php include 'includes/admin-alert.php'; ?>
 
-  <div class="table-scroll"><table class="admin-table">
-    <thead>
-      <tr>
-        <th>S.N.</th>
-        <th>Booked Date</th>
-        <th>Package Name</th>
-        <th>User ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Travel Date</th>
-        <th>Persons</th>
-        <th>Payment Status</th>
-        <th>Payment Method</th>
-        <th>Transaction ID</th>
-        <th>Status</th>
-        <th>Action</th>
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>S.N.</th>
+          <th>Booked Date</th>
+          <th>Package Name</th>
+          <th>User ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Travel Date</th>
+          <th>Persons</th>
+          <th>Payment Status</th>
+          <th>Payment Method</th>
+          <th>Transaction ID</th>
+          <th>Status</th>
+          <th>Action</th>
 
-      </tr>
-    </thead>
+        </tr>
+      </thead>
 
-    <tbody>
-      <?php
-      $i = $offset + 1;
+      <tbody>
+        <?php
+        $i = $offset + 1;
 
-      $result = mysqli_query(
-        $conn,
-        "SELECT pb.*,
+        $result = mysqli_query(
+          $conn,
+          "SELECT pb.*,
             t.title AS package_title,
             u.name AS user_name
      FROM package_bookings pb
      LEFT JOIN tours t ON pb.package_id = t.id
      LEFT JOIN users u ON pb.user_id = u.id
-     ORDER BY pb.id DESC
+     ORDER BY pb.id ASC
      LIMIT $limit OFFSET $offset"
-      );
+        );
 
-      while ($row = mysqli_fetch_assoc($result)) {
-      ?>
-        <tr>
-          <td><?= $i++ ?></td>
-          <td><?= $row['created_at'] ?></td>
-          <td><?= htmlspecialchars($row['package_title']) ?></td>
-          <td><?= $row['user_id'] ?></td>
-          <td><?= $row['name'] ?></td>
-          <td><?= $row['email'] ?></td>
-          <td><?= $row['phone'] ?></td>
-          <td><?= $row['travel_date'] ?></td>
-          <td><?= $row['persons'] ?></td>
-          <td><?= $row['payment_status'] ?></td>
-          <td><?= $row['payment_method'] ?></td>
-          <td><?= $row['transaction_id'] ?></td>
-          <td><?= $row['status'] ?></td>
+        while ($row = mysqli_fetch_assoc($result)) {
+        ?>
+          <tr>
+            <td><?= $i++ ?></td>
+            <td><?= $row['created_at'] ?></td>
+            <td><?= htmlspecialchars($row['package_title']) ?></td>
+            <td><?= $row['user_id'] ?></td>
+            <td><?= $row['name'] ?></td>
+            <td><?= $row['email'] ?></td>
+            <td><?= $row['phone'] ?></td>
+            <td><?= $row['travel_date'] ?></td>
+            <td><?= $row['persons'] ?></td>
+            <td><?= $row['payment_status'] ?></td>
+            <td><?= $row['payment_method'] ?></td>
+            <td><?= $row['transaction_id'] ?></td>
+            <td><?= $row['status'] ?></td>
 
-          <!-- <?php
-                if ($row['status'] == 1) {
-                  echo '<td class="status-col published">Active</td>';
-                } else {
-                  echo '<td class="status-col draft">Inactive</td>';
-                }
-                ?> -->
+            <!-- <?php
+                  if ($row['status'] == 1) {
+                    echo '<td class="status-col published">Active</td>';
+                  } else {
+                    echo '<td class="status-col draft">Inactive</td>';
+                  }
+                  ?> -->
 
-          <td class="action-col">
-            <!-- <a href="edit-package-booking?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
-            <?php if (in_array($row['status'], ['pending', 'canceled'])) { ?>
+            <td class="action-col">
+              <!-- <a href="edit-package-booking?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
+              <?php if (in_array($row['status'], ['pending', 'canceled'])) { ?>
 
-              <a href="?confirm=<?= $row['id'] ?>"
-                class="btn-approve"
-                onclick="return confirm('Confirm this booking?')">
-                Confirm
+                <a href="?confirm=<?= $row['id'] ?>"
+                  class="btn-approve"
+                  onclick="return confirm('Confirm this booking?')">
+                  Confirm
+                </a>
+
+
+              <?php } else { ?>
+
+                <a href="?cancel=<?= $row['id'] ?>"
+                  class="btn-reject"
+                  onclick="return confirm('Cancel this booking?')">
+                  Cancel
+                </a>
+
+
+              <?php } ?>
+
+              <a href="javascript:void(0)"
+                onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this package booking?')"
+                class="btn-delete">
+                Delete
               </a>
+            </td>
 
-
-            <?php } else { ?>
-
-              <a href="?cancel=<?= $row['id'] ?>"
-                class="btn-reject"
-                onclick="return confirm('Cancel this booking?')">
-                Cancel
-              </a>
-              
-
-            <?php } ?>
-
-            <a href="javascript:void(0)"
-              onclick="showConfirm('?delete=<?= $row['id'] ?>','Delete this package booking?')"
-              class="btn-delete">
-              Delete
-            </a>
-          </td>
-
-        </tr>
-      <?php } ?>
-    </tbody>
-  </table></div>
+          </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
 
   <?php include 'includes/admin-pagination.php'; ?>
 

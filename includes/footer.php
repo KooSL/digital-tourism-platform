@@ -121,7 +121,7 @@
   </div>
 </footer>
 
-<div id="chatToggle"><img src="assets/images/chatbot/icon.png" alt=""></div>
+<div id="chatToggle"><img src="assets/images/chatbot/icon2.png" alt=""></div>
 
 <div id="chatContainer">
   <div id="chatHeader">

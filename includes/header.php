@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/security.php'; // hardened session_start() + security headers + rate limiter
+require_once __DIR__ . '/security.php';
 ?>
 
 <!DOCTYPE html>
@@ -66,15 +66,13 @@ require_once __DIR__ . '/security.php'; // hardened session_start() + security h
       <link rel="stylesheet" href="assets/css/blog.css">
       <link rel="stylesheet" href="assets/css/anti-flicker.css">
 
-      <link rel="stylesheet"
-            href="https://unpkg.com/leaflet/dist/leaflet.css">
-
+      <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <!-- <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet"> -->
-      <!-- <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet"> -->
+
 
       <!-- <link rel="icon" href="assets/favicon/favicon.ico" type="image/x-icon">
 

@@ -19,13 +19,14 @@ if (empty($_SESSION['csrf_token'])) {
 
 require_once __DIR__ . '/config/db.php';
 include 'includes/mailer.php';
+include 'includes/validation.php';
 include 'api/recommendation.php'; // now also exposes bayesianRating(), getGlobalRatingStats()
 include 'api/nearby.php';         // Haversine-distance nearby packages (separate from recommendations)
 
 
 // Fetch tour details using prepared statement
-$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE id=? OR slug=? AND status=1");
-mysqli_stmt_bind_param($stmt, "is", $id, $slug);
+$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE id=? AND status=1");
+mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $tour = mysqli_fetch_assoc($result);
@@ -70,6 +71,31 @@ if (isset($_POST['send_inquiry'])) {
   $email     = trim($_POST['email'] ?? '');
   $phone     = trim($_POST['phone'] ?? '');
   $message   = trim($_POST['message'] ?? '');
+
+  if (!checkRateLimit('tour_inquiry', 5, 600)) {
+    header("Location: tour-details?id=$id&error=too_many_attempts");
+    exit;
+  }
+
+  $v = new Validator();
+  $v->required('name', $name, 'Full name is required.')
+    ->maxLength('name', $name, 100, 'Name is too long.');
+  $v->required('email', $email, 'Email is required.')
+    ->email('email', $email, 'Please enter a valid email address.');
+  $v->required('phone', $phone, 'Phone number is required.')
+    ->phone('phone', $phone, 'Please enter a valid phone number.');
+  $v->required('message', $message, 'Message cannot be empty.')
+    ->minLength('message', $message, 10, 'Message is too short - please add a bit more detail.')
+    ->maxLength('message', $message, 2000, 'Message is too long (max 2000 characters).');
+
+  if ($v->fails()) {
+    redirectWithErrors("tour-details?id=$id", $v->errors(), [
+      'inquiry_name' => $name,
+      'inquiry_email' => $email,
+      'inquiry_phone' => $phone,
+      'inquiry_message' => $message,
+    ]);
+  }
 
   // Insert inquiry using prepared statement
   $stmt = mysqli_prepare($conn, "INSERT INTO inquiries (trip_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
@@ -120,11 +146,36 @@ if (isset($_POST['submit_review'])) {
     exit;
   }
 
+  if (!checkRateLimit('trip_review', 5, 600)) {
+    header("Location: tour-details?id=$id&error=too_many_attempts");
+    exit;
+  }
+
   $trip_id  = (int)$_POST['trip_id'];
   $name     = trim($_POST['name'] ?? '');
-  $rating   = max(1, min(5, (int)($_POST['rating'] ?? 0)));
+  $ratingRaw = $_POST['rating'] ?? '';
   $review   = trim($_POST['review'] ?? '');
   $user_id  = $_SESSION['user_id'];
+
+  // Previously an unset/invalid rating silently became a 1-star review
+  // (max(1, min(5, (int)null)) === 1) - the user would never know their
+  // review got recorded with a rating they didn't actually choose.
+  $v = new Validator();
+  $v->required('name', $name, 'Please enter your name.')
+    ->maxLength('name', $name, 100, 'Name is too long.');
+  $v->integerRange('rating', $ratingRaw, 1, 5, 'Please select a star rating.');
+  $v->required('review', $review, 'Please write a short review.')
+    ->minLength('review', $review, 5, 'Review is too short.')
+    ->maxLength('review', $review, 1500, 'Review is too long (max 1500 characters).');
+
+  if ($v->fails()) {
+    redirectWithErrors("tour-details?id=$id", $v->errors(), [
+      'review_name' => $name,
+      'review_text' => $review,
+    ]);
+  }
+
+  $rating = (int)$ratingRaw;
 
   $stmt = mysqli_prepare(
     $conn,
@@ -234,19 +285,22 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
         </div>
       <?php endif; ?>
 
-      <?php if (isset($_GET['error'])): ?>
+      <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
         <div class="error-box package" id="errorBox">
           <strong>Error!</strong>
           <?php
           $errorMsgs = [
             'failed'         => "Inquiry failed to send. Please try again.",
             'booking_failed' => "Booking failed or cancelled. Please try again.",
+            'too_many_attempts' => "Too many submissions recently. Please try again in a few minutes.",
             'invalid'        => "Invalid request. Please try again.",
           ];
           echo $errorMsgs[$_GET['error']] ?? '';
           ?>
         </div>
       <?php endif; ?>
+
+      <?php if (($_GET['error'] ?? '') === 'validation') renderValidationErrors(); ?>
 
       <div class="banner-bottom-info">
 
@@ -384,22 +438,22 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
         <input type="hidden" name="trip_id" value="<?= (int)$tour['id']; ?>">
 
         <div class="form-group">
-          <input type="text" name="name" id="name" placeholder="Full Name">
+          <input type="text" name="name" id="name" placeholder="Full Name" value="<?= oldInput('inquiry_name') ?>">
           <small class="error"></small>
         </div>
 
         <div class="form-group">
-          <input type="email" name="email" id="email" placeholder="Email">
+          <input type="email" name="email" id="email" placeholder="Email" value="<?= oldInput('inquiry_email') ?>">
           <small class="error"></small>
         </div>
 
         <div class="form-group">
-          <input type="text" name="phone" id="phone" placeholder="Phone">
+          <input type="text" name="phone" id="phone" placeholder="Phone" value="<?= oldInput('inquiry_phone') ?>">
           <small class="error"></small>
         </div>
 
         <div class="form-group">
-          <textarea name="message" id="message" placeholder="Your Inquiry"></textarea>
+          <textarea name="message" id="message" placeholder="Your Inquiry"><?= oldInput('inquiry_message') ?></textarea>
           <small class="error"></small>
         </div>
 
@@ -423,7 +477,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
 
         <div class="form-group">
           <input type="text" name="name" placeholder="Full name" id="reviewName"
-            value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>">
+            value="<?= oldInput('review_name', $_SESSION['user_name'] ?? '') ?>">
           <small class="error"></small>
         </div>
 
@@ -448,14 +502,14 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
         </div>
 
         <div class="form-group">
-          <textarea id="review" name="review" rows="5" placeholder="Tell us about your experience..."></textarea>
+          <textarea id="review" name="review" rows="5" placeholder="Tell us about your experience..."><?= oldInput('review_text') ?></textarea>
           <small class="error"></small>
         </div>
 
         <?php if (isset($_SESSION['user_id'])) { ?>
           <button type="submit" name="submit_review">Submit Review</button>
         <?php } else { ?>
-          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="download-btn">Submit Review</a>
+          <a href="signin?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="btn">Signin to Submit Review</a>
         <?php } ?>
       </form>
 
@@ -492,7 +546,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
 <section class="container recommend-section">
 
   <h3>Recommended for You</h3>
-  <!-- <p class="recommend-subtitle">Powered by our hybrid recommendation engine - blending your browsing habits, similar travelers' bookings, and Bayesian-weighted ratings.</p> -->
+  <p class="recommend-subtitle">Powered by our hybrid recommendation engine - blending your browsing habits, similar travelers' bookings, and Bayesian-weighted ratings.</p>
 
   <div class="recommend-grid">
 
@@ -533,7 +587,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
   <section class="container nearby-section">
 
     <h3>Nearby <?= htmlspecialchars($tour['location_name'] ?: 'This Destination') ?></h3>
-    <p class="recommend-subtitle">Other packages close to <?= htmlspecialchars($tour['location_name'] ?: 'this destination') ?></p>
+    <p class="recommend-subtitle">Other packages close to <?= htmlspecialchars($tour['location_name'] ?: 'this destination') ?>, based on straight-line distance.</p>
 
     <div class="recommend-grid">
       <?php while ($row = $nearbyByDestination->fetch_assoc()): ?>
@@ -590,5 +644,7 @@ $nearbyByDestination = getNearbyToursForTour($conn, $tour, 300, 6);
 <script src="api/weather.js"></script>
 <script src="assets/js/track-time.js"></script>
 <script src="assets/js/nearby-packages.js"></script>
+
+<?php clearOldInput(); ?>
 
 <?php include 'includes/footer.php'; ?>

@@ -1,16 +1,16 @@
 <?php
-include 'includes/header.php';
-require_once __DIR__ . '/config/db.php';
+include '../includes/header.php';
+include '../config/db.php';
 
 $p_id = intval($_GET['package_id'] ?? 0);
 
 if (!isset($_GET['package_id']) || $p_id <= 0) {
-    header("Location: tours?error=invalid");
+    header("Location: ../tours?error=invalid");
     exit;
 }
 
 if (!isset($_SESSION['booking_data'])) {
-    header("Location: booking?id=$p_id&error=required");
+    header("Location: ../booking?id=$p_id&error=required");
     exit;
 }
 
@@ -21,7 +21,7 @@ $package_id = $data['package_id'];
 // package_id in the URL, and that the amount really was set server-side
 // by booking.php (not something a client could inject).
 if ($package_id !== $p_id || !isset($data['amount']) || !is_numeric($data['amount'])) {
-    header("Location: booking?id=$p_id&error=required");
+    header("Location: ../booking?id=$p_id&error=required");
     exit;
 }
 
@@ -33,8 +33,8 @@ $_SESSION['pid'] = $pid;
 // below is eSewa's PUBLIC sandbox/test secret and is fine for the RC/UAT
 // endpoint, but must be replaced with your real merchant secret before
 // going live on the production eSewa endpoint.
-$env = parse_ini_file(__DIR__ . '/.env');
-$secret_key = $env['ESEWA_SECRET_KEY'] ?? '8gBm/:&EnhH.1/q';
+$env = parse_ini_file(__DIR__ . '/../.env');
+$secret_key = $env['ESEWA_SECRET_KEY'];
 
 $subtotal = round($data['amount'] * $data['persons'], 2);
 
@@ -74,8 +74,8 @@ $signature = base64_encode(hash_hmac('sha256', $payload, $secret_key, true));
         <input type="hidden" name="product_code" value="<?= htmlspecialchars($product_code) ?>">
         <input type="hidden" name="product_service_charge" value="0">
         <input type="hidden" name="product_delivery_charge" value="0">
-        <input type="hidden" name="success_url" value="<?= htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/Digital_Tourism_Platform/esewa-success') ?>">
-        <input type="hidden" name="failure_url" value="<?= htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/Digital_Tourism_Platform/esewa-fail') ?>">
+        <input type="hidden" name="success_url" value="<?= htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/Digital_Tourism_Platform/payment/esewa-success') ?>">
+        <input type="hidden" name="failure_url" value="<?= htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/Digital_Tourism_Platform/payment/esewa-fail') ?>">
         <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code">
         <input type="hidden" name="signature" value="<?= htmlspecialchars($signature) ?>">
         <noscript><button type="submit">Continue to eSewa</button></noscript>
