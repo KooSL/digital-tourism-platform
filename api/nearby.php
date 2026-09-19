@@ -37,7 +37,7 @@ const EARTH_RADIUS_KM = 6371;
  *                            getRecommendations(), so calling code doesn't
  *                            need to know/care which engine produced it.
  */
-function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit = 6)
+function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit = 5)
 {
     // No coordinates on the reference tour -> nothing to compare against.
     if ($lat === null || $lng === null || $lat === '' || $lng === '') {
@@ -97,7 +97,7 @@ function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit 
  * location (the common case on tour-details.php - "other packages near
  * this destination").
  */
-function getNearbyToursForTour($conn, array $tour, $radiusKm = 300, $limit = 6)
+function getNearbyToursForTour($conn, array $tour, $radiusKm = 300, $limit = 5)
 {
     return getNearbyTours(
         $conn,
@@ -113,7 +113,7 @@ function getNearbyToursForTour($conn, array $tour, $radiusKm = 300, $limit = 6)
  * Convenience wrapper: nearby tours relative to the visiting USER's live
  * GPS location (from browser geolocation - see nearby-user.php below).
  */
-function getNearbyToursForUser($conn, $userLat, $userLng, $exclude_id = 0, $radiusKm = 300, $limit = 6)
+function getNearbyToursForUser($conn, $userLat, $userLng, $exclude_id = 0, $radiusKm = 300, $limit = 5)
 {
     return getNearbyTours($conn, $userLat, $userLng, $exclude_id, $radiusKm, $limit);
 }

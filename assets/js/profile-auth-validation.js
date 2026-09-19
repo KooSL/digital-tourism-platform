@@ -30,6 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
         message: "Passwords do not match",
       },
 
+      country: {
+        regex: /^.{2,}$/,
+        message: "Country must be at least 2 characters",
+      },
+
       address: {
         regex: /^.{5,}$/,
         message: "Address must be at least 5 characters",

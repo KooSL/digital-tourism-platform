@@ -97,8 +97,7 @@ if (!$bus) {
         <div id="notify"></div>
 
         <?php if (isset($_GET['success'])): ?>
-            <div class="success-box-contact" id="successBox">
-                <strong>Success!</strong>
+            <div class="success-box" id="successBox">
                 <?php
                 if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
                 ?>
@@ -106,8 +105,7 @@ if (!$bus) {
         <?php endif; ?>
 
         <?php if (isset($_GET['error'])): ?>
-            <div class="error-box-contact" id="errorBox">
-                <strong>Error!</strong>
+            <div class="error-box" id="errorBox">
                 <?php
                 if ($_GET['error'] === 'failed') echo "Inquiry failed to send. Please try again.";
                 ?>

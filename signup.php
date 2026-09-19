@@ -118,7 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
     <?php if (isset($_GET['success'])): ?>
         <div class="success-box" id="successBox">
-            <strong>Success!</strong>
             <?php
             if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".";
             ?>
@@ -127,12 +126,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['signup'])) {
 
     <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
         <div class="error-box" id="errorBox">
-            <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'email_exist') echo "Email already exists.";
             if ($_GET['error'] === 'invalid') echo "Registration failed! Please try again.";
             if ($_GET['error'] === 'otp_expired') echo "OTP has been expired! Please signup again.";
             if ($_GET['error'] === 'too_many_attempts') echo "Too many signup attempts. Please try again in a few minutes.";
+            if ($_GET['error'] === 'invalid_access') echo "Invalid access. Please sign up first.";
             ?>
         </div>
     <?php endif; ?>

@@ -11,7 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 require_once 'config/db.php';
 
 if (!isset($_SESSION['signup_data'])) {
-    header("Location: signup");
+    header("Location: signup?error=invalid_access");
     exit;
 }
 
@@ -102,7 +102,6 @@ if (isset($_POST['verify'])) {
 
     <?php if (isset($_GET['success'])): ?>
         <div class="success-box" id="successBox">
-            <strong>Success!</strong>
             <?php
             if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
             ?>
@@ -111,7 +110,6 @@ if (isset($_POST['verify'])) {
 
     <?php if (isset($_GET['error'])): ?>
         <div class="error-box" id="errorBox">
-            <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'invalid_otp') echo "Invalid OTP! Please try again.";
             ?>

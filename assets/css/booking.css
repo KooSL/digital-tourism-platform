@@ -7,13 +7,20 @@
 }
 
 .booking-form {
-  width: 100%;
-  max-width: 400px;
+  display: flex;
+  gap: 20px;
+  /* width: 100%; */
+  max-width: 1000px;
   background: #fff;
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
+}
+
+.booking-form-sec-left,
+.booking-form-sec-right {
+  flex: 1;
 }
 
 .booking-btn {
@@ -24,7 +31,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .booking-btn:hover {
@@ -49,7 +56,7 @@
 }
 
 .payment-summary {
-  margin-top: 20px;
+  /* margin-top: 20px; */
   padding: 10px;
   background: #f9fafb;
   border: 1px solid var(--fade-blue);
@@ -80,14 +87,117 @@ hr {
   font-weight: bold;
   font-size: 14px;
 }
-.payment-icons img{
+.payment-icons img {
   width: 100px;
   height: auto;
 }
 
-.esewa-redirect {
+.redirect-message {
   margin-top: 10px;
   font-size: 14px;
   color: var(--blue);
   text-align: center;
+}
+
+.payment-methods {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.payment-icons img {
+  width: 100px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.payment-methods label {
+  border: 2px solid var(--fade-blue);
+  border-radius: 6px;
+  padding: 5px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.payment-methods label:hover {
+  border-color: var(--orange);
+}
+
+.payment-methods input[type="radio"] {
+  display: none;
+}
+
+.payment-methods input[type="radio"]:checked {
+  border-color: var(--blue);
+}
+
+@media (max-width: 768px) {
+  .booking-container {
+    padding: 20px 10px;
+  }
+
+  .booking-form {
+    padding: 20px;
+    flex-direction: column;
+  }
+
+  .payment-methods {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.payment-option-group {
+  margin-top: 14px;
+  text-align: left;
+}
+
+.payment-option-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.payment-option-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid var(--fade-blue);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.payment-option-choice:hover {
+  border-color: var(--orange);
+}
+
+.payment-option-choice input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--blue);
+}
+
+.payment-option-choice:has(input:checked),
+.payment-method-choice:has(input:checked) {
+  border-color: var(--blue);
+  background: #f0f6ff;
+}
+
+.payment-option-choice small {
+  color: #666;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.payment-icons.mobile-banking img {
+  width: 50px;
+  height: 60px;
 }

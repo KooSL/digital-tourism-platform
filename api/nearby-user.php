@@ -26,13 +26,15 @@ if ($lat === null || $lng === null || $lat < -90 || $lat > 90 || $lng < -180 || 
     exit;
 }
 
-$nearby = getNearbyToursForUser($conn, $lat, $lng, $exclude, $radius, 8);
+$nearby = getNearbyToursForUser($conn, $lat, $lng, $exclude, $radius, 5);
 
 $out = [];
 while ($row = $nearby->fetch_assoc()) {
     $out[] = [
         'id'            => (int)$row['id'],
         'title'         => $row['title'],
+        'slug'          => $row['slug'],
+        'type'          => $row['type'],
         'duration'      => $row['duration'],
         'price'         => $row['price'],
         'price_usd'     => $row['price_usd'],

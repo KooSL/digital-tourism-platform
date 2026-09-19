@@ -142,6 +142,7 @@ if (isset($_POST['update'])) {
   }
 
   $title         = trim($_POST['title']);
+  $slug          = trim($_POST['slug'] ?? '') ?: slugifyTour($title);
   $type          = $_POST['type'];
   $duration      = trim($_POST['duration']);
   $price         = (float)$_POST['price'];
@@ -175,15 +176,16 @@ if (isset($_POST['update'])) {
   } else {
     $stmt = $conn->prepare("
             UPDATE tours SET
-              title = ?, type = ?, duration = ?, price = ?, price_usd = ?,
+              title = ?,  slug = ?, type = ?, duration = ?, price = ?, price_usd = ?,
               overview = ?, highlights = ?, includes = ?, excludes = ?,
               banner_image = ?, pdf_file = ?, is_popular = ?, status = ?,
               latitude = ?, longitude = ?, location_name = ?
             WHERE id = ?
         ");
     $stmt->bind_param(
-      "sssddsssssssiddsi",
+      "ssssddsssssssiddsi",
       $title,
+      $slug,
       $type,
       $duration,
       $price,
@@ -330,6 +332,7 @@ unset($_SESSION['reopen_modal']);
           <th>S.N.</th>
           <th>Created Date</th>
           <th>Title</th>
+          <th>Slug</th>
           <th>Type</th>
           <th>Duration</th>
           <th>Price</th>
@@ -360,6 +363,7 @@ unset($_SESSION['reopen_modal']);
             <td><?= $i++ ?></td>
             <td><?= htmlspecialchars($row['created_at']) ?></td>
             <td><?= htmlspecialchars($row['title']) ?></td>
+            <td><?= htmlspecialchars($row['slug']) ?></td>
             <td><?= htmlspecialchars($row['type']) ?></td>
             <td><?= htmlspecialchars($row['duration']) ?></td>
             <td><?= htmlspecialchars($row['price']) ?></td>
@@ -387,6 +391,7 @@ unset($_SESSION['reopen_modal']);
                 onclick="openEditModal(this)"
                 data-id="<?= $row['id'] ?>"
                 data-title="<?= htmlspecialchars($row['title']) ?>"
+                data-slug="<?= htmlspecialchars($row['slug']) ?>"
                 data-type="<?= htmlspecialchars($row['type']) ?>"
                 data-duration="<?= htmlspecialchars($row['duration']) ?>"
                 data-price="<?= htmlspecialchars($row['price']) ?>"
@@ -499,7 +504,9 @@ unset($_SESSION['reopen_modal']);
       <input type="hidden" name="qs" value="<?= htmlspecialchars($qs) ?>">
       <input type="hidden" name="id" value="">
 
-      <div class="form-group"><input type="text" name="title" placeholder="Tour Title" data-validate="text10"><small class="error"></small></div>
+      <div class="form-group"><input type="text" name="title" id="edit-title" placeholder="Tour Title" data-validate="text10"><small class="error"></small></div>
+      <div class="form-group"><input type="text" name="slug" id="edit-slug" placeholder="Slug (auto-generated)" data-validate="text10"><small class="error"></small></div>
+
 
       <label>Type</label>
       <select name="type">
@@ -579,6 +586,32 @@ unset($_SESSION['reopen_modal']);
     slugInput.addEventListener('input', () => {
       slugEdited = true;
       slugInput.value = slugify(slugInput.value);
+    });
+  }
+</script>
+
+<script>
+  // Edit modal slug handling
+  const editTitleInput = document.getElementById('edit-title');
+  const editSlugInput = document.getElementById('edit-slug');
+  let editSlugEdited = false;
+
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (editSlugInput) {
+        editSlugInput.value = btn.dataset.slug || '';
+        editSlugEdited = true; // treat existing slug as "already set" so typing the title won't overwrite it
+      }
+    });
+  });
+
+  if (editTitleInput && editSlugInput) {
+    editTitleInput.addEventListener('input', () => {
+      if (!editSlugEdited) editSlugInput.value = slugify(editTitleInput.value);
+    });
+    editSlugInput.addEventListener('input', () => {
+      editSlugEdited = true;
+      editSlugInput.value = slugify(editSlugInput.value);
     });
   }
 </script>

@@ -1,25 +1,27 @@
 <?php
-include '../includes/header.php';
+
+/**
+ * NOTE ON LOCATION: this file now lives in payment/esewa-success.php,
+ * matching the success_url built in payment/esewa-payment.php. Includes
+ * below are adjusted one level up (__DIR__ . '/../...') accordingly.
+ */
+require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
 /**
  * ============================================================================
- *  CRITICAL FIX: this page used to insert a 'paid' booking the instant a
- *  browser landed here - with no check that a payment ever actually
- *  happened. Since $_SESSION['booking_data'] is fully under the visitor's
- *  control (set by submitting the booking form), ANYONE could get a free
- *  "paid" booking just by navigating straight to esewa-success.php.
+ *  CRITICAL FIX (kept from the original hardening pass): this page used to
+ *  insert a 'paid' booking the instant a browser landed here - with no
+ *  check that a payment ever actually happened. This version verifies the
+ *  payment THREE ways (signature, status, and a server-to-server status
+ *  check with eSewa) before recording anything.
  *
- *  This version verifies the payment THREE ways before recording anything:
- *   1. eSewa's own signature on the returned `data` payload (proves the
- *      response actually came from eSewa and wasn't forged/tampered with).
- *   2. status === "COMPLETE" in that payload.
- *   3. A server-to-server call to eSewa's transaction status-check API,
- *      which confirms with eSewa directly (not just trusting the redirect)
- *      that this transaction really was paid, for this exact amount.
- *
- *  Only if all three pass does a booking get written to the database.
+ *  UPDATED: now also records how much was actually paid vs the full
+ *  package price, since a booking can be paid in full or via a 10%
+ *  deposit - both amounts are read from $_SESSION['esewa_expected'],
+ *  which is entirely server-generated (set in payment/esewa-payment.php),
+ *  never from anything the client sent directly at this step.
  * ============================================================================
  */
 
@@ -36,7 +38,7 @@ function esewaVerificationFailed($package_id)
 {
     error_log("eSewa payment verification FAILED for package_id=$package_id, session=" . session_id());
     unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
-    header("Location: esewa-fail?reason=verification_failed"); 
+    header("Location: esewa-fail?reason=verification_failed");
     exit;
 }
 
@@ -54,7 +56,7 @@ if (!$decoded || !isset($decoded['signature'], $decoded['signed_field_names'], $
 }
 
 $env = parse_ini_file(__DIR__ . '/../.env');
-$secret_key = $env['ESEWA_SECRET_KEY'];
+$secret_key = trim($env['ESEWA_SECRET_KEY']);
 
 // Rebuild the exact payload string eSewa signed, using the field order
 // eSewa itself reports in signed_field_names - don't assume a fixed order.
@@ -76,10 +78,8 @@ if ($decoded['status'] !== 'COMPLETE') {
 
 // ---------------------------------------------------------------------------
 // STEP 2: the transaction_uuid & total_amount in the response must match
-// EXACTLY what we generated in esewa-payment.php - not just be internally
-// signature-consistent. This stops someone from paying for a cheap package
-// and replaying/adapting that valid signature onto a different/expensive
-// booking.
+// EXACTLY what we generated in payment/esewa-payment.php - not just be
+// internally signature-consistent.
 // ---------------------------------------------------------------------------
 if (
     $decoded['transaction_uuid'] !== $expected['transaction_uuid'] ||
@@ -91,9 +91,6 @@ if (
 
 // ---------------------------------------------------------------------------
 // STEP 3: server-to-server confirmation directly with eSewa's status API.
-// This is the step that actually protects against a forged `data` param -
-// even if steps 1-2 were somehow spoofed, eSewa's own servers won't confirm
-// a transaction that never happened.
 // ---------------------------------------------------------------------------
 $statusUrl = "https://rc.esewa.com.np/api/epay/transaction/status/?"
     . http_build_query([
@@ -123,18 +120,33 @@ if (!$statusData || ($statusData['status'] ?? '') !== 'COMPLETE') {
 }
 
 // ---------------------------------------------------------------------------
-// ALL CHECKS PASSED - safe to record the booking as paid.
+// ALL CHECKS PASSED - safe to record the booking.
+//
+// total_amount   = full package price (after group discount) - regardless
+//                  of how much was actually charged in this transaction.
+// amount_paid    = what was actually charged now (full amount, or the 10%
+//                  deposit) - read from server-generated session data set
+//                  at payment-init time, never from the client at this step.
+// payment_type   = 'full' or 'deposit'.
+// payment_status = 'paid' if the full amount was charged, 'partial' if
+//                  only the deposit was - lets my-bookings.php show a
+//                  distinct "Partially Paid" state instead of conflating
+//                  it with a fully-paid booking.
 // ---------------------------------------------------------------------------
 $pid = $expected['transaction_uuid'];
+$fullPackageTotal = $expected['full_package_total'] ?? $expected['total_amount'];
+$amountPaid = $expected['amount_charged_now'] ?? $expected['total_amount'];
+$paymentOption = $expected['payment_option'] ?? 'full';
+$paymentStatus = $paymentOption === 'deposit' ? 'partial' : 'fully_paid';
 
 $stmt = $conn->prepare("
     INSERT INTO package_bookings
-    (package_id, user_id, name, email, country, phone, travel_date, persons, payment_status, payment_method, transaction_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', 'eSewa', ?)
+    (package_id, user_id, name, email, country, phone, travel_date, persons, total_amount, amount_paid, payment_type, payment_status, payment_method, transaction_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'eSewa', ?)
 ");
 
 $stmt->bind_param(
-    "iisssssis",
+    "iisssssiddsss",
     $data['package_id'],
     $data['user_id'],
     $data['name'],
@@ -143,18 +155,47 @@ $stmt->bind_param(
     $data['phone'],
     $data['date'],
     $data['persons'],
+    $fullPackageTotal,
+    $amountPaid,
+    $paymentOption,
+    $paymentStatus,
     $pid
 );
 
-$stmt->execute();
+// SAFEGUARD: if this exact transaction_id was already recorded (e.g. the
+// user double-clicked, hit back-and-forward, or eSewa redelivered the
+// callback), the UNIQUE KEY on transaction_id rejects the duplicate insert.
+// That's expected and fine - it means the booking already exists from the
+// first successful attempt, so just continue to the success page instead
+// of treating it as an error (and without re-sending duplicate emails).
+$alreadyRecorded = false;
+try {
+    $stmt->execute();
+} catch (mysqli_sql_exception $e) {
+    if ($e->getCode() === 1062) { // ER_DUP_ENTRY
+        $alreadyRecorded = true;
+    } else {
+        throw $e; // any other DB error is a real problem, don't swallow it
+    }
+}
+
+if ($alreadyRecorded) {
+    unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
+    header("Location: ../tour-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
+    exit;
+}
 
 require_once __DIR__ . '/../includes/send_fcm_notification.php';
 $customerName = $data['name'];
 sendAdminNotification(
     '🧳 New Booking Received!',
-    $customerName . ' booked a trip.',
+    $customerName . ' booked a trip (' . ($paymentOption === 'deposit' ? '10% deposit' : 'full payment') . ').',
     '../admin/inquiries.php'
 );
+
+$paymentLabel = $paymentOption === 'deposit'
+    ? "Deposit Paid: NPR " . number_format($amountPaid, 2) . " (Balance Due: NPR " . number_format($fullPackageTotal - $amountPaid, 2) . ")"
+    : "Full Amount Paid: NPR " . number_format($amountPaid, 2);
 
 $adminsubject = "New Booking for Package ID: " . $data['package_id'];
 $adminbody = "
@@ -165,6 +206,7 @@ $adminbody = "
         <p><strong>Phone:</strong> " . htmlspecialchars($data['phone']) . "</p>
         <p><strong>Travel Date:</strong> " . htmlspecialchars($data['date']) . "</p>
         <p><strong>Persons:</strong> " . htmlspecialchars($data['persons']) . "</p>
+        <p><strong>" . $paymentLabel . "</strong></p>
         <p><strong>Transaction ID:</strong> " . htmlspecialchars($pid) . "</p>
     ";
 sendAdminMail($adminsubject, $adminbody);
@@ -178,6 +220,7 @@ $userbody = "
         <p><strong>Phone:</strong> " . htmlspecialchars($data['phone']) . "</p>
         <p><strong>Travel Date:</strong> " . htmlspecialchars($data['date']) . "</p>
         <p><strong>Persons:</strong> " . htmlspecialchars($data['persons']) . "</p>
+        <p><strong>" . $paymentLabel . "</strong></p>
         <p><strong>Transaction ID:</strong> " . htmlspecialchars($pid) . "</p>
     ";
 sendUserMail($data['email'], $usersubject, $userbody);
@@ -194,5 +237,6 @@ if (!empty($data['user_id'])) {
 
 unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
 
-header("Location: ../tour-details?id=" . $data['package_id'] . "&success=booked");
+header("Location: ../tour-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
 exit;
+ 

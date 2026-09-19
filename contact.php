@@ -106,8 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 <section class="page-banner">
 
   <?php if (isset($_GET['success'])): ?>
-    <div class="success-box-contact" id="successBox">
-      <strong>Success!</strong>
+    <div class="success-box" id="successBox">
       <?php
       if ($_GET['success'] === 'sent') echo "Your message has been sent successfully. We’ll contact you soon.";
       ?>
@@ -115,8 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
   <?php endif; ?>
 
   <?php if (isset($_GET['error']) && $_GET['error'] !== 'validation'): ?>
-    <div class="error-box-contact" id="errorBox">
-      <strong>Error!</strong>
+    <div class="error-box" id="errorBox">
       <?php
       if ($_GET['error'] === 'failed') echo "Message failed to send. Please try again.";
       if ($_GET['error'] === 'too_many_attempts') echo "Too many messages sent recently. Please try again in a few minutes.";
@@ -155,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
       <h2 class="map-title">Find Us on Map</h2>
 
       <div class="map-box">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d467.46101159637254!2d84.43384670509566!3d27.68345207834983!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994fb2d933d355d%3A0x5e79bbe09d977ee3!2sSaptagandaki%20Multiple%20Campus!5e1!3m2!1sen!2snp!4v1778753106784!5m2!1sen!2snp" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d587.5420272945311!2d84.43435351904736!3d27.683319358460615!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994fb2d933d355d%3A0x5e79bbe09d977ee3!2sSaptagandaki%20Multiple%20Campus!5e1!3m2!1sen!2snp!4v1787764347606!5m2!1sen!2snp" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
 
     </div>

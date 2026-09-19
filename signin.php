@@ -79,8 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box-contact" id="successBox">
-            <strong>Success!</strong>
+        <div class="success-box" id="successBox">
             <?php
             if ($_GET['success'] === 'signin') echo "Sign in successful!";
             if ($_GET['success'] === 'pw_reset') echo "Password reset successful!";
@@ -90,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
 
     <?php if (isset($_GET['error'])): ?>
         <div class="error-box" id="errorBox">
-            <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'invalid') echo "Invalid email or password.";
             if ($_GET['error'] === 'not_found') echo "Account does not exist.";

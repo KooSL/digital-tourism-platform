@@ -19,34 +19,40 @@ if (isset($_GET['i'])) {
 <?php
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/api/recommendation.php';
+
+$ratingResult = mysqli_query(
+  $conn,
+  "SELECT AVG(rating) AS avg_rating, COUNT(*) AS total FROM testimonials WHERE status = 1"
+);
+$ratingRow  = $ratingResult ? mysqli_fetch_assoc($ratingResult) : null;
+$heroRating = ($ratingRow && $ratingRow['total'] > 0) ? round($ratingRow['avg_rating'], 1) : null;
 ?>
 
 <!-- HERO SECTION -->
 <section class="home-hero" style="background-image: url('assets/images/home_page/home_page_6.jpg');">
   <div class="hero-overlay">
-    <div class="container-hero-content">
+    <!-- <div class="container-hero-content"> -->
 
-      <?php if (isset($_GET['success'])): ?>
-        <div class="success-box" id="successBox">
-          <strong>Success!</strong>
-          <?php
-          $homeSuccessMsgs = [
-            'signin'  => "Sign in successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
-            'signup'  => "Sign Up successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
-            'signout' => "You have been signed out successfully.",
-          ];
-          echo $homeSuccessMsgs[$_GET['success']] ?? '';
-          ?>
-        </div>
-      <?php endif; ?>
+    <?php if (isset($_GET['success'])): ?>
+      <div class="success-box" id="successBox">
+        <?php
+        $homeSuccessMsgs = [
+          'signin'  => "Sign in successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
+          'signup'  => "Sign Up successful! Welcome, " . htmlspecialchars($_SESSION['user_name'] ?? 'User') . ".",
+          'signout' => "You have been signed out successfully.",
+        ];
+        echo $homeSuccessMsgs[$_GET['success']] ?? '';
+        ?>
+      </div>
+    <?php endif; ?>
 
-      <?php if (isset($_GET['error'])): ?>
-        <div class="error-box" id="errorBox">
-          <strong>Error!</strong>
-          <?php if ($_GET['error'] === 'error') echo "Something went wrong!"; ?>
-        </div>
-      <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+      <div class="error-box" id="errorBox">
+        <?php if ($_GET['error'] === 'error') echo "Something went wrong!"; ?>
+      </div>
+    <?php endif; ?>
 
+    <div class="hero-top-section">
       <div class="hero-search">
         <form class="search-bar">
           <input type="text" id="tourSearch" placeholder="Search">
@@ -56,8 +62,26 @@ require_once __DIR__ . '/api/recommendation.php';
         </form>
         <div id="searchResults" class="search-results"></div>
       </div>
-
     </div>
+
+    <div class="hero-bottom-section">
+      <div class="hero-cta">
+        <a href="tours" class="btn-primary-vtp">Explore Packages</a>
+        <a href="contact" class="btn-outline-light">Plan Trip Directly</a>
+      </div>
+
+      <div class="hero-trust-strip">
+        <span><i class="fa-solid fa-users"></i> 4,200+ Happy Travelers</span>
+        <span><i class="fa-solid fa-dollar-sign"></i>Best price guarantee</span>
+        <span><i class="fa-solid fa-phone"></i>24/7 Support</span>
+        <?php if ($heroRating): ?>
+          <span><i class="fa-solid fa-star"></i><?= htmlspecialchars($heroRating); ?>/5 Rated</span>
+        <?php endif; ?>
+      </div>
+    </div>
+
+
+    <!-- </div> -->
   </div>
 </section>
 
@@ -105,13 +129,30 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
 
             <div class="tour-card">
 
-              <div class="tour-card-img">
+              <div class="trip-card-banner-img">
+                <img src="uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
+                  alt="<?= htmlspecialchars($tour['title']); ?>">
+                <div class="image-bottom-fade"></div>
 
-                <?php if ($tour['is_popular'] == 1): ?>
-                  <span class="popular-badge-home">
-                    <i class="fa-solid fa-fire"></i> Popular
-                  </span>
-                <?php endif; ?>
+
+                <div class="badges-home right">
+
+                  <?php if ($tour['is_popular'] == 1): ?>
+                    <span class="popular-badge-home">
+                      <i class="fa-solid fa-fire"></i> Popular
+                    </span>
+                  <?php endif; ?>
+
+                  <?php if (!empty($tour['old_price']) && (float)$tour['old_price'] > 0):
+                    $discount = round((((float)$tour['old_price'] - (float)$tour['price']) / (float)$tour['old_price']) * 100);
+                  ?>
+                    <span class="discount-badge-home">
+                      <?= $discount ?>% OFF
+                    </span>
+                  <?php endif; ?>
+
+                </div>
+
 
                 <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
                   <span class="latest-badge-home">
@@ -119,28 +160,16 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
                   </span>
                 <?php endif; ?>
 
-                <div class="trip-card-banner-img">
-                  <img src="uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
-                    alt="<?= htmlspecialchars($tour['title']); ?>">
-                  <div class="image-bottom-fade"></div>
-                </div>
-
-                <?php if (!empty($tour['old_price']) && (float)$tour['old_price'] > 0):
-                  $discount = round((((float)$tour['old_price'] - (float)$tour['price']) / (float)$tour['old_price']) * 100);
-                ?>
-                  <span class="discount-badge home">
-                    <?= $discount ?>% OFF
-                  </span>
-                <?php endif; ?>
-
                 <div class="rating-summary home" title="Bayesian-weighted rating">
-                  <a href="tour-details?id=<?= (int)$tour['id'] ?>#reviews">
+                  <a href="tour-details?slug=<?= htmlspecialchars($tour['slug']) ?>#reviews">
                     <i class="fa-solid fa-star"></i> <?= number_format($tour['bayesian_rating'], 1) ?>
                     (<?= (int)$tour['review_count'] ?> reviews)
                   </a>
                 </div>
 
               </div>
+
+
 
               <div class="tour-info">
                 <h3><?= htmlspecialchars($tour['title']) ?></h3>
@@ -152,7 +181,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
               </div>
 
               <div class="tour-card-btn">
-                <a href="tour-details?slug=<?= htmlspecialchars($tour['slug']) ?>&id=<?= (int)$tour['id'] ?>">
+                <a href="tour-details?trip=<?= htmlspecialchars($tour['slug']) ?>&type=<?= htmlspecialchars($tour['type']) ?>">
                   View Details
                 </a>
               </div>

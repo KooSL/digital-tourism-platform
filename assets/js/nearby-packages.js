@@ -40,7 +40,7 @@
           <p class="current-price recommend-price">
             NPR ${t.price} <span>| USD $${t.price_usd} PP</span>
           </p>
-          <a href="tour-details?id=${t.id}">View</a>
+          <a href="tour-details?trip=${t.slug}&type=${t.type}&rec=1&id=${t.id}">View</a>
         </div>
       `;
       })

@@ -53,24 +53,84 @@ if (isset($_GET['latest'])) {
   $where[] = "created_at >= NOW() - INTERVAL 7 DAY";
 }
 
-$sql = "SELECT * FROM tours WHERE " . implode(" AND ", $where);
-$sql .= " ORDER BY is_popular DESC, created_at DESC";
+/* ---------- PAGINATION ---------- */
+
+$limit = 8;
+
+$page = max((int)($_GET['page'] ?? 1), 1);
+
+$offset = ($page - 1) * $limit;
+
+
+/* ---------- COUNT TOTAL RESULTS ---------- */
+
+$countSql = "
+    SELECT COUNT(*) AS total
+    FROM tours
+    WHERE " . implode(" AND ", $where);
+
+$countStmt = $conn->prepare($countSql);
+
+if (!empty($params)) {
+  $countStmt->bind_param($types, ...$params);
+}
+
+$countStmt->execute();
+
+$totalRows = $countStmt
+  ->get_result()
+  ->fetch_assoc()['total'];
+
+$totalPages = max(1, ceil($totalRows / $limit));
+
+
+/* Prevent invalid page numbers */
+
+if ($page > $totalPages) {
+  $page = $totalPages;
+  $offset = ($page - 1) * $limit;
+}
+
+
+/* ---------- GET TOUR RESULTS ---------- */
+
+$sql = "
+    SELECT *
+    FROM tours
+    WHERE " . implode(" AND ", $where) . "
+    ORDER BY is_popular DESC, created_at DESC
+    LIMIT ? OFFSET ?
+";
 
 $stmt = $conn->prepare($sql);
 
-if (!empty($params)) {
-  $stmt->bind_param($types, ...$params);
-}
+
+/* Add pagination parameters */
+
+$queryParams = $params;
+$queryTypes = $types;
+
+$queryParams[] = $limit;
+$queryTypes .= "i";
+
+$queryParams[] = $offset;
+$queryTypes .= "i";
+
+
+$stmt->bind_param(
+  $queryTypes,
+  ...$queryParams
+);
 
 $stmt->execute();
+
 $result = $stmt->get_result();
 ?>
 
 <section class="page-banner">
 
   <?php if (isset($_GET['success'])): ?>
-    <div class="success-box-contact" id="successBox">
-      <strong>Success!</strong>
+    <div class="success-box" id="successBox">
       <?php
       if ($_GET['success'] === 'sent') echo "Your inquiry has been sent successfully. We’ll contact you soon.";
       ?>
@@ -78,10 +138,10 @@ $result = $stmt->get_result();
   <?php endif; ?>
 
   <?php if (isset($_GET['error'])): ?>
-    <div class="error-box-contact" id="errorBox">
-      <strong>Error!</strong>
+    <div class="error-box" id="errorBox">
       <?php
       if ($_GET['error'] === 'invalid') echo "Invalid request. Please try again.";
+      if ($_GET['error'] === 'not_found') echo "Trip not found. Please try again.";
       ?>
     </div>
   <?php endif; ?>
@@ -186,36 +246,38 @@ $result = $stmt->get_result();
 
           <div class="tour-details">
 
-            <div class="tour-badges">
-              <?php if (!$type && in_array($row['type'], ['domestic', 'international'])): ?>
-                <span class="type-badge">
-                  <i class="fa-solid 
+            <div class="badges-container">
+              <div class="tour-badges">
+                <?php if (!$type && in_array($row['type'], ['domestic', 'international'])): ?>
+                  <span class="type-badge">
+                    <i class="fa-solid 
                 <?= $row['type'] === 'domestic' ? 'fa-house' : 'fa-earth-americas' ?>"></i>
-                  <?= ucfirst($row['type']) ?>
-                </span>
-              <?php endif; ?>
+                    <?= ucfirst($row['type']) ?>
+                  </span>
+                <?php endif; ?>
 
-              <?php if ($row['is_popular'] == 1) { ?>
-                <span class="popular-badge"><i class="fa-solid fa-fire"></i> Popular</span>
-              <?php } ?>
+                <?php if ($row['is_popular'] == 1) { ?>
+                  <span class="popular-badge"><i class="fa-solid fa-fire"></i> Popular</span>
+                <?php } ?>
 
-              <?php if (strtotime($row['created_at']) >= strtotime('-7 days')): ?>
-                <span class="latest-badge">
-                  <i class="fa-solid fa-star"></i> Latest
-                </span>
-              <?php endif; ?>
+                <?php if (strtotime($row['created_at']) >= strtotime('-7 days')): ?>
+                  <span class="latest-badge">
+                    <i class="fa-solid fa-star"></i> Latest
+                  </span>
+                <?php endif; ?>
 
-              <!-- DISCOUNT BADGE -->
-              <?php if (!empty($row['old_price'])):
-                $discount = round((($row['old_price'] - $row['price']) / $row['old_price']) * 100);
-              ?>
-                <span class="discount-badge trips">
-                  <?= $discount ?>% OFF
-                </span>
-              <?php endif; ?>
+                <?php if (!empty($row['old_price'])):
+                  $discount = round((($row['old_price'] - $row['price']) / $row['old_price']) * 100);
+                ?>
+                  <span class="discount-badge trips">
+                    <?= $discount ?>% OFF
+                  </span>
+                <?php endif; ?>
+
+              </div>
 
               <div class="rating-summary trips">
-                <a href="tour-details?id=<?= $row['id'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                <a href="tour-details?trip=<?= $row['slug'] ?>&type=<?= $row['type'] ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
                   (<?= $ratingData['total_reviews'] ?> reviews)</a>
               </div>
 
@@ -242,7 +304,7 @@ $result = $stmt->get_result();
               <span>| USD $<?= $row['price_usd'] ?> PP</span>
             </p>
 
-            <a href="tour-details?slug=<?= $row['slug'] ?>&id=<?= $row['id'] ?>" class="btn">
+            <a href="tour-details?trip=<?= $row['slug'] ?>&type=<?= $row['type'] ?>" class="btn">
               View Details
             </a>
           </div>
@@ -255,7 +317,49 @@ $result = $stmt->get_result();
 
   </div>
 
+  <?php if ($totalPages > 1): ?>
+    <div class="pagination trips">
+      <?php if ($page > 1): ?>
+        <?php
+        $previousParams = $_GET;
+        $previousParams['page'] = $page - 1;
+        ?>
+        <a
+          href="?<?= htmlspecialchars(http_build_query($previousParams)) ?>"
+          class="page-btn page-prev">
+          <i class="fa-solid fa-chevron-left"></i>
+        </a>
+      <?php endif; ?>
+
+      <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+        <?php
+        $pageParams = $_GET;
+        $pageParams['page'] = $p;
+        ?>
+        <a
+          href="?<?= htmlspecialchars(http_build_query($pageParams)) ?>"
+          class="page-btn <?= $p == $page ? 'active' : '' ?>">
+          <?= $p ?>
+        </a>
+      <?php endfor; ?>
+
+      <?php if ($page < $totalPages): ?>
+        <?php
+        $nextParams = $_GET;
+        $nextParams['page'] = $page + 1;
+        ?>
+        <a
+          href="?<?= htmlspecialchars(http_build_query($nextParams)) ?>"
+          class="page-btn page-next">
+          <i class="fa-solid fa-chevron-right"></i>
+        </a>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
 </section>
+
+
 
 <script>
   const btn = document.getElementById("filterToggle");

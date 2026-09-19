@@ -10,17 +10,14 @@ require_once __DIR__ . '/security.php';
 
 <head>
       <meta charset="UTF-8">
-      <!-- <title>Digital Tourism Platform</title> -->
+
       <title><?= isset($metaTitle) ? htmlspecialchars($metaTitle) : (isset($pageTitle) ? htmlspecialchars($pageTitle) . " | Digital Tourism Platform" : "Digital Tourism Platform") ?></title>
+
+      <meta name="description" content="<?= isset($metaDescription) ? htmlspecialchars($metaDescription) : 'Explore the Digital Tourism Platform for an immersive travel experience. Discover destinations, plan trips, and connect with fellow travelers.' ?>">
+
+      <meta name="keywords" content="<?= isset($metaKeywords) ? htmlspecialchars($metaKeywords) : 'digital tourism, travel platform, immersive experiences, trip planning, travel community' ?>">
+
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-      <?php if (isset($metaDescription)): ?>
-            <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
-      <?php endif; ?>
-
-      <?php if (isset($metaKeywords)): ?>
-            <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
-      <?php endif; ?>
 
       <meta name="robots" content="<?= isset($metaRobots) ? htmlspecialchars($metaRobots) : 'index, follow' ?>">
 
@@ -28,7 +25,7 @@ require_once __DIR__ . '/security.php';
             <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
       <?php endif; ?>
 
-      <?php if (isset($metaTitle) || isset($metaDescription)): ?>
+      <?php if (isset($metaTitle) || isset($pageTitle) || isset($metaKeywords) || isset($metaDescription)): ?>
             <meta property="og:type" content="<?= isset($ogType) ? htmlspecialchars($ogType) : 'website' ?>">
             <meta property="og:title" content="<?= htmlspecialchars($metaTitle ?? $pageTitle ?? 'Digital Tourism Platform') ?>">
             <?php if (isset($metaDescription)): ?>
@@ -52,6 +49,8 @@ require_once __DIR__ . '/security.php';
       <?php endif; ?>
 
       <link rel="stylesheet" href="assets/css/style.css">
+      <link rel="stylesheet" href="assets/css/variables.css">
+      <link rel="stylesheet" href="assets/css/global.css">
       <link rel="stylesheet" href="assets/css/tour-details.css">
       <link rel="stylesheet" href="assets/css/search-filter.css">
       <link rel="stylesheet" href="assets/css/pagination.css">
@@ -59,12 +58,13 @@ require_once __DIR__ . '/security.php';
       <link rel="stylesheet" href="assets/css/chatbot.css">
       <link rel="stylesheet" href="assets/css/table.css">
       <link rel="stylesheet" href="assets/css/booking.css">
-      <link rel="stylesheet" href="assets/css/discount-badge.css">
+      <link rel="stylesheet" href="assets/css/badges.css">
       <link rel="stylesheet" href="assets/css/reviews.css">
       <link rel="stylesheet" href="assets/css/confirmation-box.css">
       <link rel="stylesheet" href="assets/css/home.css">
       <link rel="stylesheet" href="assets/css/blog.css">
       <link rel="stylesheet" href="assets/css/anti-flicker.css">
+      <link rel="stylesheet" href="assets/css/successError.css">
 
       <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
@@ -72,21 +72,6 @@ require_once __DIR__ . '/security.php';
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-
-      <!-- <link rel="icon" href="assets/favicon/favicon.ico" type="image/x-icon">
-
-      <link rel="icon" type="image/png" sizes="96x96"
-            href="assets/favicon/favicon-96x96.png">
-
-      <link rel="apple-touch-icon"
-            href="assets/favicon/apple-touch-icon.png">
-
-      <link rel="web-app-manifest-192x192"
-            href="assets/favicon/web-app-manifest-192x192">
-
-      <link rel="web-app-manifest-512x512"
-            href="assets/favicon/web-app-manifest-512x512.png"> -->
 
 </head>
 

@@ -1,6 +1,6 @@
 # 🌍 Digital Tourism Platform
 
-A full-featured tour and travel booking platform built with PHP & MySQL — covering tour packages, flights, bus bookings, an admin panel, eSewa payment integration, and Firebase push notifications.
+A full-featured tour and travel booking platform built with PHP & MySQL — covering tour packages, flights, bus bookings, a blog, an AI-powered chatbot and recommendation engine, a full admin panel, dual payment gateway integration (eSewa + Khalti), and Firebase push notifications.
 
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
@@ -13,6 +13,7 @@ A full-featured tour and travel booking platform built with PHP & MySQL — cove
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
+- [Database](#-database)
 - [Getting Started](#-getting-started)
 - [Configuration](#-configuration)
 - [Security](#-security-implemented)
@@ -26,66 +27,96 @@ A full-featured tour and travel booking platform built with PHP & MySQL — cove
 
 ### 🌐 Frontend
 
-- Tour listing (Domestic & International)
+- Tour listing (Domestic & International) with search, filters, and detail pages with full itineraries
 - Flight and bus listings with group fare badges
-- Dynamic tour details page with itinerary
-- Inquiry / booking form with live client-side validation
+- Booking flow with booking details, booking history (My Bookings), and cancellation
+- Blog with categories and threaded comments
+- Photo gallery organized into albums
+- Client / partner showcase, testimonials, and trip reviews
+- FAQs page
+- Dynamic sitemap
 - Downloadable trip PDF
-- eSewa payment integration
-- Mobile-responsive layout
-- Success & error handling UI
+- Dual payment gateway: **eSewa** and **Khalti**, each with dedicated success/failure callback pages
+- Account system: signup with **email OTP verification**, sign in/out, forgot/reset password
+- Mobile-responsive layout with clean, extension-less URLs (e.g. `/tours` instead of `/tours.php`)
+
+### 🤖 AI-Powered Chatbot, Recommendations & Algorithms
+
+- On-site chatbot that answers questions about tours, flights, and buses using a coverage-scored keyword matcher backed by **Gemini embeddings** (`gemini-embedding-001`) for semantic similarity, with a one-time backfill script to embed existing content
+- **Smart hybrid recommendation engine** combining five weighted signals: content-based similarity (price, duration, tour type against a blended user-taste profile), collaborative filtering (co-booking patterns), popularity (log-dampened bookings/clicks), ranking by scores with the use of Bayesian Rating Algorithm for ratings as well and more
+- **Nearby packages**: Haversine-distance based "packages near this one" on tour detail pages, plus a live-GPS "packages near you" widget
+- User activity tracking (views, time spent, clicks) feeding both the recommendation engine and admin analytics
+- Dynamically discount price and full and deposit cost calculation
 
 ### 🔐 Admin Panel
 
-- Secure admin login
-- Add / edit / delete tours
-- Dynamic itinerary management
-- Banner & PDF upload
+- Secure admin login with session-based auth
+- Dashboard with key metrics
+- Manage tours (add/edit/delete, dynamic itinerary builder, banner & PDF upload, "Popular" badge, active/inactive toggle)
 - Manage flights and buses
-- "Popular" badge toggle
-- Active / inactive status control
-
-### 🔔 Notifications
-
-- Firebase Cloud Messaging (FCM)
-- Multi-device admin push notifications
-- Automatic invalid token cleanup
+- Manage blog posts, blog categories, and blog comments (with moderation)
+- Manage gallery albums and photos
+- Manage clients/partners, testimonials, and trip reviews
+- Manage FAQs
+- View and manage package bookings, bus inquiries, and general inquiries
+- Manage admin users
+- Multi-device push notifications via Firebase Cloud Messaging, with automatic invalid-token cleanup
 
 ---
 
 ## 🛠 Tech Stack
 
-| Layer         | Technology                                |
-| ------------- | ----------------------------------------- |
-| Backend       | PHP (procedural + prepared statements)    |
-| Database      | MySQL                                     |
-| Frontend      | Vanilla JavaScript, custom responsive CSS |
-| Notifications | Firebase Cloud Messaging                  |
-| Payments      | eSewa                                     |
-| Server        | Apache / XAMPP                            |
+| Layer         | Technology                                           |
+| ------------- | ---------------------------------------------------- |
+| Backend       | PHP (procedural + prepared statements)               |
+| Database      | MySQL                                                |
+| Frontend      | Vanilla JavaScript, custom responsive CSS            |
+| AI / Chatbot  | Google Gemini API (embeddings + semantic search)     |
+| Notifications | Firebase Cloud Messaging                             |
+| Payments      | eSewa, Khalti                                        |
+| Email         | PHPMailer (OTP verification, password reset, alerts) |
+| Server        | Apache / XAMPP                                       |
 
 ---
 
 ## 📁 Project Structure
 
+```
 digital-tourism-platform/
-├── admin/ # Admin panel (tours, flights, bookings management)
-├── api/ # API endpoints
-├── assets/ # Images, CSS, JS, static files
-├── config/ # DB connection & app configuration
-├── includes/ # Shared PHP includes (headers, footers, helpers)
-├── sql_db/ # Database schema / seed SQL
-├── logs/ # Runtime logs (git-ignored in practice)
-├── booking.php # Tour booking flow
-├── esewa-payment.php # eSewa payment initiation
-├── esewa-success.php # Payment success callback
-├── esewa-fail.php # Payment failure callback
+├── admin/              # Admin panel (tours, flights, buses, blog, gallery, reviews, bookings, etc.)
+│   ├── api/             # Admin-only API endpoints (e.g. FCM token save)
+│   ├── scripts/          # One-off maintenance scripts (e.g. chatbot embeddings backfill)
+│   └── includes/         # Shared admin header/sidebar/footer
+├── api/                 # Public API endpoints (chatbot, embeddings, recommendations, nearby, search, etc.)
+├── payment/             # eSewa & Khalti payment initiation + success/fail callbacks
+├── assets/               # Images, CSS, JS, fonts, static files
+├── config/               # DB connection & app configuration
+├── includes/             # Shared PHP includes (headers, footers, helpers)
+├── sql_db/               # Database schema (dtp.sql)
+├── booking.php / booking-details.php / cancel-booking.php / my-bookings.php
 ├── tours.php / tour-details.php
 ├── flights.php / flight-details.php
 ├── buses.php / bus-details.php
-├── signin.php / signup.php / signout.php
-├── admin/ # Admin dashboard
+├── blogs.php / blog-details.php
+├── gallery.php / album.php
+├── faqs.php / about.php / services.php / contact.php
+├── signin.php / signup.php / verify-otp.php / signout.php
+├── forgot-password.php / reset-password.php / profile.php
+├── firebase-messaging-sw.js
 └── .htaccess
+```
+
+---
+
+## 🗄 Database
+
+The schema (`sql_db/dtp.sql`) defines 25 tables, including:
+
+- **Core**: `tours`, `tour_itineraries`, `flights`, `buses`, `users`, `admins`
+- **Bookings & inquiries**: `package_bookings`, `bus_inquiries`, `inquiries`
+- **Content**: `blogs`, `blog_categories`, `blog_comments`, `gallery_albums`, `gallery_photos`, `faqs`, `clients`, `testimonials`, `trip_reviews`, `site_content`
+- **AI / analytics**: `chatbot_quiries`, `user_activity`, `recmnd_clicks`
+- **Auth & notifications**: `password_resets`, `admin_fcm_tokens`
 
 ---
 
@@ -95,9 +126,11 @@ digital-tourism-platform/
 
 - PHP 8.0+
 - MySQL 5.7+ / MariaDB
-- Apache (XAMPP, WAMP, or LAMP stack)
+- Apache (XAMPP, WAMP, or LAMP stack) with `mod_rewrite` enabled
 - A Firebase project (for push notifications)
-- An eSewa merchant account (for payments)
+- A Google Gemini API key (for chatbot embeddings/semantic search)
+- An eSewa merchant account and a Khalti merchant account (for payments)
+- An SMTP-capable email account (for OTP/password-reset emails via PHPMailer)
 
 ### Installation
 
@@ -116,38 +149,39 @@ digital-tourism-platform/
 
 3. **Import the database**
    - Create a MySQL database (e.g. `tourism_platform`)
-   - Import the schema from `sql_db/`:
+   - Import the schema:
 
 ```bash
-     mysql -u root -p tourism_platform < sql_db/schema.sql
+     mysql -u root -p tourism_platform < sql_db/dtp.sql
 ```
 
 4. **Configure environment variables**
-   - Copy the example config and fill in your own credentials:
+   - Create a `.env` file in the project root (see [Configuration](#-configuration) for the required keys)
+   - Add your Firebase service account JSON, Gemini API key, and eSewa/Khalti secret keys
 
-```bash
-     cp config/config.example.php config/db.php
-```
+5. **(Optional) Backfill chatbot embeddings**
+   - Run `admin/scripts/backfill_chatbot_embeddings.php` once after seeding tour data, so the chatbot's semantic search has vectors to compare against
 
-- Update `config/db.php` with your DB host, username, password, and database name.
-- Add your Firebase server key and eSewa merchant credentials where required (see [Configuration](#-configuration)).
-
-5. **Start Apache & MySQL**, then visit:
+6. **Start Apache & MySQL**, then visit:
    http://localhost/digital-tourism-platform/
 
 ---
 
 ## ⚙️ Configuration
 
-This project relies on a few credentials that **should never be committed to git**:
+This project loads its configuration from a **git-ignored `.env` file** in the project root (`config/db.php` parses it directly — there's no separate PHP config file to copy).
 
-| Variable                                   | Used in             | Purpose                |
-| ------------------------------------------ | ------------------- | ---------------------- |
-| `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME` | `config/db.php`     | MySQL connection       |
-| Firebase Server Key                        | admin notifications | FCM push notifications |
-| eSewa Merchant ID / Secret                 | `esewa-payment.php` | Payment gateway        |
+| Variable                                                          | Purpose                                        |
+| ----------------------------------------------------------------- | ---------------------------------------------- |
+| `APP_NAME`, `APP_ENV`                                             | General app settings                           |
+| `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`                        | MySQL connection                               |
+| `FCM_PROJECT_ID` (+ `config/firebase-service-account.json`)       | Firebase Cloud Messaging push notifications    |
+| `SEND_MAIL_USERNAME`, `SEND_MAIL_PASSWORD`, `RECVE_MAIL_USERNAME` | PHPMailer (OTP emails, password reset, alerts) |
+| `geminiAPIKey`                                                    | Gemini embeddings for the chatbot              |
+| `ESEWA_SECRET_KEY`                                                | eSewa payment gateway                          |
+| `KHALTI_SECRET_KEY`                                               | Khalti payment gateway                         |
 
-> ⚠️ If `config/db.php` currently contains real credentials, rotate them and move to environment variables or a git-ignored config file before making the repo public / sharing it.
+> ⚠️ Never commit `.env` or `config/firebase-service-account.json`. If real credentials have ever been committed to this repo's history, rotate them immediately — removing the file in a later commit does not invalidate an already-exposed key.
 
 ---
 
@@ -156,20 +190,24 @@ This project relies on a few credentials that **should never be committed to git
 - Prepared statements for database queries
 - Session-based authentication
 - Password hashing (`password_hash`)
-- Token-based FCM device management
+- Email OTP verification on signup, plus a token-based forgot/reset password flow
+- CSRF token validation on forms across the site (signup, verify-otp, and others)
+- Token-based FCM device management with automatic cleanup of invalid tokens
 - Input sanitization
 - PRG pattern (Post-Redirect-Get) on form submissions
 - Client + server-side validation
+- `.env`-based configuration, kept out of version control
+- `.htaccess` rules blocking direct access to `.env`, `.json`, `.log`, and `.sql` files
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] CSRF token validation on all forms
+- [ ] Extend CSRF token validation to any remaining forms without it
 - [ ] Consistent output escaping (`htmlspecialchars`) across all views
-- [ ] Server-side amount recalculation on payment flows
+- [ ] Server-side amount recalculation on payment flows (both eSewa and Khalti)
 - [ ] Automated tests / CI (PHP lint on push)
-- [ ] `.env`-based configuration
+- [ ] Add a `.env.example` template for easier onboarding
 
 ---
 

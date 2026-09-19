@@ -1,9 +1,9 @@
-<?php 
+<?php
 $pageTitle = "Terms and Conditions";
 include 'includes/header.php'; ?>
 <div class="header-wrapper">
-  <?php include 'includes/topbar.php'; ?>
-  <?php include 'includes/navbar.php'; ?>
+    <?php include 'includes/topbar.php'; ?>
+    <?php include 'includes/navbar.php'; ?>
 </div>
 
 <?php include 'config/db.php'; ?>
@@ -19,71 +19,23 @@ include 'includes/header.php'; ?>
 <!-- TERMS CONTENT -->
 <section class="terms-section">
     <div class="container terms-container">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing and using our services, you accept and agree to be bound by the terms and provision of this agreement.</p>
 
-        <!-- <p class="effective-date">
-            <strong>Last Updated:</strong> <?php echo date("F d, Y"); ?>
-        </p>
+        <h2>2. Use of Services</h2>
+        <p>You agree to use our services only for lawful purposes and in accordance with these Terms.</p>
 
-        <p>
-            Welcome to TakeYourSeat. By accessing or using our website and services,
-            you agree to comply with and be bound by these Terms & Conditions.
-            If you do not agree, please do not use our services.
-        </p>
+        <h2>3. Intellectual Property</h2>
+        <p>All content included on this site, such as text, graphics, logos, images, and software, is the property of our company or its content suppliers.</p>
 
-        <h2>2. Services</h2>
-        <ul>
-            <li>Domestic & International Tour Packages</li>
-            <li>Flight Booking Services</li>
-            <li>Visa Assistance</li>
-            <li>Adventure & Trekking Packages</li>
-            <li>Travel Consultation Services</li>
-        </ul>
+        <h2>4. Limitation of Liability</h2>
+        <p>In no event shall we be liable for any damages arising out of or in connection with the use of our services.</p>
 
-        <h2>3. Booking & Payments</h2>
-        <ul>
-            <li>All bookings are subject to confirmation.</li>
-            <li>Prices may change without prior notice.</li>
-            <li>Partial or full payment may be required to confirm reservations.</li>
-            <li>Failure to complete payment may result in cancellation.</li>
-        </ul>
+        <h2>5. Changes to Terms</h2>
+        <p>We reserve the right to modify these terms at any time. Your continued use of the services constitutes acceptance of those changes.</p>
 
-        <h2>4. Cancellation & Refund Policy</h2>
-        <ul>
-            <li>Cancellation charges may apply.</li>
-            <li>Refunds depend on third-party provider policies.</li>
-            <li>Some services may be non-refundable.</li>
-        </ul>
-
-        <h2>5. Intellectual Property</h2>
-        <p>
-            All website content including design, code, branding, images, and tour
-            itineraries are the exclusive property of TakeYourSeat. Unauthorized
-            reproduction or redistribution is strictly prohibited.
-        </p>
-
-        <h2>6. Limitation of Liability</h2>
-        <p>
-            TakeYourSeat is not responsible for delays, cancellations, natural
-            disasters, visa rejections, government restrictions, or actions
-            of third-party providers.
-        </p>
-
-        <h2>7. Governing Law</h2>
-        <p>
-            These Terms shall be governed in accordance with the laws of Nepal.
-        </p>
-
-        <h2>8. Contact Us</h2>
-        <p>
-            <strong>Email:</strong> contact.takeyourseat@gmail.com <br>
-            <strong>Phone:</strong> +977-9764667165 <br>
-        </p>
-
-        <h2>9. Terms and Conditions Updates</h2>
-        <p>
-            We may update this Terms and conditions periodically.
-            Changes will be posted on this page with an updated revision date.
-        </p> -->
+        <h2>6. Governing Law</h2>
+        <p>These terms shall be governed by and construed in accordance with the laws of the jurisdiction in which our company is established.</p>
 
     </div>
 </section>

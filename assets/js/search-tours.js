@@ -22,7 +22,7 @@ input.addEventListener('keyup', () => {
         div.onclick = () => {
           // redirect using title
           window.location.href =
-            `tour-details?id=${encodeURIComponent(tour.id)}`;
+            `tour-details?trip=${encodeURIComponent(tour.slug)}`;
         };
 
         resultsBox.appendChild(div);

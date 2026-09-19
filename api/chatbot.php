@@ -198,6 +198,7 @@ $data = [
           - Never create fake tour names, prices, discounts, availability or booking details. But if you know information about a specific package, flight, or bus from the internet sources even if it's not in our database, you can provide it.
           - If user asks about a specific package and information is unavailable, ask them to check the Tours page or contact support.
           - Keep answers professional and helpful.
+          - If you are giving answer in list then use numbers instead of bullet points and use bold style for the words before this symbol ':' of each point.
           - Ask follow-up questions when needed (example: destination, travel date, number of travelers, budget).
           - For complaints or problems, respond politely and guide the user toward support.
           - If a package, flight or bus exists in database, explain it clearly.

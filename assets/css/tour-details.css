@@ -88,12 +88,14 @@
   padding: 20px;
 } */
 
-.recommend-section h3, .nearby-section h3 {
+.recommend-section h3,
+.nearby-section h3 {
   text-align: center;
   color: var(--blue);
 }
 
-.recommend-subtitle, .nearby-status {
+.recommend-subtitle,
+.nearby-status {
   text-align: center;
   color: #6b7280;
   font-size: 15px;
@@ -104,7 +106,7 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 15px;
   padding-top: 10px;
-  padding-bottom: 30px;
+  padding-bottom: 20px;
   justify-content: center;
 }
 
@@ -290,8 +292,21 @@
     padding-left: 10px;
     padding-right: 10px;
   }
+
+  .rating-summary span {
+    display: block;
+  }
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
+}
+
+.nearby-btn {
+  text-align: center;
+}
+
+.nearby-section,
+.recommend-section {
+  padding: 20px;
 }

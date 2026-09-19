@@ -80,6 +80,13 @@ header("Content-Security-Policy: " . implode('; ', [
         "https://api.open-meteo.com",       // weather.js - tour-details weather widget
         "https://tile.openstreetmap.org",   // tripMap.js - Leaflet map tiles
         "https://unpkg.com",                // Leaflet CDN - also covers its .map sourcemap fetch in devtools
+        "https://cdnjs.cloudflare.com",     // Font Awesome CDN - also covers its .map sourcemap fetch in devtools
+        "https://fonts.gstatic.com",        // Google Fonts CDN - also covers its .map sourcemap fetch in devtools
+        "https://www.google-analytics.com", // GA CDN - also covers its .map sourcemap fetch in devtools
+        "https://www.googletagmanager.com",      // GTM CDN - also covers its .map sourcemap fetch in devtools
+        "https://www.google.com",           // GTM CDN - also covers its .map sourcemap fetch in devtools
+        "https://www.googleadservices.com", // GTM CDN - also covers its .map sourcemap fetch in devtools
+        "https://www.gstatic.com"          // GTM CDN - also covers its .map sourcemap fetch in devtools
     ]),
     "frame-ancestors 'self'",
     "object-src 'none'",

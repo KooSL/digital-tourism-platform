@@ -2,6 +2,7 @@
 $pageTitle = "Profile";
 include 'includes/header.php';
 include 'config/db.php';
+include 'api/countries.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: signin");
@@ -33,9 +34,10 @@ if (isset($_POST['update_profile'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
+    $country = trim($_POST['country']);
     $address = trim($_POST['address']);
 
-    if (empty($name) || empty($email) || empty($phone) || empty($address)) {
+    if (empty($name) || empty($email) || empty($phone) || empty($address) || empty($country)) {
         header("Location: profile?error=required");
         exit;
     }
@@ -47,11 +49,11 @@ if (isset($_POST['update_profile'])) {
 
     $stmt = $conn->prepare("
         UPDATE users 
-        SET name=?, email=?, phone=?, address=?, last_update=NOW()
+        SET name=?, email=?, phone=?, country=?, address=?, last_update=NOW()
         WHERE id=?
     ");
 
-    $stmt->bind_param("ssssi", $name, $email, $phone, $address, $user_id);
+    $stmt->bind_param("sssssi", $name, $email, $phone, $country, $address, $user_id);
 
     if ($stmt->execute()) {
 
@@ -113,8 +115,7 @@ if (isset($_POST['change_password'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box-contact" id="successBox">
-            <strong>Success!</strong>
+        <div class="success-box" id="successBox">
             <?php
             if ($_GET['success'] === 'updated') echo "Profile updated successfully.";
             if ($_GET['success'] === 'password_changed') echo "Password changed successfully.";
@@ -124,7 +125,6 @@ if (isset($_POST['change_password'])) {
 
     <?php if (isset($_GET['error'])): ?>
         <div class="error-box" id="errorBox">
-            <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'invalid_email') echo "Invalid email format!";
             if ($_GET['error'] === 'failed') echo "Failed to update profile!";
@@ -156,25 +156,38 @@ if (isset($_POST['change_password'])) {
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
             <div class="form-group">
-                <input type="text" name="name" id="name"
+                <input type="text" name="name" id="name" placeholder="Full Name"
                     value="<?php echo htmlspecialchars($user['name']); ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="email" name="email" id="email"
+                <input type="email" name="email" id="email" placeholder="Email"
                     value="<?php echo htmlspecialchars($user['email']); ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="text" name="phone" id="phone"
+                <input type="text" name="phone" id="phone" placeholder="Phone Number"
                     value="<?php echo htmlspecialchars($user['phone']); ?>">
                 <small class="error"></small>
             </div>
 
             <div class="form-group">
-                <input type="text" name="address" id="address"
+                <select name="country" id="country">
+                    <option value="">Select Country</option>
+                    <?php foreach ($countries as $country): ?>
+                        <option value="<?php echo htmlspecialchars($country); ?>"
+                            <?php if ($user['country'] === $country) echo 'selected'; ?>>
+                            <?php echo htmlspecialchars($country); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="error"></small>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="address" id="address" placeholder="Address"
                     value="<?php echo htmlspecialchars($user['address']); ?>">
                 <small class="error"></small>
             </div>

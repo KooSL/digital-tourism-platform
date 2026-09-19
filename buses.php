@@ -1,5 +1,8 @@
 <?php
 $pageTitle = "Buses";
+$metaDescription = "Find the best bus deals and book your next journey with our reliable and comfortable bus services.";
+$metaKeywords = "buses, bus services, travel, transportation, booking";
+
 include 'includes/header.php'; ?>
 <div class="header-wrapper">
     <?php include 'includes/topbar.php'; ?>

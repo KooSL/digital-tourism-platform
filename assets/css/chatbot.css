@@ -17,9 +17,9 @@
 } */
 
 #chatToggle {
-  position: fixed;
+  /* position: fixed;
   right: 25px;
-  bottom: 25px;
+  bottom: 25px; */
 
   width: 55px;
   height: 55px;
@@ -32,11 +32,12 @@
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 
   z-index: 9999;
+  transition: transform 0.2s ease-in-out;
 }
 
-/* #chatToggle:hover {
-  background: var(--orange);
-} */
+#chatToggle:hover {
+  transform: translateY(-2px);
+}
 
 /* Chat Container */
 #chatContainer {
@@ -52,7 +53,11 @@
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
   font-family: "Segoe UI", sans-serif;
-  z-index: 9999; /* was missing - this is why slider buttons/badges (z-index up to ~1454) could render above the chat window on scroll */
+  z-index: 9999;
+}
+
+#chatContainer.move-up {
+    bottom: 140px;
 }
 
 /* Header */

@@ -92,8 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 <section class="page-banner">
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="success-box-contact" id="successBox">
-            <strong>Success!</strong>
+        <div class="success-box" id="successBox">
             <?php
             if ($_GET['success'] === 'signup') echo "Sign Up successful! Welcome, " . (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User') . ".";
             if ($_GET['success'] === 'link_sent') echo "Reset link has been sent to your email.";
@@ -103,7 +102,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
 
     <?php if (isset($_GET['error'])): ?>
         <div class="error-box" id="errorBox">
-            <strong>Error!</strong>
             <?php
             if ($_GET['error'] === 'email_doesnt_exist') echo "Account does not exist.";
             if ($_GET['error'] === 'invalid') echo "Registration failed! Please try again.";

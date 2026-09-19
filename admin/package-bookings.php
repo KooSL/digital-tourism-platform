@@ -90,7 +90,7 @@ include 'includes/sidebar.php';
           <th>Payment Status</th>
           <th>Payment Method</th>
           <th>Transaction ID</th>
-          <th>Status</th>
+          <th>Booking Status</th>
           <th>Action</th>
 
         </tr>
@@ -108,7 +108,7 @@ include 'includes/sidebar.php';
      FROM package_bookings pb
      LEFT JOIN tours t ON pb.package_id = t.id
      LEFT JOIN users u ON pb.user_id = u.id
-     ORDER BY pb.id ASC
+     ORDER BY pb.id DESC
      LIMIT $limit OFFSET $offset"
         );
 
@@ -141,18 +141,32 @@ include 'includes/sidebar.php';
               <!-- <a href="edit-package-booking?id=<?= $row['id'] ?>" class="btn-edit">Edit</a> -->
               <?php if (in_array($row['status'], ['pending', 'canceled'])) { ?>
 
-                <a href="?confirm=<?= $row['id'] ?>"
+                <!-- <a href="?confirm=<?= $row['id'] ?>"
                   class="btn-approve"
                   onclick="return confirm('Confirm this booking?')">
+                  Confirm
+                </a> -->
+
+                <a href="javascript:void(0)"
+                  onclick="showConfirm('?confirm=<?= $row['id'] ?>','Confirm this package booking?')"
+                  class="btn-approve">
                   Confirm
                 </a>
 
 
+
+
               <?php } else { ?>
 
-                <a href="?cancel=<?= $row['id'] ?>"
+                <!-- <a href="?cancel=<?= $row['id'] ?>"
                   class="btn-reject"
                   onclick="return confirm('Cancel this booking?')">
+                  Cancel
+                </a> -->
+
+                <a href="javascript:void(0)"
+                  onclick="showConfirm('?cancel=<?= $row['id'] ?>','Cancel this package booking?')"
+                  class="btn-reject">
                   Cancel
                 </a>
 

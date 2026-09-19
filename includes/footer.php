@@ -32,7 +32,7 @@
         <?php
         $tourQuery = mysqli_query(
           $conn,
-          "SELECT id, title 
+          "SELECT id, slug, title 
             FROM tours 
             WHERE status = 1 AND is_popular = 1 
             ORDER BY id DESC 
@@ -42,7 +42,7 @@
         while ($tour = mysqli_fetch_assoc($tourQuery)) {
         ?>
           <li>
-            <a href="tour-details?id=<?= $tour['id']; ?>">
+            <a href="tour-details?trip=<?= $tour['slug']; ?>">
               <?= htmlspecialchars($tour['title']); ?>
             </a>
           </li>
@@ -121,7 +121,29 @@
   </div>
 </footer>
 
-<div id="chatToggle"><img src="assets/images/chatbot/icon2.png" alt=""></div>
+<div id="confirmModal" class="confirm-overlay">
+
+  <div class="confirm-box">
+
+    <h3 id="confirmTitle">Are you sure?</h3>
+
+    <p id="confirmMessage">
+      This action cannot be undone.
+    </p>
+
+    <div class="confirm-actions">
+
+      <button id="cancelBtn" class="cancel">
+        Cancel
+      </button>
+
+      <a id="confirmBtn" href="#" class="confirm">
+        Confirm
+      </a>
+
+    </div>
+  </div>
+</div>
 
 <div id="chatContainer">
   <div id="chatHeader">
@@ -145,33 +167,14 @@
 
 </div>
 
-<script src="assets/js/chatbot.js"></script>
-
-<div id="confirmModal" class="confirm-overlay">
-
-  <div class="confirm-box">
-
-    <h3 id="confirmTitle">Are you sure?</h3>
-
-    <p id="confirmMessage">
-      This action cannot be undone.
-    </p>
-
-    <div class="confirm-actions">
-
-      <button id="cancelBtn" class="cancel">
-        Cancel
-      </button>
-
-      <a id="confirmBtn" href="#" class="confirm">
-        Confirm
-      </a>
-
-    </div>
-
+<div class="chatbotAndbackToTopGrid">
+  <div id="chatToggle"><img src="assets/images/chatbot/icon2.png" alt=""></div>
+  <div class="backToTop">
+    <button id="backToTop">↑</button>
   </div>
-
 </div>
+<script src="assets/js/chatbot.js"></script>
+<script src="assets/js/backToTop.js"></script>
 
 </body>
 

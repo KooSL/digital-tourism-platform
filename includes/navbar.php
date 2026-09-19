@@ -5,7 +5,7 @@
     <ul class="nav-menu" id="navMenu">
       <li><a href="/Digital_Tourism_Platform">Home</a></li>
       <li class="dropdown">
-        <a href="">Tours / Treks</a>
+        <a href="">Trips</a>
         <ul class="dropdown-menu">
           <li><a href="tours?type=domestic">Domestic</a></li>
           <li><a href="tours?type=international">International</a></li>
@@ -25,7 +25,7 @@
 
           <ul class="dropdown-menu">
             <li><a href="profile">Profile</a></li>
-            <li><a href="my-bookings">Bookings</a></li>
+            <li><a href="my-bookings">My Bookings</a></li>
             <li><a href="signout">Sign Out</a></li>
           </ul>
         </li>
@@ -50,7 +50,7 @@
       <ul>
         <li><a href="/Digital_Tourism_Platform">Home</a></li>
         <li class="mobile-dropdown">
-          <a href="">Tours / Treks</a>
+          <a href="">Trips</a>
           <ul class="mobile-submenu">
             <li><a href="tours?type=domestic">Domestic</a></li>
             <li><a href="tours?type=international">International</a></li>
@@ -70,7 +70,7 @@
 
             <ul class="mobile-submenu">
               <li><a href="profile">Profile</a></li>
-              <li><a href="my-bookings">Bookings</a></li>
+              <li><a href="my-bookings">My Bookings</a></li>
               <li><a href="signout">Sign Out</a></li>
             </ul>
           </li>

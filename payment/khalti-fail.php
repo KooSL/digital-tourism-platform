@@ -9,6 +9,7 @@ $slug = $data['package_slug'];
 
 unset($_SESSION['booking_data']);
 unset($_SESSION['pid']);
+unset($_SESSION['khalti_expected']);
 
 header("Location: ../booking?trip=$slug&type=" . urlencode($data['pckg_type']) . "&price=" . urlencode($data['pckg_price']) . "&id=" . urlencode($data['package_id']) . "&error=$reason");
 exit;
