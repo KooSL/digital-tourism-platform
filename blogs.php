@@ -1,5 +1,4 @@
 <?php
-$pageTitle = "Travel Blog";
 include 'config/db.php';
 include 'includes/blog-functions.php';
 
@@ -49,11 +48,9 @@ if (!empty($params)) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
-/* Categories for filter bar */
 $categories = mysqli_query($conn, "SELECT * FROM blog_categories ORDER BY name ASC");
 
-/* ---------- SEO META (must be set BEFORE includes/header.php) ---------- */
-$metaTitle       = $catSlug ? ucwords(str_replace('-', ' ', $catSlug)) . " Articles | Digital Tourism Platform Blog" : "Travel Blog | Tips, Guides & Stories | Digital Tourism Platform";
+$metaTitle       = $catSlug ? ucwords(str_replace('-', ' ', $catSlug)) . " Articles | Digital Tourism Platform Blog" : "Blogs | Tips, Guides & Stories | Digital Tourism Platform";
 $metaDescription = "Explore travel tips, trekking guides, festival stories and destination insights from Digital Tourism Platform's travel blog.";
 $metaKeywords    = "nepal travel blog, trekking tips, travel guides, digital tourism platform";
 $canonical       = "https://www.digitaltourismplatform.com/blogs" . ($catSlug ? "?category=" . urlencode($catSlug) : "");
@@ -94,7 +91,7 @@ include 'includes/header.php';
         <div class="blog-grid">
           <?php while ($row = mysqli_fetch_assoc($result)): ?>
             <article class="blog-card <?= $row['is_featured'] ? 'featured' : '' ?>">
-              <a href="blog-details?slug=<?= urlencode($row['slug']) ?>" class="blog-img">
+              <a href="blog-details?article=<?= urlencode($row['slug']) ?>&category=<?= urlencode($row['category_slug']) ?>" class="blog-img">
                 <img
                   src="uploads/images/blogs/<?= htmlspecialchars($row['cover_image'] ?: 'default-blog.jpg') ?>"
                   alt="<?= htmlspecialchars($row['title']) ?>"
@@ -111,7 +108,7 @@ include 'includes/header.php';
                   </a>
                 <?php endif; ?>
 
-                <h2><a href="blog-details?slug=<?= urlencode($row['slug']) ?>"><?= htmlspecialchars($row['title']) ?></a></h2>
+                <h2><a href="blog-details?article=<?= urlencode($row['slug']) ?>&category=<?= urlencode($row['category_slug']) ?>"><?= htmlspecialchars($row['title']) ?></a></h2>
 
                 <p class="blog-excerpt">
                   <?= htmlspecialchars($row['excerpt'] ?: autoExcerpt($row['content'])) ?>
@@ -123,7 +120,7 @@ include 'includes/header.php';
                   <span><i class="fa-regular fa-clock"></i><?= readingTime($row['content']) ?></span>
                 </div>
 
-                <a href="blog-details?slug=<?= urlencode($row['slug']) ?>" class="btn">Read More</a>
+                <a href="blog-details?article=<?= urlencode($row['slug']) ?>&category=<?= urlencode($row['category_slug']) ?>" class="btn">Read More</a>
               </div>
             </article>
           <?php endwhile; ?>
@@ -131,12 +128,39 @@ include 'includes/header.php';
 
         <?php if ($totalPages > 1): ?>
           <div class="pagination">
+
+            <?php if ($page > 1): ?>
+              <?php
+              $previousParams = $_GET;
+              $previousParams['page'] = $page - 1;
+              ?>
+              <a
+                href="?<?= htmlspecialchars(http_build_query($previousParams)) ?>"
+                class="page-btn page-prev">
+                <i class="fa-solid fa-chevron-left"></i>
+              </a>
+            <?php endif; ?>
+
+
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
               <a href="?page=<?= $p ?><?= $catSlug ? '&category=' . urlencode($catSlug) : '' ?><?= $q ? '&q=' . urlencode($q) : '' ?>"
                 class="page-btn <?= $p == $page ? 'active' : '' ?>">
                 <?= $p ?>
               </a>
             <?php endfor; ?>
+
+            <?php if ($page < $totalPages): ?>
+              <?php
+              $nextParams = $_GET;
+              $nextParams['page'] = $page + 1;
+              ?>
+              <a
+                href="?<?= htmlspecialchars(http_build_query($nextParams)) ?>"
+                class="page-btn page-next">
+                <i class="fa-solid fa-chevron-right"></i>
+              </a>
+            <?php endif; ?>
+
           </div>
         <?php endif; ?>
 
