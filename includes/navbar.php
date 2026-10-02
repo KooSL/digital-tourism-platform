@@ -7,8 +7,8 @@
       <li class="dropdown">
         <a href="">Trips</a>
         <ul class="dropdown-menu">
-          <li><a href="tours?type=domestic">Domestic</a></li>
-          <li><a href="tours?type=international">International</a></li>
+          <li><a href="trips?type=domestic">Domestic</a></li>
+          <li><a href="trips?type=international">International</a></li>
         </ul>
       </li>
       <li><a href="buses">Buses</a></li>
@@ -52,8 +52,8 @@
         <li class="mobile-dropdown">
           <a href="">Trips</a>
           <ul class="mobile-submenu">
-            <li><a href="tours?type=domestic">Domestic</a></li>
-            <li><a href="tours?type=international">International</a></li>
+            <li><a href="trips?type=domestic">Domestic</a></li>
+            <li><a href="trips?type=international">International</a></li>
           </ul>
         </li>
         <li><a href="buses">Buses</a></li>

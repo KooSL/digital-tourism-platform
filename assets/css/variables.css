@@ -1,0 +1,72 @@
+:root {
+  --blue: #003b73;
+  --blue-600: #0a4d94;
+  --blue-700: #002c58;
+  --blue-900: #001b36;
+  --blue-50: #eaf1fb;
+
+  --orange: #ffa630;
+  --orange-600: #ef9312;
+  --orange-50: #fff4e2;
+
+  --white: #ffffff;
+  --black: var(--blue);
+  --gray: #f4f4f4;
+  --dark-bg: #121212;
+  --dark-text: #e0e0e0;
+  --fade-blue: #bfdbfe;
+  --success-green: #28a745;
+  --success-bg: #e9f9ef;
+  --error-red: #dc3545;
+  --error-bg: #fdecec;
+
+  --ink: #16223a;
+  --muted: #64748b;
+  --border: #e4e9f1;
+
+  --img-placeholder: #eef2f6;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-xs: 4px;
+  --radius-lg: 12px;
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
+
+  --transition: 0.3s ease;
+
+  --font-family-heading: "Poppins", sans-serif;
+  --font-family-body: "Inter", sans-serif;
+  --font-family-nav: "Inter", "Segoe UI", sans-serif;
+
+  --fs-2xs: 12px;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-base: 15px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 22px;
+  --fs-3xl: 26px;
+  --fs-4xl: 30px;
+  --fs-5xl: 32px;
+  --fs-6xl: 36px;
+  --fs-7xl: 40px;
+  --fs-8xl: 42px;
+  --fs-hero: 50px;
+
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  --space-2xs: 8px;
+  --space-xs: 12px;
+  --space-sm: 20px;
+  --space-md: 30px;
+  --space-lg: 50px;
+  --space-xl: 60px;
+  --space-2xl: 80px;
+}

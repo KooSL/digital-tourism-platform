@@ -60,12 +60,12 @@ include 'includes/sidebar.php';
         $conn,
         "SELECT 
         inquiries.*,
-        tours.title AS tour_name
+        trips.title AS trip_name
 
         FROM inquiries
 
-        LEFT JOIN tours 
-        ON inquiries.trip_id = tours.id
+        LEFT JOIN trips 
+        ON inquiries.trip_id = trips.id
 
         ORDER BY inquiries.id DESC
 
@@ -76,7 +76,7 @@ include 'includes/sidebar.php';
       ?>
         <tr>
           <td><?= $i++ ?></td>
-          <td><?= htmlspecialchars($row['tour_name']) ?></td>
+          <td><?= htmlspecialchars($row['trip_name']) ?></td>
           <td><?= htmlspecialchars($row['name']) ?></td>
           <td><?= htmlspecialchars($row['email']) ?></td>
           <td><?= htmlspecialchars($row['phone']) ?></td>

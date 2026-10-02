@@ -7,17 +7,17 @@ require_once __DIR__ . '/../includes/pricing.php';
 $slug = $_GET['slug'];
 
 if (!isset($_GET['slug']) || empty($slug)) {
-    header("Location: ../tours?error=invalid");
+    header("Location: ../trips?error=invalid");
     exit;
 }
 
-$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE slug=? AND status=1");
+$stmt = mysqli_prepare($conn, "SELECT * FROM trips WHERE slug=? AND status=1");
 mysqli_stmt_bind_param($stmt, "s", $slug);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
-$tour = mysqli_fetch_assoc($result);
+$trip = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
-$p_id = $tour['id'] ?? null;
+$p_id = $trip['id'] ?? null;
 
 $data = $_SESSION['booking_data'];
 $package_id = $data['package_id'];

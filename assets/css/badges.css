@@ -1,0 +1,130 @@
+/* DISCOUNT */
+.discount-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+/* .discount-badge.home {
+  top: 40px;
+  right: 10px;
+} */
+
+.discount-badge.trips {
+  position: static;
+  text-align: center;
+}
+
+/* Flights */
+
+.group-fare-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  /* background: linear-gradient(135deg, var(--orange), var(--orange-600)); */
+  background: var(--orange);
+  color: var(--white);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* box-shadow: 0 4px 10px rgba(0,0,0,0.25); */
+}
+
+.group-fare-badge i {
+  font-size: 12px;
+}
+
+/* Home */
+
+.popular-badge-home {
+  background: var(--orange);
+  color: var(--white);
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+}
+
+.discount-badge-home {
+  background: red;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.latest-badge-home {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+}
+
+.badges-home.right {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+/* trips */
+
+.trip-badges {
+  display: flex;
+  gap: 10px;
+}
+
+.type-badge {
+  background: var(--orange);
+  color: var(--white);
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+  text-align: center;
+}
+
+.popular-badge,
+.latest-badge {
+  background: var(--orange);
+  color: var(--white);
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+  text-align: center;
+}
+
+.badges-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+@media screen and (max-width: 768px) {
+  .type-badge,
+  .popular-badge,
+  .latest-badge {
+    font-size: 12px;
+  }
+}

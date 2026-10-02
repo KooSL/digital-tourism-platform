@@ -40,7 +40,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
   </url>
 
   <url>
-    <loc><?= xmlEscape(siteUrl('/tours')) ?></loc>
+    <loc><?= xmlEscape(siteUrl('/trips')) ?></loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -172,26 +172,26 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
   }
   ?>
 
-  <!-- Published Tour Details -->
+  <!-- Published trip Details -->
 
   <?php
 
-  $tours = mysqli_query(
+  $trips = mysqli_query(
     $conn,
     "SELECT id, updated_at
-     FROM tours
+     FROM trips
      WHERE status = 1
      ORDER BY updated_at DESC"
   );
 
-  if ($tours) {
+  if ($trips) {
 
-    while ($row = mysqli_fetch_assoc($tours)) {
+    while ($row = mysqli_fetch_assoc($trips)) {
 
-      $tourId = (string) $row['id'];
+      $tripId = (string) $row['id'];
 
-      $tourUrl = siteUrl(
-        '/tour-details?id=' . urlencode($tourId)
+      $tripUrl = siteUrl(
+        '/trip-details?id=' . urlencode($tripId)
       );
 
       $lastmod = '';
@@ -206,7 +206,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
   ?>
 
       <url>
-        <loc><?= xmlEscape($tourUrl) ?></loc>
+        <loc><?= xmlEscape($tripUrl) ?></loc>
 
         <?php if ($lastmod !== ''): ?>
           <lastmod><?= xmlEscape($lastmod) ?></lastmod>
@@ -220,7 +220,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     }
   } else {
 
-    error_log('Sitemap tour query failed: ' . mysqli_error($conn));
+    error_log('Sitemap trip query failed: ' . mysqli_error($conn));
   }
   ?>
 

@@ -51,7 +51,7 @@ require_once __DIR__ . '/security.php';
       <link rel="stylesheet" href="assets/css/style.css">
       <link rel="stylesheet" href="assets/css/variables.css">
       <link rel="stylesheet" href="assets/css/global.css">
-      <link rel="stylesheet" href="assets/css/tour-details.css">
+      <link rel="stylesheet" href="assets/css/trip-details.css">
       <link rel="stylesheet" href="assets/css/search-filter.css">
       <link rel="stylesheet" href="assets/css/pagination.css">
       <link rel="stylesheet" href="assets/css/auth-form.css">
@@ -65,6 +65,8 @@ require_once __DIR__ . '/security.php';
       <link rel="stylesheet" href="assets/css/blog.css">
       <link rel="stylesheet" href="assets/css/anti-flicker.css">
       <link rel="stylesheet" href="assets/css/successError.css">
+      <link rel="stylesheet" href="assets/css/booking-details.css">
+
 
       <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">

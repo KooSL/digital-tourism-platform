@@ -2,7 +2,7 @@
  * nearby-packages.js
  * ----------------------------------------------------------------------
  * Asks the browser for the visitor's GPS location, then calls
- * api/nearby-user.php to fetch tours near them (Haversine distance,
+ * api/nearby-user.php to fetch trips near them (Haversine distance,
  * computed server-side in MySQL). Renders results into #nearbyGrid.
  *
  * Falls back to a friendly message if the user denies location access
@@ -18,8 +18,8 @@
 
   const excludeId = grid.dataset.excludeId || 0;
 
-  function renderCards(tours) {
-    if (!tours.length) {
+  function renderCards(trips) {
+    if (!trips.length) {
       statusEl.textContent =
         "No packages found near your current location yet.";
       return;
@@ -27,11 +27,11 @@
 
     statusEl.style.display = "none";
 
-    grid.innerHTML = tours
+    grid.innerHTML = trips
       .map(function (t) {
         return `
         <div class="recommend-card">
-          <img src="uploads/images/tours/${t.banner_image}" alt="${t.title}">
+          <img src="uploads/images/trips/${t.banner_image}" alt="${t.title}">
           <h4>${t.title}</h4>
           <div class="recommend-info">
             <p><i class="fa-solid fa-clock"></i> ${t.duration}</p>
@@ -40,7 +40,7 @@
           <p class="current-price recommend-price">
             NPR ${t.price} <span>| USD $${t.price_usd} PP</span>
           </p>
-          <a href="tour-details?trip=${t.slug}&type=${t.type}&rec=1&id=${t.id}">View</a>
+          <a href="trip-details?trip=${t.slug}&type=${t.type}&rec=1&id=${t.id}">View</a>
         </div>
       `;
       })
@@ -65,7 +65,7 @@
           return res.json();
         })
         .then(function (data) {
-          renderCards(data.tours || []);
+          renderCards(data.trips || []);
         })
         .catch(function () {
           statusEl.textContent = "Couldn't load nearby packages right now.";

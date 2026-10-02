@@ -18,26 +18,26 @@ include 'includes/pricing.php';
 $slug = $_GET['trip'];
 
 if (!isset($_GET['trip']) || empty($slug)) {
-    header("Location: tours?error=invalid");
+    header("Location: trips?error=invalid");
     exit;
 }
 
-$stmt = mysqli_prepare($conn, "SELECT * FROM tours WHERE slug=? AND status=1");
+$stmt = mysqli_prepare($conn, "SELECT * FROM trips WHERE slug=? AND status=1");
 mysqli_stmt_bind_param($stmt, "s", $slug);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
-$tour = mysqli_fetch_assoc($result);
+$trip = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
-$id = $tour['id'] ?? null;
+$id = $trip['id'] ?? null;
 
-if (!$tour) {
-    header("Location: tours?error=not_found");
+if (!$trip) {
+    header("Location: trips?error=not_found");
     exit;
 }
 
-$latitude = $tour['latitude'];
-$longitude = $tour['longitude'];
-$location_name = $tour['location_name'];
+$latitude = $trip['latitude'];
+$longitude = $trip['longitude'];
+$location_name = $trip['location_name'];
 
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
@@ -61,7 +61,8 @@ if (isset($_POST['book'])) {
         !isset($_POST['csrf_token']) ||
         !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
     ) {
-        die("CSRF validation failed.");
+        header("Location: booking?trip=$slug&type=" . urlencode($trip['type']) . "&price=" . urlencode($trip['price']) . "&id=" . urlencode($trip['id']) . "&error=invalid");
+        exit;
     }
 
     $package_id = intval($_POST['package_id']);
@@ -74,10 +75,10 @@ if (isset($_POST['book'])) {
     $payment_method = trim($_POST['payment_method'] ?? '');
     $payment_option = trim($_POST['payment_option'] ?? '');
 
-    // Re-fetch the tour SERVER-SIDE to get its real price - never trust a
-    // price/amount coming from the client. This also confirms the tour
+    // Re-fetch the trip SERVER-SIDE to get its real price - never trust a
+    // price/amount coming from the client. This also confirms the trip
     // being booked actually exists and is still active.
-    $priceStmt = mysqli_prepare($conn, "SELECT price FROM tours WHERE id = ? AND slug = ? AND status = 1");
+    $priceStmt = mysqli_prepare($conn, "SELECT price FROM trips WHERE id = ? AND slug = ? AND status = 1");
     mysqli_stmt_bind_param($priceStmt, "is", $package_id, $slug);
     mysqli_stmt_execute($priceStmt);
     $priceResult = mysqli_stmt_get_result($priceStmt);
@@ -85,7 +86,7 @@ if (isset($_POST['book'])) {
     mysqli_stmt_close($priceStmt);
 
     if (!$priceRow) {
-        header("Location: booking?trip=$slug&type=" . urlencode($tour['type']) . "&price=" . urlencode($tour['price']) . "&id=" . urlencode($tour['id']) . "&error=required");
+        header("Location: booking?trip=$slug&type=" . urlencode($trip['type']) . "&price=" . urlencode($trip['price']) . "&id=" . urlencode($trip['id']) . "&error=required");
         exit;
     }
 
@@ -104,12 +105,12 @@ if (isset($_POST['book'])) {
     $v->integerRange('persons', $persons, 1, 50, 'Number of persons must be between 1 and 50.');
     // "Pay full" vs "pay 10% deposit now" - never trust a client-sent
     // amount, only this choice; the actual amounts are computed
-    // server-side from the real tour price in esewa-payment.php.
+    // server-side from the real trip price in esewa-payment.php.
     $v->required('payment_option', $payment_option, 'Please choose to pay in full or pay a deposit.')
         ->inArray('payment_option', $payment_option, ['full', 'deposit'], 'Please choose a valid payment option.');
 
     if ($v->fails()) {
-        redirectWithErrors("booking?trip=$slug&type=" . urlencode($tour['type']) . "&price=" . urlencode($tour['price']) . "&id=" . urlencode($tour['id']), $v->errors(), [
+        redirectWithErrors("booking?trip=$slug&type=" . urlencode($trip['type']) . "&price=" . urlencode($trip['price']) . "&id=" . urlencode($trip['id']), $v->errors(), [
             'name' => $name,
             'email' => $email,
             'phone' => $phone,
@@ -122,13 +123,13 @@ if (isset($_POST['book'])) {
     $_SESSION['booking_data'] = [
         'package_id' => $package_id,
         'package_slug' => $slug,
-        'pckg_type' => $tour['type'],
+        'pckg_type' => $trip['type'],
         'user_id' => $_SESSION['user_id'] ?? null,
         'name' => $name,
         'email' => $email,
         'country' => $country,
         'phone' => $phone,
-        'pckg_price' => $tour['price'],
+        'pckg_price' => $trip['price'],
         'date' => $travel_date,
         'persons' => $persons,
         'amount' => (float)$priceRow['price'], // per-person price, server-verified
@@ -171,8 +172,8 @@ mysqli_stmt_close($avgStmt);
 </div>
 
 <!-- BANNER -->
-<section class="tour-banner"
-    style="background-image: url('uploads/images/tours/<?= htmlspecialchars($tour['banner_image']) ?>');">
+<section class="trip-banner"
+    style="background-image: url('uploads/images/trips/<?= htmlspecialchars($trip['banner_image']) ?>');">
 
     <div class="overlay">
         <div class="container">
@@ -201,8 +202,8 @@ mysqli_stmt_close($avgStmt);
 
             <?php if (($_GET['error'] ?? '') === 'validation') renderValidationErrors(); ?>
 
-            <h1><?= htmlspecialchars($tour['title']) ?></h1>
-            <p><?= htmlspecialchars($tour['duration']) ?></p>
+            <h1><?= htmlspecialchars($trip['title']) ?></h1>
+            <p><?= htmlspecialchars($trip['duration']) ?></p>
 
             <div class="banner-bottom-info">
 
@@ -211,13 +212,13 @@ mysqli_stmt_close($avgStmt);
                 </div>
 
                 <div class="popular-badge-detail-box">
-                    <?php if ($tour['is_popular'] == 1): ?>
+                    <?php if ($trip['is_popular'] == 1): ?>
                         <span class="popular-badge-detail"><i class="fa-solid fa-fire"></i> Popular</span>
                     <?php endif; ?>
                 </div>
 
                 <div class="rating-summary">
-                    <a href="tour-details?trip=<?= urlencode($tour['slug']) ?>&type=<?= urlencode($tour['type']) ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
+                    <a href="trip-details?trip=<?= urlencode($trip['slug']) ?>&type=<?= urlencode($trip['type']) ?>#reviews"><i class="fa-solid fa-star"></i> <?= $ratingData['avg_rating'] ?? '0.0' ?>
                         (<?= (int)($ratingData['total_reviews'] ?? 0) ?> reviews)</a>
                 </div>
 
@@ -249,7 +250,7 @@ mysqli_stmt_close($avgStmt);
             <form method="POST" novalidate>
 
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <input type="hidden" name="package_id" value="<?php echo (int)$tour['id']; ?>">
+                <input type="hidden" name="package_id" value="<?php echo (int)$trip['id']; ?>">
 
                 <div class="form-group">
                     <input type="date" name="travel_date" id="travel_date" min="<?= date('Y-m-d') ?>"
@@ -302,10 +303,10 @@ mysqli_stmt_close($avgStmt);
 
         <div class="booking-form-sec-right">
             <div class="payment-summary">
-                <p>Price: NPR <span id="packagePrice"><?= htmlspecialchars($tour['price']) ?></span> / person</p>
+                <p>Price: NPR <span id="packagePrice"><?= htmlspecialchars($trip['price']) ?></span> / person</p>
                 <p class="discount-txt">Discount: <span id="discountText">0%</span></p>
                 <hr>
-                <p><strong>Total Package Price: NPR <span id="totalAmount"><?= htmlspecialchars($tour['price']) ?></span></strong></p>
+                <p><strong>Total Package Price: NPR <span id="totalAmount"><?= htmlspecialchars($trip['price']) ?></span></strong></p>
 
                 <!-- PAY FULL vs PAY DEPOSIT -->
                 <div class="payment-option-group">
@@ -313,7 +314,7 @@ mysqli_stmt_close($avgStmt);
 
                     <label class="payment-option-choice">
                         <input type="radio" name="payment_option" value="full" id="payFull" checked>
-                        <span>Pay Full Amount - NPR <span id="fullAmountText"><?= htmlspecialchars($tour['price']) ?></span></span>
+                        <span>Pay Full Amount - NPR <span id="fullAmountText"><?= htmlspecialchars($trip['price']) ?></span></span>
                     </label>
 
                     <label class="payment-option-choice">
@@ -346,7 +347,7 @@ mysqli_stmt_close($avgStmt);
                     <label class="payment-method-choice">
                         <!-- <input type="radio" name="payment_method" id="payment_method" value="khalti"> -->
                         <div class="payment-icons mobile-banking">
-                            <a href="booking?trip=<?= urlencode($tour['slug']) ?>&type=<?= urlencode($tour['type']) ?>&price=<?= urlencode($tour['price']) ?>&id=<?= urlencode($tour['id']) ?>&error=mobile_banking">
+                            <a href="booking?trip=<?= urlencode($trip['slug']) ?>&type=<?= urlencode($trip['type']) ?>&price=<?= urlencode($trip['price']) ?>&id=<?= urlencode($trip['id']) ?>&error=mobile_banking">
                                 <img src="assets/images/payments/mobile-banking.jpg" alt="Khalti">
                             </a>
                         </div>
@@ -364,7 +365,7 @@ mysqli_stmt_close($avgStmt);
 <script src="assets/js/success-errorBox.js"></script>
 
 <script>
-    const pricePerPerson = <?= json_encode((float)$tour['price']) ?>;
+    const pricePerPerson = <?= json_encode((float)$trip['price']) ?>;
 </script>
 
 <script>

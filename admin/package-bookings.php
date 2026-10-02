@@ -19,7 +19,7 @@ $totalRows = mysqli_fetch_assoc($totalResult)['total'];
 $totalPages = ceil($totalRows / $limit);
 
 
-// DELETE TOUR
+// DELETE trip
 if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
 
@@ -87,8 +87,8 @@ include 'includes/sidebar.php';
           <th>Phone</th>
           <th>Travel Date</th>
           <th>Persons</th>
-          <th>Payment Status</th>
           <th>Payment Method</th>
+          <th>Payment Status</th>
           <th>Transaction ID</th>
           <th>Booking Status</th>
           <th>Action</th>
@@ -106,7 +106,7 @@ include 'includes/sidebar.php';
             t.title AS package_title,
             u.name AS user_name
      FROM package_bookings pb
-     LEFT JOIN tours t ON pb.package_id = t.id
+     LEFT JOIN trips t ON pb.package_id = t.id
      LEFT JOIN users u ON pb.user_id = u.id
      ORDER BY pb.id DESC
      LIMIT $limit OFFSET $offset"
@@ -124,8 +124,15 @@ include 'includes/sidebar.php';
             <td><?= $row['phone'] ?></td>
             <td><?= $row['travel_date'] ?></td>
             <td><?= $row['persons'] ?></td>
-            <td><?= $row['payment_status'] ?></td>
             <td><?= $row['payment_method'] ?></td>
+            <!-- <td><?= $row['payment_status'] ?></td> -->
+            <td class="status-col">
+              <a href="javascript:void(0)"
+                onclick="showConfirm('toggle-payment-status?id=<?= $row['id'] ?>','<?= $row['payment_status'] == 'full' ? 'Change to Deposit Paid' : 'Change to Fully Paid' ?> this booking?')"
+                class="pill <?= $row['payment_status'] == 'full' ? 'fully-paid' : 'deposit-paid' ?>">
+                <?= $row['payment_status'] == 'full' ? 'Fully Paid' : 'Deposit Paid' ?>
+              </a>
+            </td>
             <td><?= $row['transaction_id'] ?></td>
             <td><?= $row['status'] ?></td>
 

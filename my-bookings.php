@@ -23,9 +23,9 @@ $page = max($page, 1);
 $offset = ($page - 1) * $limit;
 
 $stmt = $conn->prepare("
-    SELECT pb.*, t.title, t.slug AS tour_slug
+    SELECT pb.*, t.title, t.slug AS trip_slug
     FROM package_bookings pb
-    JOIN tours t ON pb.package_id = t.id
+    JOIN trips t ON pb.package_id = t.id
     WHERE pb.user_id = ?
     ORDER BY pb.id DESC
     LIMIT ? OFFSET ?
@@ -164,10 +164,10 @@ $total_pages = ceil($total_result['total'] / $limit);
                                 <td><?php echo htmlspecialchars($row['persons']); ?></td>
                                 <td><?php echo htmlspecialchars($row['transaction_id'] ?? '-'); ?></td>
                                 <td>
-                                    <?php if ($row['payment_status'] == 'paid'): ?>
-                                        <span class="badge success">Paid</span>
-                                    <?php elseif ($row['payment_status'] == 'partial'): ?>
-                                        <span class="badge pending">Partially Paid</span>
+                                    <?php if ($row['payment_status'] == 'full'): ?>
+                                        <span class="badge success">Fully Paid</span>
+                                    <?php elseif ($row['payment_status'] == 'deposit'): ?>
+                                        <span class="badge pending">Deposit Paid</span>
                                     <?php else: ?>
                                         <span class="badge pending">Pending</span>
                                     <?php endif; ?>
@@ -184,7 +184,7 @@ $total_pages = ceil($total_result['total'] / $limit);
                                 <td>
                                     <div class="table-actions">
 
-                                        <a href="booking-details?slug=<?= urlencode($row['tour_slug']) ?>" class="btn view">
+                                        <a href="booking-details?trip=<?= urlencode($row['trip_slug']) ?>&booking_id=<?= (int)$row['id'] ?>" class="btn view">
                                             View
                                         </a>
 

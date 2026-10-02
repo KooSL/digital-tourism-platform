@@ -77,7 +77,7 @@ header("Content-Security-Policy: " . implode('; ', [
         "https://api.esewa.com.np",
         "https://rc-epay.esewa.com.np",
         "https://rc.esewa.com.np",
-        "https://api.open-meteo.com",       // weather.js - tour-details weather widget
+        "https://api.open-meteo.com",       // weather.js - trip-details weather widget
         "https://tile.openstreetmap.org",   // tripMap.js - Leaflet map tiles
         "https://unpkg.com",                // Leaflet CDN - also covers its .map sourcemap fetch in devtools
         "https://cdnjs.cloudflare.com",     // Font Awesome CDN - also covers its .map sourcemap fetch in devtools

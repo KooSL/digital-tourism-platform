@@ -3,9 +3,9 @@
 /**
  * AJAX endpoint: GET api/nearby-user.php?lat=..&lng=..&exclude=..
  *
- * Returns JSON list of tours near the user's live GPS location (Haversine),
+ * Returns JSON list of trips near the user's live GPS location (Haversine),
  * used by assets/js/nearby-packages.js after requesting browser geolocation.
- * Kept separate from tour-details.php so it can be polled independently
+ * Kept separate from trip-details.php so it can be polled independently
  * without re-rendering the whole page.
  */
 
@@ -26,7 +26,7 @@ if ($lat === null || $lng === null || $lat < -90 || $lat > 90 || $lng < -180 || 
     exit;
 }
 
-$nearby = getNearbyToursForUser($conn, $lat, $lng, $exclude, $radius, 5);
+$nearby = getNearbytripsForUser($conn, $lat, $lng, $exclude, $radius, 5);
 
 $out = [];
 while ($row = $nearby->fetch_assoc()) {
@@ -44,4 +44,4 @@ while ($row = $nearby->fetch_assoc()) {
     ];
 }
 
-echo json_encode(['tours' => $out]);
+echo json_encode(['trips' => $out]);

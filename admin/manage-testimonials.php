@@ -245,7 +245,7 @@ unset($_SESSION['reopen_modal']);
         <small class="error"></small>
       </div>
       <div class="form-group">
-        <input type="text" name="service" placeholder="Service (Tour / Flight / Visa)" data-validate="name">
+        <input type="text" name="service" placeholder="Service (trip / Flight / Visa)" data-validate="name">
         <small class="error"></small>
       </div>
       <div class="form-group">

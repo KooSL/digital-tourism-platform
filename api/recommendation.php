@@ -10,7 +10,7 @@
  *
  *    1. CONTENT-BASED SIMILARITY   - price closeness (smooth decay, not a
  *                                    hard ±5000 cutoff) + duration match +
- *                                    same tour "type" match, compared against
+ *                                    same trip "type" match, compared against
  *                                    a *blended* user-taste profile built
  *                                    from views, time-spent, bookings and
  *                                    reviews (not just "the most recent one").
@@ -18,13 +18,13 @@
  *                                    booked this" (item-based CF via co-
  *                                    booking counts).
  *    3. POPULARITY                 - log-dampened booking + click counts so
- *                                    one viral tour can't drown everything.
+ *                                    one viral trip can't drown everything.
  *    4. BAYESIAN RATING            - IMDB-style Bayesian average instead of
- *                                    raw AVG(rating), so a tour with one 5*
- *                                    review can't outrank a tour with fifty
+ *                                    raw AVG(rating), so a trip with one 5*
+ *                                    review can't outrank a trip with fifty
  *                                    4.8* reviews.
  *    5. FRESHNESS                  - small recency boost for newly added
- *                                    tours (cold-start help).
+ *                                    trips (cold-start help).
  *
  *  All signals are normalised to 0..1 before being combined, so the weights
  *  below are the *actual* relative importance of each signal (easy to tune).
@@ -39,39 +39,39 @@ const REC_WEIGHTS = [
     'collaborative' => 0.20,   // co-booking pattern with similar users
     'popularity'    => 0.15,   // bookings + clicks
     'rating'        => 0.25,   // bayesian rating
-    'freshness'     => 0.10,   // newly added tours
+    'freshness'     => 0.10,   // newly added trips
 ];
 
-/* Bayesian prior: how many "average" votes a brand-new tour is assumed to
- * start with. Higher = new tours need more reviews before rating matters. */
+/* Bayesian prior: how many "average" votes a brand-new trip is assumed to
+ * start with. Higher = new trips need more reviews before rating matters. */
 const BAYESIAN_MIN_VOTES = 5;
 
 /**
- * Public entry point for the TOUR-DETAILS PAGE - "Recommended for You"
- * relative to the tour currently being viewed. Kept the same name/signature
- * so tour-details.php does not need to change how it calls this file.
+ * Public entry point for the trip-DETAILS PAGE - "Recommended for You"
+ * relative to the trip currently being viewed. Kept the same name/signature
+ * so trip-details.php does not need to change how it calls this file.
  *
  * @return mysqli_result-like array-based result via a tiny wrapper so the
  *         calling code's `while ($row = $recommended->fetch_assoc())`
  *         keeps working unchanged.
  */
-function getRecommendations($conn, $current_tour_id, $limit = 5)
+function getRecommendations($conn, $current_trip_id, $limit = 5)
 {
     $user_id = $_SESSION['user_id'] ?? null;
 
-    $currentTour = fetchCurrentTour($conn, $current_tour_id);
-    if (!$currentTour) {
+    $currenttrip = fetchCurrenttrip($conn, $current_trip_id);
+    if (!$currenttrip) {
         return new ArrayResult([]);
     }
 
-    $tasteProfile = buildUserTasteProfile($conn, $user_id, $currentTour);
+    $tasteProfile = buildUserTasteProfile($conn, $user_id, $currenttrip);
     $coBooked     = $user_id ? getCollaborativeCandidates($conn, $user_id) : [];
     $globalStats  = getGlobalRatingStats($conn);
-    $candidates   = fetchCandidateTours($conn, $current_tour_id);
+    $candidates   = fetchCandidatetrips($conn, $current_trip_id);
 
     $scored = [];
-    foreach ($candidates as $tour) {
-        $scored[] = scoreTour($tour, $tasteProfile, $coBooked, $globalStats);
+    foreach ($candidates as $trip) {
+        $scored[] = scoretrip($trip, $tasteProfile, $coBooked, $globalStats);
     }
 
     usort($scored, fn($a, $b) => $b['_score'] <=> $a['_score']);
@@ -82,10 +82,10 @@ function getRecommendations($conn, $current_tour_id, $limit = 5)
 /**
  * Public entry point for the HOMEPAGE - "Explore Our Latest and Popular
  * Packages". Same 5-signal hybrid model as getRecommendations(), but there
- * is no single "tour being viewed" to anchor content-based similarity on,
+ * is no single "trip being viewed" to anchor content-based similarity on,
  * so instead:
  *   - Logged-in users: taste profile is built purely from their OWN history
- *     (views/time-spent/bookings/reviews) - no seed tour.
+ *     (views/time-spent/bookings/reviews) - no seed trip.
  *   - Guests: no personalization is possible, so the content & collaborative
  *     signals drop out and ranking falls back to popularity + Bayesian
  *     rating + freshness (still far better than the old raw-AVG scoring).
@@ -100,11 +100,11 @@ function getHomepageRecommendations($conn, $limit = 6)
     $tasteProfile = $user_id ? buildUserTasteProfile($conn, $user_id, null) : null;
     $coBooked     = $user_id ? getCollaborativeCandidates($conn, $user_id) : [];
     $globalStats  = getGlobalRatingStats($conn);
-    $candidates   = fetchCandidateTours($conn, 0);
+    $candidates   = fetchCandidatetrips($conn, 0);
 
     $scored = [];
-    foreach ($candidates as $tour) {
-        $scored[] = scoreTour($tour, $tasteProfile, $coBooked, $globalStats);
+    foreach ($candidates as $trip) {
+        $scored[] = scoretrip($trip, $tasteProfile, $coBooked, $globalStats);
     }
 
     usort($scored, fn($a, $b) => $b['_score'] <=> $a['_score']);
@@ -113,11 +113,11 @@ function getHomepageRecommendations($conn, $limit = 6)
 }
 
 /* ---------------------------------------------------------------------------
- |  1. CURRENT TOUR
+ |  1. CURRENT trip
  |-------------------------------------------------------------------------*/
-function fetchCurrentTour($conn, $id)
+function fetchCurrenttrip($conn, $id)
 {
-    $stmt = $conn->prepare("SELECT id, price, duration, type FROM tours WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, price, duration, type FROM trips WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     return $stmt->get_result()->fetch_assoc();
@@ -125,22 +125,22 @@ function fetchCurrentTour($conn, $id)
 
 /* ---------------------------------------------------------------------------
  |  2. USER TASTE PROFILE
- |     Instead of picking a single "most viewed" tour, we blend price /
+ |     Instead of picking a single "most viewed" trip, we blend price /
  |     duration / type preference across every signal we have, weighted by
  |     how strong that signal is (view count, time spent, bookings, ratings).
  |     This is far more representative of what the user actually likes.
  |-------------------------------------------------------------------------*/
-function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
+function buildUserTasteProfile($conn, $user_id, ?array $currenttrip = null)
 {
-    // If we have a tour the user is currently looking at (tour-details page),
+    // If we have a trip the user is currently looking at (trip-details page),
     // seed the profile with it so logged-out users / users with no history
     // still get relevant results anchored to what they're viewing right now.
-    // On the homepage there is no such tour, so we start from an empty
+    // On the homepage there is no such trip, so we start from an empty
     // profile and rely entirely on the user's own history below.
-    $profile = $currentTour ? [
-        'price'      => (float)$currentTour['price'],
-        'durations'  => [$currentTour['duration'] => 1.0],
-        'types'      => [$currentTour['type'] => 1.0],
+    $profile = $currenttrip ? [
+        'price'      => (float)$currenttrip['price'],
+        'durations'  => [$currenttrip['duration'] => 1.0],
+        'types'      => [$currenttrip['type'] => 1.0],
     ] : [
         'price'      => 0.0,
         'durations'  => [],
@@ -151,12 +151,12 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
         return $profile;
     }
 
-    $weightedPrices = $currentTour ? [(float)$currentTour['price'] => 1.0] : [];
+    $weightedPrices = $currenttrip ? [(float)$currenttrip['price'] => 1.0] : [];
 
     // --- Views (weighted by view_count) & Time spent (weighted by seconds)
     $stmt = $conn->prepare("
         SELECT t.price, t.duration, t.type, ua.view_count, ua.time_spent
-        FROM tours t
+        FROM trips t
         JOIN user_activity ua ON t.id = ua.package_id
         WHERE ua.user_id = ?
     ");
@@ -178,7 +178,7 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
     // --- Bookings (strongest signal - user paid real money)
     $stmt = $conn->prepare("
         SELECT t.price, t.duration, t.type, COUNT(*) AS cnt
-        FROM tours t
+        FROM trips t
         JOIN package_bookings pb ON t.id = pb.package_id
         WHERE pb.user_id = ?
         GROUP BY t.id
@@ -198,7 +198,7 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
     //     about taste than a 1* review, which is really a complaint signal)
     $stmt = $conn->prepare("
         SELECT t.price, t.duration, t.type, tr.rating
-        FROM tours t
+        FROM trips t
         JOIN trip_reviews tr ON t.id = tr.trip_id
         WHERE tr.user_id = ?
     ");
@@ -222,10 +222,10 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
     }
     if ($sumW > 0) {
         $profile['price'] = $sumWP / $sumW;
-    } elseif ($currentTour) {
-        $profile['price'] = (float)$currentTour['price'];
+    } elseif ($currenttrip) {
+        $profile['price'] = (float)$currenttrip['price'];
     } else {
-        $profile['price'] = getAveragePriceAcrossTours($conn);
+        $profile['price'] = getAveragePriceAcrosstrips($conn);
     }
 
     return $profile;
@@ -236,19 +236,19 @@ function buildUserTasteProfile($conn, $user_id, ?array $currentTour = null)
  * (e.g. a logged-in user who hasn't viewed/booked/reviewed anything yet).
  * Using the platform-wide average price is a reasonable neutral default -
  * better than 0, which would make exp(-diff/6000) collapse to ~0 for
- * every real tour and make the content signal meaningless.
+ * every real trip and make the content signal meaningless.
  */
-function getAveragePriceAcrossTours($conn)
+function getAveragePriceAcrosstrips($conn)
 {
-    $res = mysqli_query($conn, "SELECT AVG(CAST(price AS DECIMAL(10,2))) AS avg_price FROM tours WHERE status = 1");
+    $res = mysqli_query($conn, "SELECT AVG(CAST(price AS DECIMAL(10,2))) AS avg_price FROM trips WHERE status = 1");
     $row = mysqli_fetch_assoc($res);
     return $row && $row['avg_price'] !== null ? (float)$row['avg_price'] : 0.0;
 }
 
 /* ---------------------------------------------------------------------------
  |  3. COLLABORATIVE FILTERING CANDIDATES
- |     "Users who booked what this user booked also booked these tours."
- |     Returns [tour_id => co_booking_count]
+ |     "Users who booked what this user booked also booked these trips."
+ |     Returns [trip_id => co_booking_count]
  |-------------------------------------------------------------------------*/
 function getCollaborativeCandidates($conn, $user_id)
 {
@@ -294,12 +294,12 @@ function getGlobalRatingStats($conn)
  *
  *   WR = (v / (v + m)) * R  +  (m / (v + m)) * C
  *
- *   R = tour's own average rating
- *   v = number of reviews the tour has
- *   m = minimum votes required before a tour's own rating is trusted
+ *   R = trip's own average rating
+ *   v = number of reviews the trip has
+ *   m = minimum votes required before a trip's own rating is trusted
  *   C = the average rating across the whole platform
  *
- * This stops a single 5-star review from outranking a tour with dozens of
+ * This stops a single 5-star review from outranking a trip with dozens of
  * consistently strong (but not perfect) reviews.
  */
 function bayesianRating($R, $v, $m, $C)
@@ -309,9 +309,9 @@ function bayesianRating($R, $v, $m, $C)
 }
 
 /* ---------------------------------------------------------------------------
- |  5. CANDIDATE TOURS  (with pre-aggregated bookings / clicks / reviews)
+ |  5. CANDIDATE trips  (with pre-aggregated bookings / clicks / reviews)
  |-------------------------------------------------------------------------*/
-function fetchCandidateTours($conn, $exclude_id)
+function fetchCandidatetrips($conn, $exclude_id)
 {
     $sql = "
         SELECT
@@ -320,7 +320,7 @@ function fetchCandidateTours($conn, $exclude_id)
             COALESCE(c.click_count, 0)    AS click_count,
             COALESCE(r.review_count, 0)   AS review_count,
             COALESCE(r.avg_rating, 0)     AS avg_rating
-        FROM tours t
+        FROM trips t
         LEFT JOIN (
             SELECT package_id, COUNT(*) AS booking_count
             FROM package_bookings
@@ -357,13 +357,13 @@ function fetchCandidateTours($conn, $exclude_id)
 /* ---------------------------------------------------------------------------
  |  6. SCORING
  |-------------------------------------------------------------------------*/
-function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalStats)
+function scoretrip($trip, ?array $tasteProfile, array $coBooked, array $globalStats)
 {
-    $price = (float)$tour['price'];
+    $price = (float)$trip['price'];
     $hasProfile = $tasteProfile !== null;
 
     /* ---- Content-based similarity (0..1) ---------------------------- */
-    // Smooth exponential decay instead of a hard ±5000 cutoff, so a tour
+    // Smooth exponential decay instead of a hard ±5000 cutoff, so a trip
     // that's 5001 away isn't treated as "completely irrelevant".
     // No profile at all (guest on the homepage) -> no content signal.
     if ($hasProfile) {
@@ -372,11 +372,11 @@ function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalSt
 
         $durationWeights = $tasteProfile['durations'];
         $durationTotal    = array_sum($durationWeights) ?: 1;
-        $durationScore    = ($durationWeights[$tour['duration']] ?? 0) / $durationTotal;
+        $durationScore    = ($durationWeights[$trip['duration']] ?? 0) / $durationTotal;
 
         $typeWeights = $tasteProfile['types'];
         $typeTotal    = array_sum($typeWeights) ?: 1;
-        $typeScore    = ($typeWeights[$tour['type']] ?? 0) / $typeTotal;
+        $typeScore    = ($typeWeights[$trip['type']] ?? 0) / $typeTotal;
 
         $contentScore = (0.5 * $priceScore) + (0.3 * $durationScore) + (0.2 * $typeScore);
     } else {
@@ -386,7 +386,7 @@ function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalSt
     /* ---- Collaborative filtering (0..1) ------------------------------ */
     $maxCoBooked = $coBooked ? max($coBooked) : 0;
     $collabScore = $maxCoBooked > 0
-        ? ($coBooked[(int)$tour['id']] ?? 0) / $maxCoBooked
+        ? ($coBooked[(int)$trip['id']] ?? 0) / $maxCoBooked
         : 0;
 
     // Weight redistribution: if there's no taste profile at all (guest,
@@ -409,24 +409,24 @@ function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalSt
     }
 
     /* ---- Popularity (0..1, log-dampened) ------------------------------ */
-    $popularityRaw   = log(1 + (int)$tour['booking_count'] * 3 + (int)$tour['click_count']);
+    $popularityRaw   = log(1 + (int)$trip['booking_count'] * 3 + (int)$trip['click_count']);
     $popularityScore = 1 - exp(-$popularityRaw / 4); // squashes into 0..1
 
     /* ---- Bayesian rating (0..1) --------------------------------------- */
     $bayesian = bayesianRating(
-        (float)$tour['avg_rating'],
-        (int)$tour['review_count'],
+        (float)$trip['avg_rating'],
+        (int)$trip['review_count'],
         BAYESIAN_MIN_VOTES,
         $globalStats['global_avg']
     );
     $ratingScore = $bayesian / 5;
 
     /* ---- Freshness (0..1) ---------------------------------------------- */
-    $ageDays = (strtotime('now') - strtotime($tour['created_at'])) / 86400;
+    $ageDays = (strtotime('now') - strtotime($trip['created_at'])) / 86400;
     $freshnessScore = $ageDays <= 30 ? max(0, 1 - ($ageDays / 30)) : 0;
 
-    /* ---- Small manual boost for admin-flagged popular tours ------------ */
-    $manualBoost = ((int)$tour['is_popular'] === 1) ? 0.05 : 0;
+    /* ---- Small manual boost for admin-flagged popular trips ------------ */
+    $manualBoost = ((int)$trip['is_popular'] === 1) ? 0.05 : 0;
 
     $finalScore =
         ($weights['content']       * $contentScore) +
@@ -436,15 +436,15 @@ function scoreTour($tour, ?array $tasteProfile, array $coBooked, array $globalSt
         ($weights['freshness']     * $freshnessScore) +
         $manualBoost;
 
-    $tour['_score']            = $finalScore;
-    $tour['bayesian_rating']   = round($bayesian, 1);
-    $tour['review_count']      = (int)$tour['review_count'];
+    $trip['_score']            = $finalScore;
+    $trip['bayesian_rating']   = round($bayesian, 1);
+    $trip['review_count']      = (int)$trip['review_count'];
 
-    return $tour;
+    return $trip;
 }
 
 /* ---------------------------------------------------------------------------
- |  Tiny drop-in replacement for a mysqli_result so tour-details.php's
+ |  Tiny drop-in replacement for a mysqli_result so trip-details.php's
  |  `while ($row = $recommended->fetch_assoc())` keeps working with zero
  |  changes to the calling page.
  |-------------------------------------------------------------------------*/

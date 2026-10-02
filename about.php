@@ -39,7 +39,7 @@ include 'includes/header.php'; ?>
       </p>
 
       <p>
-        From customized tour packages and international flight bookings to trekking,
+        From customized trip packages and international flight bookings to trekking,
         camping, visa assistance, and adventure activities, we are committed to
         delivering reliable, affordable, and memorable travel experiences.
       </p>
@@ -48,7 +48,7 @@ include 'includes/header.php'; ?>
       <ul>
         <li> Experienced travel professionals</li>
         <li> Domestic & international travel expertise</li>
-        <li> Customized tour & flight solutions</li>
+        <li> Customized trip & flight solutions</li>
         <li> Transparent pricing with no hidden costs</li>
         <li> Dedicated customer support</li>
       </ul>
@@ -80,7 +80,7 @@ include 'includes/header.php'; ?>
       <h3>Our Vision</h3>
       <p>
         To become one of Nepal’s most reliable and customer-focused travel brands,
-        recognized for excellence in tours, flight services, and adventure travel.
+        recognized for excellence in trips, flight services, and adventure travel.
       </p>
     </div>
 
@@ -113,7 +113,7 @@ include 'includes/header.php'; ?>
         <h3>Himal Dahal</h3>
         <p class="team-role">Sales Incharge</p>
         <p class="role-description">
-          Manages customer inquiries, coordinating tour packages, searching and booking flight tickets, and regularly following up with clients to ensure smooth service and customer satisfaction.
+          Manages customer inquiries, coordinating trip packages, searching and booking flight tickets, and regularly following up with clients to ensure smooth service and customer satisfaction.
         </p>
       </div>
 
@@ -172,7 +172,7 @@ include 'includes/header.php'; ?>
       <div class="team-card">
         <img src="assets/images/team/guide.png" alt="Team Member">
         <h3>Ramesh Chhetri</h3>
-        <p class="team-role">Tour Guide</p>
+        <p class="team-role">trip Guide</p>
         <p class="role-description">
           Assist travelers, provide destination information, and ensure a smooth and enjoyable travel experience.
         </p>
@@ -197,7 +197,7 @@ include 'includes/header.php'; ?>
       <p>
         Welcome to <strong>Digital Tourism Platform</strong>.
         We believe that travel should be seamless, inspiring, and truly memorable.
-        Our goal is to make every journey, whether a holiday tour, trekking adventure,
+        Our goal is to make every journey, whether a holiday trip, trekking adventure,
         or international flight, simple and stress-free for our clients.
       </p>
 

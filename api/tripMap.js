@@ -9,4 +9,4 @@
 
   L.marker([latitude, longitude])
     .addTo(map)
-    .bindPopup('Tour Destination');
+    .bindPopup('trip Destination');

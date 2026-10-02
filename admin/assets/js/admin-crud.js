@@ -37,7 +37,7 @@ function openEditModal(button) {
   var idField = modal.querySelector('[name="id"]');
   if (idField) idField.value = data.id;
 
-  // Tours: rebuild the itinerary day rows from JSON stashed in data-itinerary
+  // trips: rebuild the itinerary day rows from JSON stashed in data-itinerary
   if (data.itinerary !== undefined && typeof loadItinerary === 'function') {
     try {
       loadItinerary('edit-itinerary-wrapper', JSON.parse(data.itinerary));

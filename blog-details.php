@@ -1,10 +1,8 @@
 <?php
 include 'config/db.php';
-include 'includes/blog-functions.php';
-include 'includes/validation.php';
-include 'includes/header.php';
 
-$slug = $_GET['slug'] ?? '';
+$slug = $_GET['article'] ?? '';
+$category = $_GET['category'] ?? '';
 
 if ($slug === '') {
   header("Location: blogs");
@@ -15,10 +13,10 @@ $stmt = $conn->prepare("
     SELECT b.*, c.name AS category_name, c.slug AS category_slug
     FROM blogs b
     LEFT JOIN blog_categories c ON b.category_id = c.id
-    WHERE b.slug = ? AND b.status = 1
+    WHERE b.slug = ? AND c.slug = ? AND b.status = 1
     LIMIT 1
 ");
-$stmt->bind_param("s", $slug);
+$stmt->bind_param("ss", $slug, $category);
 $stmt->execute();
 $blog = $stmt->get_result()->fetch_assoc();
 
@@ -26,6 +24,18 @@ if (!$blog) {
   header("Location: blogs");
   exit();
 }
+
+/* ---------- SEO META (set BEFORE includes/header.php) ---------- */
+$metaTitle       = $blog['meta_title'] ?: ($blog['title'] . " | Digital Tourism Platform Blog");
+$metaDescription = $blog['meta_description'] ?: autoExcerpt($blog['content'], 155);
+$metaKeywords    = $blog['meta_keywords'] ?: ($blog['tags'] ?: '');
+$canonical       = $blog['canonical_url'] ?: ("https://www.digitaltourismplatform.com/blog-details?slug=" . urlencode($blog['slug']));
+$ogType          = "article";
+$ogImage         = "https://www.digitaltourismplatform.com/admin/uploads/images/blogs/" . ($blog['cover_image'] ?: 'default-blog.jpg');
+
+include 'includes/blog-functions.php';
+include 'includes/validation.php';
+include 'includes/header.php';
 
 
 if (empty($_SESSION['csrf_token'])) {
@@ -108,13 +118,7 @@ if ($blog['category_id']) {
   $related = $rStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-/* ---------- SEO META (set BEFORE includes/header.php) ---------- */
-$metaTitle       = $blog['meta_title'] ?: ($blog['title'] . " | Digital Tourism Platform Blog");
-$metaDescription = $blog['meta_description'] ?: autoExcerpt($blog['content'], 155);
-$metaKeywords    = $blog['meta_keywords'] ?: ($blog['tags'] ?: '');
-$canonical       = $blog['canonical_url'] ?: ("https://www.digitaltourismplatform.com/blog-details?slug=" . urlencode($blog['slug']));
-$ogType          = "article";
-$ogImage         = "https://www.digitaltourismplatform.com/admin/uploads/images/blogs/" . ($blog['cover_image'] ?: 'default-blog.jpg');
+
 
 /* JSON-LD structured data: Article + Breadcrumb */
 $articleSchema = [
@@ -277,7 +281,7 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
           <ul class="related-list">
             <?php foreach ($related as $r): ?>
               <li>
-                <a href="blog-details?slug=<?= urlencode($r['slug']) ?>">
+                <a href="blog-details?article=<?= urlencode($r['slug']) ?>&category=<?= urlencode($blog['category_slug']) ?>">
                   <img src="admin/uploads/images/blogs/<?= htmlspecialchars($r['cover_image'] ?: 'default-blog.jpg') ?>" alt="<?= htmlspecialchars($r['title']) ?>">
                   <span><?= htmlspecialchars($r['title']) ?></span>
                 </a>
@@ -289,8 +293,8 @@ $jsonLd = '<script type="application/ld+json">' . json_encode($articleSchema, JS
 
       <div class="sidebar-widget">
         <h3>Plan Your Trip</h3>
-        <p>Found this helpful? Browse our tour packages and start planning your next adventure.</p>
-        <a href="tours" class="btn">View Trips</a>
+        <p>Found this helpful? Browse our packages and start planning your next adventure.</p>
+        <a href="trips" class="btn">View Trips</a>
       </div>
     </aside>
 

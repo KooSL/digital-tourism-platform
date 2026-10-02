@@ -17,7 +17,7 @@
       <h3>Quick Links</h3>
       <ul>
         <!-- <li><a href="index.php">Home</a></li> -->
-        <li><a href="tours">Tour Packages</a></li>
+        <li><a href="trips">Trip Packages</a></li>
         <li><a href="services">Our Services</a></li>
         <li><a href="gallery">Gallery</a></li>
         <li><a href="contact">Contact Us</a></li>
@@ -25,25 +25,25 @@
       </ul>
     </div>
 
-    <!-- TOURS -->
+    <!-- trips -->
     <div class="footer-box">
-      <h3>Popular Tours</h3>
+      <h3>Popular Trips</h3>
       <ul>
         <?php
-        $tourQuery = mysqli_query(
+        $tripQuery = mysqli_query(
           $conn,
           "SELECT id, slug, title 
-            FROM tours 
+            FROM trips 
             WHERE status = 1 AND is_popular = 1 
             ORDER BY id DESC 
             LIMIT 5"
         );
 
-        while ($tour = mysqli_fetch_assoc($tourQuery)) {
+        while ($trip = mysqli_fetch_assoc($tripQuery)) {
         ?>
           <li>
-            <a href="tour-details?trip=<?= $tour['slug']; ?>">
-              <?= htmlspecialchars($tour['title']); ?>
+            <a href="trip-details?trip=<?= $trip['slug']; ?>">
+              <?= htmlspecialchars($trip['title']); ?>
             </a>
           </li>
         <?php } ?>
@@ -106,8 +106,8 @@
       <h3>Connect With us</h3>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61577350722166" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="https://www.instagram.com/takeyourseat__tours/" target="_blank"aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-        <a href="https://www.tiktok.com/@takeyourseat_tours" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="https://www.instagram.com/takeyourseat__trips/" target="_blank"aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@takeyourseat_trips" target="_blank" aria-label="YouTube"><i class="fa-brands fa-tiktok"></i></a>
         <a href="https://wa.me/9779865507624" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
       </div>
     </div> -->
@@ -173,7 +173,7 @@
     <button id="backToTop">↑</button>
   </div>
 </div>
-<script src="assets/js/chatbot.js"></script>
+<script src="assets/js/cbassistant.js"></script>
 <script src="assets/js/backToTop.js"></script>
 
 </body>

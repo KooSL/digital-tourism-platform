@@ -6,11 +6,11 @@
     <?php while ($rec = $recommended->fetch_assoc()): ?>
 
       <div class="recommend-card">
-        <img src="admin/uploads/images/tours/<?= $rec['banner_image'] ?>">
+        <img src="admin/uploads/images/trips/<?= $rec['banner_image'] ?>">
         <h4><?= $rec['title'] ?></h4>
         <p>NPR <?= $rec['price'] ?></p>
 
-        <a href="tour-details?id=<?= $rec['id'] ?>">View</a>
+        <a href="trip-details?id=<?= $rec['id'] ?>">View</a>
       </div>
 
     <?php endwhile; ?>
@@ -26,13 +26,13 @@
     <?php while($row = $also_booked->fetch_assoc()): ?>
 
       <div class="recommend-card">
-        <img src="admin/uploads/images/tours/<?= $row['banner_image'] ?>">
+        <img src="admin/uploads/images/trips/<?= $row['banner_image'] ?>">
 
         <h4><?= $row['title'] ?></h4>
 
         <p>NPR <?= $row['price'] ?></p>
 
-        <a href="tour-details?id=<?= $row['id'] ?>" class="btn-sm">
+        <a href="trip-details?id=<?= $row['id'] ?>" class="btn-sm">
           View
         </a>
       </div>

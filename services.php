@@ -40,8 +40,8 @@ include 'includes/header.php'; ?>
 
       <div class="service-card">
         <span><i class="fa-solid fa-earth-americas" style="color: var(--blue);"></i></span>
-        <h3>Tour Packages</h3>
-        <p>Domestic & international tour packages tailored for you.</p>
+        <h3>trip Packages</h3>
+        <p>Domestic & international trip packages tailored for you.</p>
       </div>
 
       <div class="service-card">
@@ -103,13 +103,13 @@ include 'includes/header.php'; ?>
 
     <div class="service-row reverse">
       <div class="service-image">
-        <!-- <img src="assets/images/services/tours.jpg" alt="Tour Packages"> -->
+        <!-- <img src="assets/images/services/tours.jpg" alt="trip Packages"> -->
          <i class="fa-solid fa-earth-americas" style="color: var(--blue);"></i>
       </div>
       <div class="service-content">
-        <h3>Tour Packages</h3>
+        <h3>trip Packages</h3>
         <p>
-          Carefully crafted domestic and international tour packages offering comfort, adventure, and unforgettable experiences. Our packages include accommodation, transportation, sightseeing, and expert guidance, tailored to suit families, couples, and groups. Whether it’s cultural exploration or leisure travel, we ensure a well-planned, enjoyable, and memorable journey from start to finish.
+          Carefully crafted domestic and international trip packages offering comfort, adventure, and unforgettable experiences. Our packages include accommodation, transportation, sightseeing, and expert guidance, tailored to suit families, couples, and groups. Whether it’s cultural exploration or leisure travel, we ensure a well-planned, enjoyable, and memorable journey from start to finish.
         </p>
       </div>
     </div>

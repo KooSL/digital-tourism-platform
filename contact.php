@@ -137,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send'])) {
       <div class="contact-info">
         <h2>Get in Touch</h2>
         <p>
-          Feel free to contact us for tour inquiries,
+          Feel free to contact us for trip inquiries,
           bookings, or any travel-related questions.
         </p>
 

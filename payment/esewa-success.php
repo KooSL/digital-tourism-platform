@@ -26,7 +26,7 @@ require_once __DIR__ . '/../includes/mailer.php';
  */
 
 if (!isset($_SESSION['booking_data']) || !isset($_SESSION['esewa_expected'])) {
-    header("Location: ../tours?error=invalid");
+    header("Location: ../trips?error=invalid");
     exit;
 }
 
@@ -128,7 +128,7 @@ if (!$statusData || ($statusData['status'] ?? '') !== 'COMPLETE') {
 //                  deposit) - read from server-generated session data set
 //                  at payment-init time, never from the client at this step.
 // payment_type   = 'full' or 'deposit'.
-// payment_status = 'paid' if the full amount was charged, 'partial' if
+// payment_status = 'Fully Paid' if the full amount was charged, 'Deposite Paid' if
 //                  only the deposit was - lets my-bookings.php show a
 //                  distinct "Partially Paid" state instead of conflating
 //                  it with a fully-paid booking.
@@ -137,16 +137,17 @@ $pid = $expected['transaction_uuid'];
 $fullPackageTotal = $expected['full_package_total'] ?? $expected['total_amount'];
 $amountPaid = $expected['amount_charged_now'] ?? $expected['total_amount'];
 $paymentOption = $expected['payment_option'] ?? 'full';
-$paymentStatus = $paymentOption === 'deposit' ? 'partial' : 'fully_paid';
+$paymentStatus = $paymentOption === 'deposit' ? 'deposit' : 'full';
+$bookingStatus = $paymentStatus === 'full' ? 'confirmed' : 'pending';
 
 $stmt = $conn->prepare("
     INSERT INTO package_bookings
-    (package_id, user_id, name, email, country, phone, travel_date, persons, total_amount, amount_paid, payment_type, payment_status, payment_method, transaction_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'eSewa', ?)
+    (package_id, user_id, name, email, country, phone, travel_date, persons, total_amount, amount_paid, payment_type, status, payment_status, payment_method, transaction_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'eSewa', ?)
 ");
 
 $stmt->bind_param(
-    "iisssssiddsss",
+    "iisssssiddssss",
     $data['package_id'],
     $data['user_id'],
     $data['name'],
@@ -158,6 +159,7 @@ $stmt->bind_param(
     $fullPackageTotal,
     $amountPaid,
     $paymentOption,
+    $bookingStatus,
     $paymentStatus,
     $pid
 );
@@ -181,7 +183,7 @@ try {
 
 if ($alreadyRecorded) {
     unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
-    header("Location: ../tour-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
+    header("Location: ../trip-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
     exit;
 }
 
@@ -237,6 +239,6 @@ if (!empty($data['user_id'])) {
 
 unset($_SESSION['booking_data'], $_SESSION['pid'], $_SESSION['esewa_expected']);
 
-header("Location: ../tour-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
+header("Location: ../trip-details?trip=" . urlencode($data['package_slug']) . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
 exit;
  

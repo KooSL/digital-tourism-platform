@@ -27,7 +27,7 @@ function calculateTotal() {
 
   // Full-vs-deposit display. This is for the user's benefit only - the
   // actual amount charged is always recalculated server-side from the
-  // real tour price before anything is sent to eSewa, so a manipulated
+  // real trip price before anything is sent to eSewa, so a manipulated
   // value here can't change what gets billed.
   let depositAmount = finalAmount * 0.1;
   let remainingAmount = finalAmount - depositAmount;

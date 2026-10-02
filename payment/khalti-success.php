@@ -17,7 +17,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
 if (!isset($_SESSION['booking_data']) || !isset($_SESSION['khalti_expected'])) {
-    header("Location: ../tours?error=invalid");
+    header("Location: ../trips?error=invalid");
     exit;
 }
 
@@ -138,7 +138,7 @@ try {
 
 if ($alreadyRecorded) {
     unset($_SESSION['booking_data'], $_SESSION['khalti_expected']);
-    header("Location: ../tour-details?trip=" . $data['package_slug'] . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
+    header("Location: ../trip-details?trip=" . $data['package_slug'] . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
     exit;
 }
 
@@ -194,5 +194,5 @@ if (!empty($data['user_id'])) {
 
 unset($_SESSION['booking_data'], $_SESSION['khalti_expected']);
 
-header("Location: ../tour-details?trip=" . $data['package_slug'] . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
+header("Location: ../trip-details?trip=" . $data['package_slug'] . "&type=" . urlencode($data['pckg_type']) . "&success=booked");
 exit;

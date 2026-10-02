@@ -18,28 +18,28 @@
  *
  *  We do the math directly in SQL (MySQL has all the trig functions we
  *  need) so the database only returns rows that are actually within range,
- *  already sorted by distance - no need to pull every tour into PHP first.
+ *  already sorted by distance - no need to pull every trip into PHP first.
  * ============================================================================
  */
 
 const EARTH_RADIUS_KM = 6371;
 
 /**
- * Get tours near a given lat/lng point.
+ * Get trips near a given lat/lng point.
  *
  * @param mysqli $conn
  * @param float  $lat        latitude of the reference point
  * @param float  $lng        longitude of the reference point
- * @param int    $exclude_id tour id to exclude (usually the tour being viewed)
+ * @param int    $exclude_id trip id to exclude (usually the trip being viewed)
  * @param float  $radiusKm   max distance to consider "nearby"
  * @param int    $limit      max results
  * @return ArrayResult       same fetch_assoc()-style wrapper used by
  *                            getRecommendations(), so calling code doesn't
  *                            need to know/care which engine produced it.
  */
-function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit = 5)
+function getNearbytrips($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit = 5)
 {
-    // No coordinates on the reference tour -> nothing to compare against.
+    // No coordinates on the reference trip -> nothing to compare against.
     if ($lat === null || $lng === null || $lat === '' || $lng === '') {
         return new ArrayResult([]);
     }
@@ -56,7 +56,7 @@ function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit 
                     ))
                 )
             ) AS distance_km
-        FROM tours t
+        FROM trips t
         WHERE t.id != ?
           AND t.status = 1
           AND t.latitude IS NOT NULL
@@ -93,33 +93,33 @@ function getNearbyTours($conn, $lat, $lng, $exclude_id, $radiusKm = 300, $limit 
 }
 
 /**
- * Convenience wrapper: nearby tours relative to the *current* tour's own
- * location (the common case on tour-details.php - "other packages near
+ * Convenience wrapper: nearby trips relative to the *current* trip's own
+ * location (the common case on trip-details.php - "other packages near
  * this destination").
  */
-function getNearbyToursForTour($conn, array $tour, $radiusKm = 300, $limit = 5)
+function getNearbytripsFortrip($conn, array $trip, $radiusKm = 300, $limit = 5)
 {
-    return getNearbyTours(
+    return getNearbytrips(
         $conn,
-        $tour['latitude'] ?? null,
-        $tour['longitude'] ?? null,
-        $tour['id'],
+        $trip['latitude'] ?? null,
+        $trip['longitude'] ?? null,
+        $trip['id'],
         $radiusKm,
         $limit
     );
 }
 
 /**
- * Convenience wrapper: nearby tours relative to the visiting USER's live
+ * Convenience wrapper: nearby trips relative to the visiting USER's live
  * GPS location (from browser geolocation - see nearby-user.php below).
  */
-function getNearbyToursForUser($conn, $userLat, $userLng, $exclude_id = 0, $radiusKm = 300, $limit = 5)
+function getNearbytripsForUser($conn, $userLat, $userLng, $exclude_id = 0, $radiusKm = 300, $limit = 5)
 {
-    return getNearbyTours($conn, $userLat, $userLng, $exclude_id, $radiusKm, $limit);
+    return getNearbytrips($conn, $userLat, $userLng, $exclude_id, $radiusKm, $limit);
 }
 
 /*
  * NOTE: This file relies on the `ArrayResult` class defined in
  * api/recommendation.php. Make sure that file is included first
- * (tour-details.php already does: recommendation.php then nearby.php).
+ * (trip-details.php already does: recommendation.php then nearby.php).
  */

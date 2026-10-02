@@ -38,11 +38,11 @@ A full-featured tour and travel booking platform built with PHP & MySQL — cove
 - Downloadable trip PDF
 - Dual payment gateway: **eSewa** and **Khalti**, each with dedicated success/failure callback pages
 - Account system: signup with **email OTP verification**, sign in/out, forgot/reset password
-- Mobile-responsive layout with clean, extension-less URLs (e.g. `/tours` instead of `/tours.php`)
+- Mobile-responsive layout with clean, extension-less URLs (e.g. `/trips` instead of `/trips.php`)
 
 ### 🤖 AI-Powered Chatbot, Recommendations & Algorithms
 
-- On-site chatbot that answers questions about tours, flights, and buses using a coverage-scored keyword matcher backed by **Gemini embeddings** (`gemini-embedding-001`) for semantic similarity, with a one-time backfill script to embed existing content
+- On-site chatbot that answers questions about trips, flights, and buses using a coverage-scored keyword matcher backed by **Gemini embeddings** (`gemini-embedding-001`) for semantic similarity, with a one-time backfill script to embed existing content
 - **Smart hybrid recommendation engine** combining five weighted signals: content-based similarity (price, duration, tour type against a blended user-taste profile), collaborative filtering (co-booking patterns), popularity (log-dampened bookings/clicks), ranking by scores with the use of Bayesian Rating Algorithm for ratings as well and more
 - **Nearby packages**: Haversine-distance based "packages near this one" on tour detail pages, plus a live-GPS "packages near you" widget
 - User activity tracking (views, time spent, clicks) feeding both the recommendation engine and admin analytics
@@ -52,7 +52,7 @@ A full-featured tour and travel booking platform built with PHP & MySQL — cove
 
 - Secure admin login with session-based auth
 - Dashboard with key metrics
-- Manage tours (add/edit/delete, dynamic itinerary builder, banner & PDF upload, "Popular" badge, active/inactive toggle)
+- Manage trips (add/edit/delete, dynamic itinerary builder, banner & PDF upload, "Popular" badge, active/inactive toggle)
 - Manage flights and buses
 - Manage blog posts, blog categories, and blog comments (with moderation)
 - Manage gallery albums and photos
@@ -83,7 +83,7 @@ A full-featured tour and travel booking platform built with PHP & MySQL — cove
 
 ```
 digital-tourism-platform/
-├── admin/              # Admin panel (tours, flights, buses, blog, gallery, reviews, bookings, etc.)
+├── admin/              # Admin panel (trips, flights, buses, blog, gallery, reviews, bookings, etc.)
 │   ├── api/             # Admin-only API endpoints (e.g. FCM token save)
 │   ├── scripts/          # One-off maintenance scripts (e.g. chatbot embeddings backfill)
 │   └── includes/         # Shared admin header/sidebar/footer
@@ -94,7 +94,7 @@ digital-tourism-platform/
 ├── includes/             # Shared PHP includes (headers, footers, helpers)
 ├── sql_db/               # Database schema (dtp.sql)
 ├── booking.php / booking-details.php / cancel-booking.php / my-bookings.php
-├── tours.php / tour-details.php
+├── trips.php / tour-details.php
 ├── flights.php / flight-details.php
 ├── buses.php / bus-details.php
 ├── blogs.php / blog-details.php
@@ -112,7 +112,7 @@ digital-tourism-platform/
 
 The schema (`sql_db/dtp.sql`) defines 25 tables, including:
 
-- **Core**: `tours`, `tour_itineraries`, `flights`, `buses`, `users`, `admins`
+- **Core**: `trips`, `tour_itineraries`, `flights`, `buses`, `users`, `admins`
 - **Bookings & inquiries**: `package_bookings`, `bus_inquiries`, `inquiries`
 - **Content**: `blogs`, `blog_categories`, `blog_comments`, `gallery_albums`, `gallery_photos`, `faqs`, `clients`, `testimonials`, `trip_reviews`, `site_content`
 - **AI / analytics**: `chatbot_quiries`, `user_activity`, `recmnd_clicks`

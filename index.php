@@ -55,7 +55,7 @@ $heroRating = ($ratingRow && $ratingRow['total'] > 0) ? round($ratingRow['avg_ra
     <div class="hero-top-section">
       <div class="hero-search">
         <form class="search-bar">
-          <input type="text" id="tourSearch" placeholder="Search">
+          <input type="text" id="tripsearch" placeholder="Search">
           <button type="submit" disabled>
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -66,7 +66,7 @@ $heroRating = ($ratingRow && $ratingRow['total'] > 0) ? round($ratingRow['avg_ra
 
     <div class="hero-bottom-section">
       <div class="hero-cta">
-        <a href="tours" class="btn-primary-vtp">Explore Packages</a>
+        <a href="trips" class="btn-primary-vtp">Explore Packages</a>
         <a href="contact" class="btn-outline-light">Plan Trip Directly</a>
       </div>
 
@@ -88,21 +88,21 @@ $heroRating = ($ratingRow && $ratingRow['total'] > 0) ? round($ratingRow['avg_ra
 <?php
 // ---------------------------------------------------------------------------
 // Homepage "Explore Our Latest and Popular Packages" now uses the SAME
-// hybrid recommendation engine as the tour-details page (api/recommendation.php)
+// hybrid recommendation engine as the trip-details page (api/recommendation.php)
 // instead of two separate hand-written SQL scoring blocks (one for logged-in
 // users, one for guests). See getHomepageRecommendations() for how logged-in
 // personalization vs. guest fallback is handled internally.
 //
-// Bonus: this also fixes the old N+1 query problem where every single tour
+// Bonus: this also fixes the old N+1 query problem where every single trip
 // card ran its own extra "SELECT AVG(rating)..." query in the loop below -
 // the engine now returns bayesian_rating + review_count already attached
 // to each row from ONE aggregated query.
 // ---------------------------------------------------------------------------
 $homepageLimit = isset($_SESSION['user_id']) ? 6 : 5;
-$recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
+$recommendedtrips = getHomepageRecommendations($conn, $homepageLimit);
 ?>
 
-<section class="home-tours recommendation-section">
+<section class="home-trips recommendation-section">
 
   <div class="container">
 
@@ -115,36 +115,36 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
       safety, and unforgettable travel experiences.
     </p>
 
-    <div class="tour-slider-wrapper">
+    <div class="trip-slider-wrapper">
 
       <button class="slider-btn prev domestic-prev">
         <i class="fas fa-chevron-left"></i>
       </button>
 
-      <div class="tour-slider-viewport">
+      <div class="trip-slider-viewport">
 
-        <div class="tour-slider-track">
+        <div class="trip-slider-track">
 
-          <?php while ($tour = $recommendedTours->fetch_assoc()): ?>
+          <?php while ($trip = $recommendedtrips->fetch_assoc()): ?>
 
-            <div class="tour-card">
+            <div class="trip-card">
 
               <div class="trip-card-banner-img">
-                <img src="uploads/images/tours/<?= htmlspecialchars($tour['banner_image']); ?>"
-                  alt="<?= htmlspecialchars($tour['title']); ?>">
+                <img src="uploads/images/trips/<?= htmlspecialchars($trip['banner_image']); ?>"
+                  alt="<?= htmlspecialchars($trip['title']); ?>">
                 <div class="image-bottom-fade"></div>
 
 
                 <div class="badges-home right">
 
-                  <?php if ($tour['is_popular'] == 1): ?>
+                  <?php if ($trip['is_popular'] == 1): ?>
                     <span class="popular-badge-home">
                       <i class="fa-solid fa-fire"></i> Popular
                     </span>
                   <?php endif; ?>
 
-                  <?php if (!empty($tour['old_price']) && (float)$tour['old_price'] > 0):
-                    $discount = round((((float)$tour['old_price'] - (float)$tour['price']) / (float)$tour['old_price']) * 100);
+                  <?php if (!empty($trip['old_price']) && (float)$trip['old_price'] > 0):
+                    $discount = round((((float)$trip['old_price'] - (float)$trip['price']) / (float)$trip['old_price']) * 100);
                   ?>
                     <span class="discount-badge-home">
                       <?= $discount ?>% OFF
@@ -154,16 +154,16 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
                 </div>
 
 
-                <?php if (strtotime($tour['created_at']) >= strtotime('-7 days')): ?>
+                <?php if (strtotime($trip['created_at']) >= strtotime('-7 days')): ?>
                   <span class="latest-badge-home">
                     <i class="fa-solid fa-star"></i> Latest
                   </span>
                 <?php endif; ?>
 
                 <div class="rating-summary home" title="Bayesian-weighted rating">
-                  <a href="tour-details?slug=<?= htmlspecialchars($tour['slug']) ?>#reviews">
-                    <i class="fa-solid fa-star"></i> <?= number_format($tour['bayesian_rating'], 1) ?>
-                    (<?= (int)$tour['review_count'] ?> reviews)
+                  <a href="trip-details?slug=<?= htmlspecialchars($trip['slug']) ?>#reviews">
+                    <i class="fa-solid fa-star"></i> <?= number_format($trip['bayesian_rating'], 1) ?>
+                    (<?= (int)$trip['review_count'] ?> reviews)
                   </a>
                 </div>
 
@@ -171,17 +171,17 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
 
 
 
-              <div class="tour-info">
-                <h3><?= htmlspecialchars($tour['title']) ?></h3>
+              <div class="trip-info">
+                <h3><?= htmlspecialchars($trip['title']) ?></h3>
 
                 <p class="current-price price home">
-                  NPR <?= htmlspecialchars($tour['price']) ?>
-                  <span>| USD $<?= htmlspecialchars($tour['price_usd']) ?> PP</span>
+                  NPR <?= htmlspecialchars($trip['price']) ?>
+                  <span>| USD $<?= htmlspecialchars($trip['price_usd']) ?> PP</span>
                 </p>
               </div>
 
-              <div class="tour-card-btn">
-                <a href="tour-details?trip=<?= htmlspecialchars($tour['slug']) ?>&type=<?= htmlspecialchars($tour['type']) ?>">
+              <div class="trip-card-btn">
+                <a href="trip-details?trip=<?= htmlspecialchars($trip['slug']) ?>&type=<?= htmlspecialchars($trip['type']) ?>">
                   View Details
                 </a>
               </div>
@@ -201,7 +201,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
     </div>
 
     <div class="center-btn">
-      <a href="tours" class="btn-primary-em">Explore More</a>
+      <a href="trips" class="btn-primary-em">Explore More</a>
     </div>
 
   </div>
@@ -292,8 +292,8 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
 
       <div class="service-card">
         <span><i class="fa-solid fa-earth-americas" style="color: var(--blue);"></i></span>
-        <h3>Tour Packages</h3>
-        <p>Domestic & international tour packages tailored for you.</p>
+        <h3>trip Packages</h3>
+        <p>Domestic & international trip packages tailored for you.</p>
       </div>
 
       <div class="service-card">
@@ -329,7 +329,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
       <div class="service-card">
         <span><i class="fa-solid fa-paw" style="color: var(--blue);"></i></span>
         <h3>Wildlife Activities</h3>
-        <p>Jungle safari, wildlife tours & nature experiences.</p>
+        <p>Jungle safari, wildlife trips & nature experiences.</p>
       </div>
 
     </div>
@@ -357,7 +357,7 @@ $recommendedTours = getHomepageRecommendations($conn, $homepageLimit);
 
       <div class="stat-box">
         <h3 class="counter" data-target="1250">0</h3>
-        <p>Tour Packages</p>
+        <p>trip Packages</p>
       </div>
 
       <div class="stat-box">
@@ -588,8 +588,8 @@ while ($c = mysqli_fetch_assoc($clients)) {
 </section>
 
 <script src="assets/js/success-errorBox.js"></script>
-<script src="assets/js/search-tours.js"></script>
-<script src="assets/js/tour-slider.js"></script>
+<script src="assets/js/search-trips.js"></script>
+<script src="assets/js/trip-slider.js"></script>
 <script src="assets/js/flight-slider.js"></script>
 <script src="assets/js/statistics.js"></script>
 <script src="assets/js/airlines-slider.js"></script>

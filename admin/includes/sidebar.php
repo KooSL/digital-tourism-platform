@@ -9,7 +9,7 @@
       </li>
 
       <li>
-        <a href="manage-tours"><i class="fa-solid fa-map-location-dot"></i><span class="link-text">Tours</span></a>
+        <a href="manage-trips"><i class="fa-solid fa-map-location-dot"></i><span class="link-text">Trips</span></a>
       </li>
 
       <li class="has-submenu">
@@ -75,10 +75,10 @@
     </li>
 
     <li class="has-submenu">
-      <a href="">Tours ▾</a>
+      <a href="">trips ▾</a>
       <ul class="submenu">
-        <li><a href="add-tour.php">Add Tour</a></li>
-        <li><a href="manage-tours.php">Manage Tours</a></li>
+        <li><a href="add-trip.php">Add trip</a></li>
+        <li><a href="manage-trips.php">Manage trips</a></li>
       </ul>
     </li>
 

@@ -36,7 +36,7 @@ function addItinerary(wrapperId, day, title, desc) {
     wrapper.appendChild(row);
 }
 
-/* Rebuild an itinerary wrapper's rows from a JSON array (used when opening the Tours edit modal) */
+/* Rebuild an itinerary wrapper's rows from a JSON array (used when opening the trips edit modal) */
 function loadItinerary(wrapperId, itineraries) {
     const wrapper = document.getElementById(wrapperId);
     if (!wrapper) return;

@@ -11,7 +11,7 @@ include 'auth.php';
 $views = mysqli_query($conn, "
     SELECT t.title, SUM(ua.view_count) AS total_views
     FROM user_activity ua
-    JOIN tours t ON ua.package_id = t.id
+    JOIN trips t ON ua.package_id = t.id
     GROUP BY ua.package_id
     ORDER BY total_views DESC
     LIMIT 5
@@ -43,7 +43,7 @@ while ($row = mysqli_fetch_assoc($bookings)) {
 
 $types = mysqli_query($conn, "
     SELECT type, COUNT(*) as total
-    FROM tours
+    FROM trips
     GROUP BY type
 ");
 
@@ -74,13 +74,13 @@ $conversionRate =
   ? round(($totalBookings / $totalViews) * 100, 2)
   : 0;
 
-$dropOffTours = mysqli_query($conn, "
+$dropOfftrips = mysqli_query($conn, "
     SELECT
         t.title,
         COALESCE(SUM(ua.view_count), 0) AS views,
         COUNT(DISTINCT pb.id) AS bookings
 
-    FROM tours t
+    FROM trips t
 
     LEFT JOIN user_activity ua
         ON ua.package_id = t.id
@@ -112,7 +112,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
   <div class="dashboard-stats">
 
     <?php
-    $tourCount = $conn->query("SELECT COUNT(*) AS total FROM tours")->fetch_assoc();
+    $tripCount = $conn->query("SELECT COUNT(*) AS total FROM trips")->fetch_assoc();
     $busCount = $conn->query("SELECT COUNT(*) AS total FROM buses")->fetch_assoc();
     $flightCount = $conn->query("SELECT COUNT(*) AS total FROM flights")->fetch_assoc();
     $inqCount  = $conn->query("SELECT COUNT(*) AS total FROM inquiries")->fetch_assoc();
@@ -125,8 +125,8 @@ $totalRecmndClicks = mysqli_fetch_assoc(
     $faqCount = $conn->query("SELECT COUNT(*) AS total FROM faqs")->fetch_assoc();
     $revCount = $conn->query("SELECT COUNT(*) AS total FROM trip_reviews")->fetch_assoc();
 
-    $activeTours = mysqli_fetch_assoc(
-      mysqli_query($conn, "SELECT COUNT(*) as total FROM tours WHERE status=1")
+    $activetrips = mysqli_fetch_assoc(
+      mysqli_query($conn, "SELECT COUNT(*) as total FROM trips WHERE status=1")
     )['total'];
 
     $activeBuses = mysqli_fetch_assoc(
@@ -137,8 +137,8 @@ $totalRecmndClicks = mysqli_fetch_assoc(
       mysqli_query($conn, "SELECT COUNT(*) as total FROM buses WHERE status=0")
     )['total'];
 
-    $inactiveTours = mysqli_fetch_assoc(
-      mysqli_query($conn, "SELECT COUNT(*) as total FROM tours WHERE status=0")
+    $inactivetrips = mysqli_fetch_assoc(
+      mysqli_query($conn, "SELECT COUNT(*) as total FROM trips WHERE status=0")
     )['total'];
 
     $activeFlights = mysqli_fetch_assoc(
@@ -153,9 +153,9 @@ $totalRecmndClicks = mysqli_fetch_assoc(
 
     <div class="stat-box">
       <p class="stat-title">Total Trips</p>
-      <h3><?php echo $tourCount['total']; ?></h3>
-      <p><span class="active">Active: <?php echo $activeTours; ?></span></p>
-      <p><span class="inactive">Inactive: <?php echo $inactiveTours; ?></span></p>
+      <h3><?php echo $tripCount['total']; ?></h3>
+      <p><span class="active">Active: <?php echo $activetrips; ?></span></p>
+      <p><span class="inactive">Inactive: <?php echo $inactivetrips; ?></span></p>
     </div>
 
     <div class="stat-box">
@@ -240,12 +240,12 @@ $totalRecmndClicks = mysqli_fetch_assoc(
       // $result = $conn->query("SELECT * FROM inquiries WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY id DESC LIMIT 5");
       $result = $conn->query("SELECT 
         inquiries.*,
-        tours.title AS tour_name
+        trips.title AS trip_name
 
         FROM inquiries
 
-        LEFT JOIN tours 
-        ON inquiries.trip_id = tours.id
+        LEFT JOIN trips 
+        ON inquiries.trip_id = trips.id
 
         ORDER BY inquiries.id DESC LIMIT 5");
       while ($row = $result->fetch_assoc()):
@@ -253,7 +253,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
         <tr>
           <td><?php echo $row['name']; ?></td>
           <td><?php echo $row['email']; ?></td>
-          <td><?php echo $row['tour_name']; ?></td>
+          <td><?php echo $row['trip_name']; ?></td>
           <td><?= htmlspecialchars($row['created_at']) ?></td>
         </tr>
       <?php endwhile; ?>
@@ -295,7 +295,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
           $result = $conn->query("
               SELECT t.title, SUM(ua.view_count) AS total_views
               FROM user_activity ua
-              JOIN tours t ON ua.package_id = t.id
+              JOIN trips t ON ua.package_id = t.id
               GROUP BY ua.package_id
               ORDER BY total_views DESC
               LIMIT 5
@@ -351,7 +351,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
             <th>Bookings</th>
           </tr>
 
-          <?php while ($row = mysqli_fetch_assoc($dropOffTours)): ?>
+          <?php while ($row = mysqli_fetch_assoc($dropOfftrips)): ?>
             <tr>
               <td><?= htmlspecialchars($row['title']) ?></td>
               <td><?= $row['views'] ?></td>
@@ -373,7 +373,7 @@ $totalRecmndClicks = mysqli_fetch_assoc(
           $result = $conn->query("
               SELECT * FROM recmnd_clicks rc
               JOIN users u ON rc.user_id = u.id 
-              JOIN tours t ON rc.package_id = t.id
+              JOIN trips t ON rc.package_id = t.id
               ORDER BY total_clicks DESC LIMIT 5;
           ");
           while ($row = $result->fetch_assoc()):
